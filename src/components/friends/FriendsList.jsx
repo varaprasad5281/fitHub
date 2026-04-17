@@ -1,0 +1,183 @@
+/**
+ * Friends List Component
+ * Shows accepted friends with options
+ */
+
+import React, { useState, useEffect } from 'react';
+import { api } from '@/api/client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
+import { MessageCircle, MoreVertical, Trash2, AlertTriangle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
+import { RemoveFriendModal, BlockUserModal } from './FriendActionModals';
+
+export default function FriendsList({ onChatClick }) {
+  const [removeModalOpen, setRemoveModalOpen] = useState(null);
+  const [blockModalOpen, setBlockModalOpen] = useState(null);
+  const queryClient = useQueryClient();
+
+  const { data: friends = [], isLoading } = useQuery({
+    queryKey: ['friends', 'accepted'],
+    queryFn: async () => {
+      const response = await api.functions.invoke('getFriendsList', {
+        type: 'accepted'
+      });
+      return response?.data?.friends || [];
+    },
+    staleTime: 1000 * 60
+  });
+
+  const removeMutation = useMutation({
+    mutationFn: async (friendEmail) => {
+      await api.functions.invoke('friendRequest', {
+        action: 'remove',
+        target_email: friendEmail
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['friends'] });
+      toast.success('Friend removed.');
+    },
+    onError: (error) => {
+      toast.error(error?.response?.data?.error || 'Failed to remove friend');
+    }
+  });
+
+  const blockMutation = useMutation({
+    mutationFn: async (friendEmail) => {
+      await api.functions.invoke('friendRequest', {
+        action: 'block',
+        target_email: friendEmail
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['friends'] });
+      toast.success('User blocked.');
+    }
+  });
+
+  if (isLoading) {
+    return (
+      <div className="space-y-2">
+        {[...Array(3)].map((_, i) => (
+          <Skeleton key={i} className="h-14 rounded-lg" />
+        ))}
+      </div>
+    );
+  }
+
+  if (friends.length === 0) {
+    return (
+      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 text-center">
+        <p className="text-sm text-zinc-400 font-semibold mb-1">No friends added yet.</p>
+        <p className="text-xs text-zinc-600">Add someone you trust. Discipline compounds faster with accountability.</p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="space-y-2">
+        {friends.map((friend, idx) => (
+          <motion.div
+            key={friend.id}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: idx * 0.05 }}
+            className="flex items-center justify-between p-3 rounded-lg bg-zinc-800/50 border border-zinc-700/50 hover:bg-zinc-800 transition-colors"
+          >
+            <div
+              className="flex items-center gap-3 flex-1 cursor-pointer"
+              onClick={() => onChatClick?.(friend.friend_email)}
+            >
+              {friend.profile_picture && (
+                <img
+                  src={friend.profile_picture}
+                  alt={friend.friend_name}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+              )}
+              <div>
+                <p className="text-sm font-semibold text-white">{friend.friend_name}</p>
+                <p className="text-xs text-zinc-500">{friend.friend_email}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={() => onChatClick?.(friend.friend_email)}
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-700"
+              >
+                <MessageCircle className="w-4 h-4" />
+              </Button>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-700"
+                  >
+                    <MoreVertical className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-zinc-900 border-zinc-700">
+                  <DropdownMenuItem
+                    onClick={() => setRemoveModalOpen(friend.friend_email)}
+                    className="text-red-400 hover:bg-zinc-800 cursor-pointer"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Remove
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setBlockModalOpen(friend.friend_email)}
+                    className="text-orange-400 hover:bg-zinc-800 cursor-pointer"
+                  >
+                    <AlertTriangle className="w-4 h-4 mr-2" />
+                    Block
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      <RemoveFriendModal
+        isOpen={!!removeModalOpen}
+        friendName={removeModalOpen}
+        onConfirm={() => {
+          if (removeModalOpen) {
+            removeMutation.mutate(removeModalOpen);
+            setRemoveModalOpen(null);
+          }
+        }}
+        onCancel={() => setRemoveModalOpen(null)}
+        isPending={removeMutation.isPending}
+      />
+
+      <BlockUserModal
+        isOpen={!!blockModalOpen}
+        userName={blockModalOpen}
+        onConfirm={() => {
+          if (blockModalOpen) {
+            blockMutation.mutate(blockModalOpen);
+            setBlockModalOpen(null);
+          }
+        }}
+        onCancel={() => setBlockModalOpen(null)}
+        isPending={blockMutation.isPending}
+      />
+    </>
+  );
+      }
