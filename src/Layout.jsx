@@ -1,8 +1,8 @@
-import React, { useState, useEffect, memo } from 'react';
-import { Link } from "react-router-dom";
+import React, { useState, useEffect, useRef, memo } from 'react';
+import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { api } from "@/api/client";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import ErrorBoundary from "@/components/ErrorBoundary";
@@ -17,12 +17,81 @@ import { useAuth } from "@/lib/AuthContext";
 
 const publicPages = ["Home", "Features", "Pricing", "Contact", "Terms", "Privacy"];
 
+// Reusable dropdown for desktop nav
+function NavDropdown({ label, children, hasbadge }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="flex items-center gap-1 text-sm text-zinc-400 hover:text-white transition-colors"
+      >
+        {label}
+        {hasbadge && <span className="w-2 h-2 rounded-full bg-red-500 mb-2" />}
+        <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="absolute top-full right-0 mt-2 w-44 rounded-xl border border-zinc-800 bg-zinc-900/95 backdrop-blur-xl shadow-xl py-1 z-50">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function NavDropdownItem({ to, onClick, children, badge }) {
+  return (
+    <Link
+      to={to}
+      onClick={onClick}
+      className="flex items-center justify-between px-4 py-2.5 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors"
+    >
+      {children}
+      {badge > 0 && (
+        <span className="bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-semibold">
+          {badge > 9 ? '9+' : badge}
+        </span>
+      )}
+    </Link>
+  );
+}
+
+function MobileLink({ to, onClose, children, badge }) {
+  return (
+    <Link
+      to={to}
+      onClick={onClose}
+      className="flex items-center justify-between text-base text-zinc-400 py-3 px-2 rounded-lg active:bg-zinc-800 transition-colors touch-target"
+      style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
+    >
+      {children}
+      {badge > 0 && (
+        <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
+          {badge > 9 ? '9+' : badge}
+        </span>
+      )}
+    </Link>
+  );
+}
+
 function LayoutContent({ children, currentPageName }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [unreadActivityCount, setUnreadActivityCount] = useState(0);
   const compatDebugger = useCompatibilityDebugger();
   const { t } = useLanguage();
   const { user, isLoadingAuth: loading } = useAuth();
+  const location = useLocation();
+
+  // Close mobile menu on route change
+  useEffect(() => { setMenuOpen(false); }, [location.pathname]);
 
   // Store debugger globally for polyfills to access
   useEffect(() => {
@@ -101,26 +170,27 @@ function LayoutContent({ children, currentPageName }) {
           </Link>
 
           {/* Desktop nav */}
-          <div className="hidden md:flex items-center gap-4 lg:gap-6">
+          <div className="hidden md:flex items-center gap-5 lg:gap-6">
             {user ? (
               <>
-                <Link to={createPageUrl("Profile")} className="text-sm text-zinc-400 hover:text-white transition-colors">{t("nav.profile")}</Link>
+                <Link to={createPageUrl("WorkoutBuilder")} className="text-sm text-zinc-400 hover:text-white transition-colors">Train</Link>
                 <Link to={createPageUrl("Nutrition")} className="text-sm text-zinc-400 hover:text-white transition-colors">{t("nav.nutrition")}</Link>
-                <Link to={createPageUrl("WorkoutBuilder")} className="text-sm text-zinc-400 hover:text-white transition-colors">{t("nav.workouts")}</Link>
                 <Link to={createPageUrl("Coaching")} className="text-sm text-zinc-400 hover:text-white transition-colors">{t("nav.coaching")}</Link>
-                <Link to={createPageUrl("Challenges")} className="text-sm text-zinc-400 hover:text-white transition-colors">{t("nav.challenges")}</Link>
-                <Link to={createPageUrl("Leaderboard")} className="text-sm text-zinc-400 hover:text-white transition-colors">{t("nav.leaderboard")}</Link>
-                <Link to={createPageUrl("Badges")} className="text-sm text-zinc-400 hover:text-white transition-colors">{t("nav.badges")}</Link>
-                <Link to={createPageUrl("Socials")} className="text-sm text-zinc-400 hover:text-white transition-colors relative">
-                  {t("nav.social")}
-                  {unreadActivityCount > 0 && (
-                    <span className="absolute -top-1 -right-3 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold pointer-events-none" aria-label={`${unreadActivityCount} unread`}>
-                      {unreadActivityCount > 9 ? '9+' : unreadActivityCount}
-                    </span>
-                  )}
-                </Link>
-                <Link to={createPageUrl("Subscription")} className="text-sm text-zinc-400 hover:text-white transition-colors">{t("nav.subscription")}</Link>
-                <Link to={createPageUrl("Contact")} className="text-sm text-zinc-400 hover:text-white transition-colors">{t("nav.contact")}</Link>
+
+                {/* Community dropdown */}
+                <NavDropdown label="Community" hasbadge={unreadActivityCount > 0}>
+                  <NavDropdownItem to={createPageUrl("Challenges")} onClick={() => {}}>Challenges</NavDropdownItem>
+                  <NavDropdownItem to={createPageUrl("Leaderboard")} onClick={() => {}}>Leaderboard</NavDropdownItem>
+                  <NavDropdownItem to={createPageUrl("Badges")} onClick={() => {}}>Badges</NavDropdownItem>
+                  <NavDropdownItem to={createPageUrl("Socials")} onClick={() => {}} badge={unreadActivityCount}>Social</NavDropdownItem>
+                </NavDropdown>
+
+                {/* Account dropdown */}
+                <NavDropdown label="Account">
+                  <NavDropdownItem to={createPageUrl("Profile")} onClick={() => {}}>{t("nav.profile")}</NavDropdownItem>
+                  <NavDropdownItem to={createPageUrl("Subscription")} onClick={() => {}}>Subscription</NavDropdownItem>
+                  <NavDropdownItem to={createPageUrl("Contact")} onClick={() => {}}>{t("nav.contact")}</NavDropdownItem>
+                </NavDropdown>
               </>
             ) : (
               <>
@@ -129,15 +199,12 @@ function LayoutContent({ children, currentPageName }) {
                 <Link to={createPageUrl("Contact")} className="text-sm text-zinc-400 hover:text-white transition-colors">{t("nav.contact")}</Link>
               </>
             )}
-            <div className="flex items-center gap-4 ml-4">
+            <div className="flex items-center gap-4 ml-2">
               {user && <NotificationCenter />}
               {!loading && !user && (
                 <>
                   <Link to="/login">
-                    <Button
-                      variant="outline"
-                      className="border-amber-500/50 text-amber-400 hover:border-amber-400 hover:text-amber-300 text-sm rounded-full touch-target transition-colors"
-                    >
+                    <Button variant="outline" className="border-amber-500/50 text-amber-400 hover:border-amber-400 hover:text-amber-300 text-sm rounded-full touch-target transition-colors">
                       Log in
                     </Button>
                   </Link>
@@ -148,7 +215,6 @@ function LayoutContent({ children, currentPageName }) {
                   </Link>
                 </>
               )}
-
             </div>
           </div>
 
@@ -168,42 +234,39 @@ function LayoutContent({ children, currentPageName }) {
         {/* Mobile menu */}
         {menuOpen && (
           <div className="md:hidden border-t border-zinc-800/50 bg-zinc-950/95 backdrop-blur-xl">
-            <div className="px-4 py-4 space-y-2 overflow-y-auto momentum-scroll" style={{ maxHeight: 'calc(var(--vh, 1vh) * 100 - 4rem)' }}>
+            <div className="px-4 py-4 space-y-1 overflow-y-auto momentum-scroll" style={{ maxHeight: 'calc(var(--vh, 1vh) * 100 - 4rem)' }}>
               {user ? (
                 <>
-                  <Link to={createPageUrl("Profile")} onClick={() => setMenuOpen(false)} className="block text-base text-zinc-400 py-3 px-2 rounded-lg active:bg-zinc-800 transition-colors touch-target" style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>{t("nav.profile")}</Link>
-                  <Link to={createPageUrl("Nutrition")} onClick={() => setMenuOpen(false)} className="block text-base text-zinc-400 py-3 px-2 rounded-lg active:bg-zinc-800 transition-colors touch-target" style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>{t("nav.nutrition")}</Link>
-                  <Link to={createPageUrl("WorkoutBuilder")} onClick={() => setMenuOpen(false)} className="block text-base text-zinc-400 py-3 px-2 rounded-lg active:bg-zinc-800 transition-colors touch-target" style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>{t("nav.workouts")}</Link>
-                  <Link to={createPageUrl("Coaching")} onClick={() => setMenuOpen(false)} className="block text-base text-zinc-400 py-3 px-2 rounded-lg active:bg-zinc-800 transition-colors touch-target" style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>{t("nav.coaching")}</Link>
-                  <Link to={createPageUrl("Challenges")} onClick={() => setMenuOpen(false)} className="block text-base text-zinc-400 py-3 px-2 rounded-lg active:bg-zinc-800 transition-colors touch-target" style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>{t("nav.challenges")}</Link>
-                  <Link to={createPageUrl("Leaderboard")} onClick={() => setMenuOpen(false)} className="block text-base text-zinc-400 py-3 px-2 rounded-lg active:bg-zinc-800 transition-colors touch-target" style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>{t("nav.leaderboard")}</Link>
-                  <Link to={createPageUrl("Badges")} onClick={() => setMenuOpen(false)} className="block text-base text-zinc-400 py-3 px-2 rounded-lg active:bg-zinc-800 transition-colors touch-target" style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>{t("nav.badges")}</Link>
-                  <Link to={createPageUrl("Socials")} onClick={() => setMenuOpen(false)} className="block text-base text-zinc-400 py-3 px-2 rounded-lg active:bg-zinc-800 transition-colors touch-target relative" style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>
-                    {t("nav.social")}
-                    {unreadActivityCount > 0 && (
-                      <span className="absolute top-3 right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold pointer-events-none">
-                        {unreadActivityCount > 9 ? '9+' : unreadActivityCount}
-                      </span>
-                    )}
-                  </Link>
-                  <Link to={createPageUrl("Subscription")} onClick={() => setMenuOpen(false)} className="block text-base text-zinc-400 py-3 px-2 rounded-lg active:bg-zinc-800 transition-colors touch-target" style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>{t("nav.subscription")}</Link>
-                  <Link to={createPageUrl("Contact")} onClick={() => setMenuOpen(false)} className="block text-base text-zinc-400 py-3 px-2 rounded-lg active:bg-zinc-800 transition-colors touch-target" style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>{t("nav.contact")}</Link>
+                  {/* Core */}
+                  <MobileLink to={createPageUrl("WorkoutBuilder")} onClose={() => setMenuOpen(false)}>Train</MobileLink>
+                  <MobileLink to={createPageUrl("Nutrition")} onClose={() => setMenuOpen(false)}>{t("nav.nutrition")}</MobileLink>
+                  <MobileLink to={createPageUrl("Coaching")} onClose={() => setMenuOpen(false)}>{t("nav.coaching")}</MobileLink>
+
+                  {/* Community group */}
+                  <p className="text-xs font-semibold text-zinc-600 uppercase tracking-widest px-2 pt-4 pb-1">Community</p>
+                  <MobileLink to={createPageUrl("Challenges")} onClose={() => setMenuOpen(false)}>Challenges</MobileLink>
+                  <MobileLink to={createPageUrl("Leaderboard")} onClose={() => setMenuOpen(false)}>Leaderboard</MobileLink>
+                  <MobileLink to={createPageUrl("Badges")} onClose={() => setMenuOpen(false)}>Badges</MobileLink>
+                  <MobileLink to={createPageUrl("Socials")} onClose={() => setMenuOpen(false)} badge={unreadActivityCount}>Social</MobileLink>
+
+                  {/* Account group */}
+                  <p className="text-xs font-semibold text-zinc-600 uppercase tracking-widest px-2 pt-4 pb-1">Account</p>
+                  <MobileLink to={createPageUrl("Profile")} onClose={() => setMenuOpen(false)}>{t("nav.profile")}</MobileLink>
+                  <MobileLink to={createPageUrl("Subscription")} onClose={() => setMenuOpen(false)}>Subscription</MobileLink>
+                  <MobileLink to={createPageUrl("Contact")} onClose={() => setMenuOpen(false)}>{t("nav.contact")}</MobileLink>
                 </>
               ) : (
                 <>
-                  <Link to={createPageUrl("Home")} onClick={() => setMenuOpen(false)} className="block text-base text-zinc-400 py-3 px-2 rounded-lg active:bg-zinc-800 transition-colors touch-target" style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>{t("nav.home")}</Link>
-                  <Link to={createPageUrl("Pricing")} onClick={() => setMenuOpen(false)} className="block text-base text-zinc-400 py-3 px-2 rounded-lg active:bg-zinc-800 transition-colors touch-target" style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>Pricing</Link>
-                  <Link to={createPageUrl("Contact")} onClick={() => setMenuOpen(false)} className="block text-base text-zinc-400 py-3 px-2 rounded-lg active:bg-zinc-800 transition-colors touch-target" style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>{t("nav.contact")}</Link>
+                  <MobileLink to={createPageUrl("Home")} onClose={() => setMenuOpen(false)}>{t("nav.home")}</MobileLink>
+                  <MobileLink to={createPageUrl("Pricing")} onClose={() => setMenuOpen(false)}>Pricing</MobileLink>
+                  <MobileLink to={createPageUrl("Contact")} onClose={() => setMenuOpen(false)}>{t("nav.contact")}</MobileLink>
                 </>
               )}
-              
+
               {!loading && !user && (
-                <div className="pt-3 space-y-2">
+                <div className="pt-4 space-y-2">
                   <Link to="/login" onClick={() => setMenuOpen(false)}>
-                    <Button
-                      variant="outline"
-                      className="w-full border-amber-500/50 text-amber-400 hover:border-amber-400 hover:text-amber-300 rounded-full touch-target transition-colors"
-                    >
+                    <Button variant="outline" className="w-full border-amber-500/50 text-amber-400 hover:border-amber-400 hover:text-amber-300 rounded-full touch-target transition-colors">
                       Log in
                     </Button>
                   </Link>
