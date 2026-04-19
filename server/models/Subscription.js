@@ -22,6 +22,7 @@ const schema = new mongoose.Schema({
   subscription_current_period_end: Date,
   payment_failures: { type: Number, default: 0 },
   last_payment_failed_date: String,
+  had_trial: { type: Boolean, default: false }, // prevents second free trial
 }, { timestamps: true });
 
 module.exports = mongoose.model('Subscription', schema);

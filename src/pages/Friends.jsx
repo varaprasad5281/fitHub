@@ -37,7 +37,7 @@ export default function FriendsPage() {
   });
   const sub = subscriptions[0];
   const isElite = sub?.plan === 'elite_monthly' || sub?.plan === 'elite_yearly';
-  const isActive = sub?.status === 'active' || (sub?.status === 'cancelled' && sub?.end_date && new Date(sub.end_date) > new Date());
+  const isActive = sub?.status === 'active' || sub?.status === 'trial' || (sub?.status === 'cancelled' && sub?.end_date && new Date(sub.end_date) > new Date());
   const hasEliteAccess = isElite && isActive;
 
   // Check auth and load suggested friends

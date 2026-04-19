@@ -31,7 +31,7 @@ export default function Coaching() {
   const sub = subscriptions[0];
   const isPro  = sub?.plan === 'pro_monthly'   || sub?.plan === 'pro_yearly';
   const isElite = sub?.plan === 'elite_monthly' || sub?.plan === 'elite_yearly';
-  const isActive = sub?.status === 'active' || (sub?.status === 'cancelled' && sub?.end_date && new Date(sub.end_date) > new Date());
+  const isActive = sub?.status === 'active' || sub?.status === 'trial' || (sub?.status === 'cancelled' && sub?.end_date && new Date(sub.end_date) > new Date());
   const hasCoachingAccess = (isPro || isElite) && isActive;
 
   const generateCoachingMutation = useMutation({

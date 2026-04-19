@@ -89,7 +89,7 @@ export default function SocialsPage() {
 
   const sub = subscription[0];
   const isElite = sub?.plan === 'elite_monthly' || sub?.plan === 'elite_yearly';
-  const isActive = sub?.status === 'active' || (sub?.status === 'cancelled' && sub?.end_date && new Date(sub.end_date) > new Date());
+  const isActive = sub?.status === 'active' || sub?.status === 'trial' || (sub?.status === 'cancelled' && sub?.end_date && new Date(sub.end_date) > new Date());
   const hasEliteAccess = isElite && isActive;
   const hasChat = hasEliteAccess;
 

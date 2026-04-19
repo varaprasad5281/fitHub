@@ -55,8 +55,6 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     auth.logout();
     queryClientInstance.clear();
-    setUser(null);
-    setIsAuthenticated(false);
     window.location.href = '/';
   };
 

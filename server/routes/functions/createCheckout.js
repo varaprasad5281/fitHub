@@ -3,6 +3,7 @@
  */
 const stripe = require('../../services/stripe');
 const { PRICE_MAP } = require('../../utils/constants');
+const Subscription = require('../../models/Subscription');
 
 const VALID_BILLING_PERIODS = Object.keys(PRICE_MAP);
 const idempotencyStore = new Map();
@@ -31,6 +32,15 @@ module.exports = async (req, res) => {
   const priceId = PRICE_MAP[billingPeriod];
   const isPro = billingPeriod.startsWith('pro_');
   const origin = req.headers.origin || req.headers.referer?.split('/').slice(0, 3).join('/') || '';
+
+  // Block second free trials for Pro plans
+  if (isPro) {
+    const sub = await Subscription.findOne({ created_by: userEmail });
+    if (sub?.had_trial) {
+      idempotencyStore.delete(idempotencyKey);
+      return res.status(400).json({ error: 'You have already used your free trial. Please subscribe directly.' });
+    }
+  }
 
   const sessionConfig = {
     payment_method_types: ['card'],

@@ -54,9 +54,10 @@ module.exports = async (req, res) => {
       stripe_subscription_id: session.subscription,
       stripe_customer_id: session.customer,
       start_date: new Date().toISOString().split('T')[0],
-      subscription_active: !isPro,
+      subscription_active: true,
       trial_start: isPro ? new Date().toISOString() : null,
       trial_end: isPro ? trialEnd.toISOString() : null,
+      ...(isPro ? { had_trial: true } : {}),
     });
 
     const emailSubject = isPro

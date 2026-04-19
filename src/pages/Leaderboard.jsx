@@ -91,7 +91,7 @@ export default function Leaderboard() {
   const isElite = subscription?.plan === 'elite_monthly' || subscription?.plan === 'elite_yearly';
 
   // CRITICAL: Only active status grants access. Pending, past_due, expired = BLOCKED
-  const isActive = subscription?.status === 'active';
+  const isActive = subscription?.status === 'active' || subscription?.status === 'trial';
 
   // Grace period: cancelled but end_date is in future
   const isGracePeriod = subscription?.status === 'cancelled' &&

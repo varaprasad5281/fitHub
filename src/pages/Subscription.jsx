@@ -42,13 +42,19 @@ export default function Subscription() {
   const isPro = subscription?.plan === 'pro_monthly' || subscription?.plan === 'pro_yearly';
   const isElite = subscription?.plan === 'elite_monthly' || subscription?.plan === 'elite_yearly';
   const isActive = subscription?.status === 'active';
+  const isTrial = subscription?.status === 'trial';
   const isCancelled = subscription?.status === 'cancelled';
   const isPastDue = subscription?.status === 'past_due';
   const isExpired = subscription?.status === 'expired';
-  
+
   // Grace period: user cancelled but still has access until period end
-  const isGracePeriod = isCancelled && subscription?.end_date && 
+  const isGracePeriod = isCancelled && subscription?.end_date &&
                         new Date(subscription.end_date) > new Date();
+
+  // Trial days remaining
+  const trialDaysRemaining = isTrial && subscription?.trial_end
+    ? Math.max(0, Math.ceil((new Date(subscription.trial_end) - new Date()) / (1000 * 60 * 60 * 24)))
+    : 0;
 
   const [isUpgrading, setIsUpgrading] = useState(false);
 
@@ -180,8 +186,10 @@ export default function Subscription() {
               </p>
             </div>
             <div className={`px-4 py-2 rounded-full ${
-             isActive 
+             isActive
                ? 'bg-green-500/10 border border-green-500/30'
+               : isTrial
+               ? 'bg-blue-500/10 border border-blue-500/30'
                : isGracePeriod
                ? 'bg-amber-500/10 border border-amber-500/30'
                : isPastDue
@@ -189,17 +197,21 @@ export default function Subscription() {
                : 'bg-zinc-800 border border-zinc-700'
             }`}>
              <span className={`text-sm font-medium ${
-               isActive 
-                 ? 'text-green-400' 
-                 : isGracePeriod 
-                 ? 'text-amber-400' 
+               isActive
+                 ? 'text-green-400'
+                 : isTrial
+                 ? 'text-blue-400'
+                 : isGracePeriod
+                 ? 'text-amber-400'
                  : isPastDue
                  ? 'text-red-400'
                  : 'text-zinc-500'
              }`}>
                {isPastDue
                  ? 'Payment Failed'
-                 : isGracePeriod 
+                 : isTrial
+                 ? `Trial — ${trialDaysRemaining}d left`
+                 : isGracePeriod
                  ? `Cancels ${new Date(subscription.end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`
                  : isActive
                  ? 'Active'
@@ -209,7 +221,17 @@ export default function Subscription() {
             </div>
           </div>
 
-          {(isPro || isElite) && (isActive || isGracePeriod) && (
+          {isTrial && isPro && (
+            <div className="flex items-start gap-3 p-4 rounded-xl bg-blue-500/5 border border-blue-500/20 mb-4">
+              <AlertCircle className="w-5 h-5 text-blue-400 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-white font-medium text-sm mb-1">Free Trial Active — {trialDaysRemaining} day{trialDaysRemaining !== 1 ? 's' : ''} remaining</p>
+                <p className="text-zinc-400 text-xs">No charge yet. Your card will be billed automatically when the trial ends. Cancel anytime before then.</p>
+              </div>
+            </div>
+          )}
+
+          {(isPro || isElite) && (isActive || isGracePeriod || isTrial) && (
             <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-500/5 border border-amber-500/20 mb-4">
               <CheckCircle className="w-5 h-5 text-amber-400 mt-0.5 shrink-0" />
               <div>
@@ -236,19 +258,20 @@ export default function Subscription() {
             </div>
           )}
 
-          {subscription?.start_date && (
+          {isTrial && subscription?.trial_end && (
+            <p className="text-blue-400/70 text-sm">
+              Trial ends {new Date(subscription.trial_end).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} — card will be charged automatically
+            </p>
+          )}
+          {!isTrial && subscription?.start_date && (
             <p className="text-zinc-600 text-sm">
-              Active since {new Date(subscription.start_date).toLocaleDateString('en-GB', { 
-                day: 'numeric', 
-                month: 'long', 
-                year: 'numeric' 
-              })}
+              Active since {new Date(subscription.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
             </p>
           )}
         </div>
 
         {/* Actions - Only show for existing subscribers */}
-        {(isPro || isElite) && (isActive || isGracePeriod) && (
+        {(isPro || isElite) && (isActive || isGracePeriod || isTrial) && (
           <div className="space-y-4">
             <button
               onClick={handleManageBilling}
@@ -281,7 +304,14 @@ export default function Subscription() {
                     Downgrade to Pro (Yearly)
                   </button>
                 )}
-                {(isPro || isElite) && (
+                {isTrial ? (
+                  <button
+                    onClick={handleCancelClick}
+                    className="w-full flex items-center justify-center h-11 rounded-xl border border-red-500/30 bg-transparent text-red-400 hover:bg-red-500/10 transition-colors font-medium text-sm"
+                  >
+                    Cancel Free Trial
+                  </button>
+                ) : (isPro || isElite) && (
                   <button
                     onClick={handleCancelClick}
                     className="w-full flex items-center justify-center h-11 rounded-xl border border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800 transition-colors font-medium text-sm"
@@ -310,6 +340,8 @@ export default function Subscription() {
             <p className="text-zinc-600 text-xs leading-relaxed">
               {isPastDue
                 ? 'Payment failed. Please update your payment method in the billing portal to restore your Pro access.'
+                : isTrial
+                ? `Your free trial ends in ${trialDaysRemaining} day${trialDaysRemaining !== 1 ? 's' : ''}. Cancel before then to avoid being charged. No refunds after the trial converts.`
                 : (isPro || isElite)
                 ? 'Cancelling will disable premium features at the end of your billing period. You can resubscribe anytime.'
                 : 'Upgrade to unlock leaderboard access, advanced analytics, and coaching insights.'}

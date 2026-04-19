@@ -20,7 +20,8 @@ module.exports = async (req, res) => {
 
     const plan = subscription?.plan || "starter";
     const proPlans = ['pro_monthly', 'pro_yearly', 'elite_monthly', 'elite_yearly'];
-    if (!proPlans.includes(plan) || (subscription?.status !== 'active' && !(subscription?.status === 'cancelled' && subscription?.end_date && new Date(subscription.end_date) > new Date()))) {
+    const isActiveStatus = subscription?.status === 'active' || subscription?.status === 'trial' || (subscription?.status === 'cancelled' && subscription?.end_date && new Date(subscription.end_date) > new Date());
+    if (!proPlans.includes(plan) || !isActiveStatus) {
       return res.status(403).json({ error: 'Coaching requires a Pro or Elite subscription' });
     }
 

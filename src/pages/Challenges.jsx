@@ -31,7 +31,7 @@ export default function Challenges() {
 
   const sub = subscription[0];
   const hasElite = sub?.plan === 'elite_monthly' || sub?.plan === 'elite_yearly';
-  const isActive = sub?.status === 'active' || (sub?.status === 'cancelled' && sub?.end_date && new Date(sub.end_date) > new Date());
+  const isActive = sub?.status === 'active' || sub?.status === 'trial' || (sub?.status === 'cancelled' && sub?.end_date && new Date(sub.end_date) > new Date());
   const hasPro = hasElite && isActive; // alias kept so JSX below continues to work
 
   if (isLoading) {
