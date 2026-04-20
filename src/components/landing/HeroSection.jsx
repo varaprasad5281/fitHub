@@ -54,7 +54,7 @@ export default function HeroSection() {
                 type="button"
                 size="lg"
                 aria-label="Start free trial"
-                className="w-full sm:w-auto bg-gradient-to-r from-amber-300 to-amber-500 text-black font-bold px-8 sm:px-10 h-14 text-base rounded-full shadow-[0_0_40px_rgba(251,191,36,0.6)] animate-pulse-glow active:scale-95 transition-transform touch-target"
+                className="w-full sm:w-auto bg-gradient-to-r from-amber-300 to-amber-500 text-black font-bold px-8 sm:px-10 h-14 text-base rounded-full shadow-[0_0_10px_rgba(251,191,36,0.6)] animate-pulse-glow active:scale-95 transition-transform touch-target"
                 style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
               >
                 Join the 7% Free

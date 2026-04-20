@@ -3,7 +3,7 @@ import { api } from '@/api/client';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Plus, Trash2, Apple, Loader2, Calendar, Zap, Settings2 } from "lucide-react";
+import { Plus, Trash2, Apple, Loader2, Calendar, Zap, Settings2, History, TrendingUp, Utensils } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AnimatePresence } from "framer-motion";
 import MealLogForm from "@/components/nutrition/MealLogForm";
@@ -82,6 +82,26 @@ export default function Nutrition() {
     initialData: [],
     staleTime: 1000 * 60 * 10,
     gcTime: 1000 * 60 * 60,
+  });
+
+  const { data: mealLogHistory } = useQuery({
+    queryKey: ['meal-log-history'],
+    queryFn: async () => {
+      const all = await api.entities.MealLog.list().catch(() => []);
+      const byDate = {};
+      for (const meal of all) {
+        const d = meal.date || meal.createdAt?.slice(0, 10);
+        if (!d) continue;
+        if (!byDate[d]) byDate[d] = [];
+        byDate[d].push(meal);
+      }
+      return Object.entries(byDate)
+        .sort(([a], [b]) => new Date(b) - new Date(a))
+        .slice(0, 7)
+        .map(([date, meals]) => ({ date, meals }));
+    },
+    initialData: [],
+    staleTime: 1000 * 60 * 2,
   });
 
   // Load temp meals from localStorage on mount
@@ -172,6 +192,7 @@ export default function Nutrition() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['meals', today] });
+      queryClient.invalidateQueries({ queryKey: ['meal-log-history'] });
       refetchMeals();
       setShowForm(false);
       toast.success('Meal logged!');
@@ -197,6 +218,7 @@ export default function Nutrition() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['meals', today] });
+      queryClient.invalidateQueries({ queryKey: ['meal-log-history'] });
       toast.success('Meal removed');
     },
     onError: () => toast.error('Failed to delete meal'),
@@ -348,6 +370,9 @@ export default function Nutrition() {
             </TabsTrigger>
             <TabsTrigger value="plan" className="data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-400">
               <Calendar className="w-4 h-4 mr-2" /> Meal Plan
+            </TabsTrigger>
+            <TabsTrigger value="history" className="data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-400">
+              <History className="w-4 h-4 mr-2" /> History
             </TabsTrigger>
             </TabsList>
 
@@ -522,6 +547,143 @@ export default function Nutrition() {
               </div>
             )}
             </TabsContent>
+
+          <TabsContent value="history" className="mt-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 rounded-lg bg-amber-500/10">
+                <TrendingUp className="w-5 h-5 text-amber-400" />
+              </div>
+              <div>
+                <h2 className="text-white font-bold text-lg">Meal Log History</h2>
+                <p className="text-zinc-500 text-sm">Last 7 days with logged meals</p>
+              </div>
+            </div>
+
+            {mealLogHistory.length === 0 ? (
+              <div className="rounded-2xl border border-zinc-800/50 bg-zinc-900/30 p-12 text-center">
+                <Utensils className="w-12 h-12 text-zinc-700 mx-auto mb-4" />
+                <p className="text-zinc-500">No meal logs yet. Start logging meals to see history!</p>
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-zinc-800 bg-zinc-900/80">
+                        <th className="text-left text-zinc-400 font-semibold px-4 py-3 uppercase tracking-wider text-xs">Date</th>
+                        <th className="text-center text-zinc-400 font-semibold px-4 py-3 uppercase tracking-wider text-xs"># Meals</th>
+                        <th className="text-right text-amber-400 font-semibold px-4 py-3 uppercase tracking-wider text-xs">Calories</th>
+                        <th className="text-right text-blue-400 font-semibold px-4 py-3 uppercase tracking-wider text-xs">Protein</th>
+                        <th className="text-right text-green-400 font-semibold px-4 py-3 uppercase tracking-wider text-xs">Carbs</th>
+                        <th className="text-right text-orange-400 font-semibold px-4 py-3 uppercase tracking-wider text-xs">Fats</th>
+                        <th className="text-center text-zinc-400 font-semibold px-4 py-3 uppercase tracking-wider text-xs">vs Target</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-800/60">
+                      {mealLogHistory.map(({ date, meals: dayMeals }, idx) => {
+                        const totalCal = dayMeals.reduce((s, m) => s + (Number(m.calories) || 0), 0);
+                        const totalPro = dayMeals.reduce((s, m) => s + (Number(m.protein) || 0), 0);
+                        const totalCarb = dayMeals.reduce((s, m) => s + (Number(m.carbs) || 0), 0);
+                        const totalFat = dayMeals.reduce((s, m) => s + (Number(m.fats) || 0), 0);
+                        const isToday = date === today;
+                        const pct = Math.round((totalCal / calorieTarget) * 100);
+                        const formattedDate = new Date(date + 'T00:00:00').toLocaleDateString('en-US', {
+                          weekday: 'short', month: 'short', day: 'numeric'
+                        });
+                        const types = new Set(dayMeals.map(m => m.meal_type));
+                        return (
+                          <tr
+                            key={date}
+                            className={`transition-colors hover:bg-zinc-800/30 ${isToday ? 'bg-amber-500/5' : ''}`}
+                          >
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-2">
+                                <span className="text-white font-medium">{formattedDate}</span>
+                                {isToday && (
+                                  <span className="text-xs bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full font-semibold">Today</span>
+                                )}
+                              </div>
+                              <div className="flex gap-1 mt-1">
+                                {types.has('breakfast') && <span title="Breakfast" className="text-xs">🌅</span>}
+                                {types.has('lunch') && <span title="Lunch" className="text-xs">☀️</span>}
+                                {types.has('dinner') && <span title="Dinner" className="text-xs">🌙</span>}
+                                {types.has('snack') && <span title="Snack" className="text-xs">🍎</span>}
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-zinc-800 text-zinc-300 font-semibold text-xs">
+                                {dayMeals.length}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-right">
+                              <span className="text-amber-400 font-bold">{totalCal.toLocaleString()}</span>
+                              <span className="text-zinc-600 text-xs ml-1">kcal</span>
+                            </td>
+                            <td className="px-4 py-3 text-right">
+                              <span className="text-blue-400 font-medium">{totalPro}g</span>
+                            </td>
+                            <td className="px-4 py-3 text-right">
+                              <span className="text-green-400 font-medium">{totalCarb}g</span>
+                            </td>
+                            <td className="px-4 py-3 text-right">
+                              <span className="text-orange-400 font-medium">{totalFat}g</span>
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              <div className="flex flex-col items-center gap-1">
+                                <span className={`text-xs font-semibold ${pct > 110 ? 'text-red-400' : pct >= 90 ? 'text-green-400' : 'text-zinc-400'}`}>
+                                  {pct}%
+                                </span>
+                                <div className="w-16 h-1.5 rounded-full bg-zinc-800 overflow-hidden">
+                                  <div
+                                    className={`h-full rounded-full ${pct > 110 ? 'bg-red-500' : pct >= 90 ? 'bg-green-500' : 'bg-amber-500'}`}
+                                    style={{ width: `${Math.min(pct, 100)}%` }}
+                                  />
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                    {mealLogHistory.length > 1 && (
+                      <tfoot>
+                        <tr className="border-t border-zinc-700 bg-zinc-900/80">
+                          <td className="px-4 py-3 text-zinc-500 text-xs font-semibold uppercase tracking-wider">Avg / day</td>
+                          <td className="px-4 py-3 text-center">
+                            <span className="text-zinc-400 font-medium text-xs">
+                              {Math.round(mealLogHistory.reduce((s, { meals: m }) => s + m.length, 0) / mealLogHistory.length)}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <span className="text-amber-400 font-bold">
+                              {Math.round(mealLogHistory.reduce((s, { meals: m }) => s + m.reduce((ms, meal) => ms + (Number(meal.calories) || 0), 0), 0) / mealLogHistory.length).toLocaleString()}
+                            </span>
+                            <span className="text-zinc-600 text-xs ml-1">kcal</span>
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <span className="text-blue-400 font-medium">
+                              {Math.round(mealLogHistory.reduce((s, { meals: m }) => s + m.reduce((ms, meal) => ms + (Number(meal.protein) || 0), 0), 0) / mealLogHistory.length)}g
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <span className="text-green-400 font-medium">
+                              {Math.round(mealLogHistory.reduce((s, { meals: m }) => s + m.reduce((ms, meal) => ms + (Number(meal.carbs) || 0), 0), 0) / mealLogHistory.length)}g
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <span className="text-orange-400 font-medium">
+                              {Math.round(mealLogHistory.reduce((s, { meals: m }) => s + m.reduce((ms, meal) => ms + (Number(meal.fats) || 0), 0), 0) / mealLogHistory.length)}g
+                            </span>
+                          </td>
+                          <td />
+                        </tr>
+                      </tfoot>
+                    )}
+                  </table>
+                </div>
+              </div>
+            )}
+          </TabsContent>
 
             </Tabs>
 

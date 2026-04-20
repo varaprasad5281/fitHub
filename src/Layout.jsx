@@ -173,7 +173,7 @@ function LayoutContent({ children, currentPageName }) {
           <div className="hidden md:flex items-center gap-5 lg:gap-6">
             {user ? (
               <>
-                <Link to={createPageUrl("WorkoutBuilder")} className="text-sm text-zinc-400 hover:text-white transition-colors">Train</Link>
+                <Link to={createPageUrl("Workouts")} className="text-sm text-zinc-400 hover:text-white transition-colors">Workouts</Link>
                 <Link to={createPageUrl("Nutrition")} className="text-sm text-zinc-400 hover:text-white transition-colors">{t("nav.nutrition")}</Link>
                 <Link to={createPageUrl("Coaching")} className="text-sm text-zinc-400 hover:text-white transition-colors">{t("nav.coaching")}</Link>
 
@@ -209,7 +209,7 @@ function LayoutContent({ children, currentPageName }) {
                     </Button>
                   </Link>
                   <Link to="/register">
-                    <Button className="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-semibold text-sm px-5 rounded-full touch-target">
+                    <Button className={`bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-semibold text-sm px-5 rounded-full touch-target ${GOLD.shine}`}>
                       Start Free
                     </Button>
                   </Link>
@@ -238,7 +238,7 @@ function LayoutContent({ children, currentPageName }) {
               {user ? (
                 <>
                   {/* Core */}
-                  <MobileLink to={createPageUrl("WorkoutBuilder")} onClose={() => setMenuOpen(false)}>Train</MobileLink>
+                  <MobileLink to={createPageUrl("Workouts")} onClose={() => setMenuOpen(false)}>Workouts</MobileLink>
                   <MobileLink to={createPageUrl("Nutrition")} onClose={() => setMenuOpen(false)}>{t("nav.nutrition")}</MobileLink>
                   <MobileLink to={createPageUrl("Coaching")} onClose={() => setMenuOpen(false)}>{t("nav.coaching")}</MobileLink>
 
@@ -271,7 +271,7 @@ function LayoutContent({ children, currentPageName }) {
                     </Button>
                   </Link>
                   <Link to="/register" onClick={() => setMenuOpen(false)}>
-                    <Button className="w-full bg-gradient-to-r from-amber-400 to-amber-500 text-black font-semibold rounded-full touch-target">Start Free</Button>
+                    <Button className={`w-full bg-gradient-to-r from-amber-400 to-amber-500 text-black font-semibold rounded-full touch-target ${GOLD.shine}`}>Start Free</Button>
                   </Link>
                 </div>
               )}

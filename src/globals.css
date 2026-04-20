@@ -77,11 +77,11 @@
   @keyframes pulse-glow {
     0%, 100% {
       opacity: 1;
-      box-shadow: 0 0 40px rgba(251, 191, 36, 0.4);
+      box-shadow: 0 0 40px rgba(234, 179, 8, 0.5);  /* yellow-500 shiny gold */
     }
     50% {
-      opacity: 0.8;
-      box-shadow: 0 0 60px rgba(251, 191, 36, 0.6);
+      opacity: 0.85;
+      box-shadow: 0 0 70px rgba(234, 179, 8, 0.75);
     }
   }
   
@@ -89,6 +89,8 @@
     -webkit-animation: pulse-glow 3s ease-in-out infinite;
     animation: pulse-glow 3s ease-in-out infinite;
   }
+
+
 
   /* Cross-browser compatibility utilities */
   .backdrop-blur-xl {

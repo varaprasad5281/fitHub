@@ -43,6 +43,12 @@ export const SUBSCRIPTION_TIERS = {
   }
 };
 
+// Reusable gold shine class names (defined in globals.css)
+export const GOLD = {
+  shine: 'gold-shine',        // light-sweep — buttons, cards, badges
+  textShine: 'gold-text-shine', // glow-pulse  — amber text, headings
+};
+
 export const ANIMATION_DELAYS = {
   stagger: 0.1,
   card: 0.2,

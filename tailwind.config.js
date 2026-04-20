@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+const colors = require('tailwindcss/colors');
+
 module.exports = {
     darkMode: ["class"],
     content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
@@ -10,6 +12,11 @@ module.exports = {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
+  			/* ── GOLD SHINY THEME ───────────────────────────────────────
+  			   amber-* → yellow (brighter vivid gold — more shiny/metallic)
+  			   To restore: remove these two lines.                       */
+  			amber: colors.yellow,
+
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

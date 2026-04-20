@@ -37,7 +37,8 @@ router.post('/register', async (req, res) => {
     res.status(201).json({ token, user: { id: user._id, email: user.email, full_name: user.full_name } });
   } catch (err) {
     console.error('[register]', err);
-    res.status(500).json({ error: err.message });
+    const isDbError = err.name === 'MongoNetworkError' || err.name === 'AggregateError' || err.message?.includes('connect');
+    res.status(500).json({ error: isDbError ? 'Service temporarily unavailable. Please try again shortly.' : err.message });
   }
 });
 
