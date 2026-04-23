@@ -7,7 +7,7 @@ const WorkoutCompletion = require('../../models/WorkoutCompletion');
 const Workout = require('../../models/Workout');
 const { invokeLLM } = require('../../services/ai');
 
-/** Fire-and-forget GET — just warms up the Cloudflare / Pollinations cache */
+/** Fire-and-forget GET — warms the Pollinations cache before the user opens the modal */
 function prewarm(url) {
   https.get(url, (res) => res.resume()).on('error', () => {});
 }
@@ -119,16 +119,15 @@ ${userGoals.length > 0 ? `- Active Goals: ${userGoals.map((g) => `${g.name || g.
   const exercisesWithImages = workoutPlan.exercises.map((ex) => {
     const seed = ex.name.toLowerCase().split('').reduce((a, c) => a + c.charCodeAt(0), 0);
     const prompt = encodeURIComponent(
-      `person doing ${ex.name} exercise gym photorealistic`
+      `man doing ${ex.name} exercise in gym, fitness, correct form, realistic photo`
     );
     return {
       ...ex,
-      image_url: `https://image.pollinations.ai/prompt/${prompt}?width=300&height=300&seed=${seed}&nologo=true`,
+      image_url: `https://image.pollinations.ai/prompt/${prompt}?width=512&height=512&seed=${seed}&nologo=true`,
     };
   });
 
-  // Pre-warm all exercise images in the background so Cloudflare caches them
-  // before the user opens the modal. Fire-and-forget — don't await.
+  // Pre-warm all exercise images so Pollinations caches them before the user opens the modal
   exercisesWithImages.forEach((ex) => prewarm(ex.image_url));
 
   const savedWorkout = await Workout.create({

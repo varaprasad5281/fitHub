@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Clock, Flame, Dumbbell, CheckCircle, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,40 +9,45 @@ const difficultyColors = {
   advanced:     'text-red-400    bg-red-400/10    border-red-400/20',
 };
 
-// Instant SVG dumbbell — zero network, always available
 const FALLBACK_SVG = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' style='background:%2318181b'><g fill='%23f59e0b' opacity='0.7'><rect x='10' y='44' width='80' height='12' rx='6'/><rect x='8' y='36' width='14' height='28' rx='5'/><rect x='78' y='36' width='14' height='28' rx='5'/><rect x='2' y='40' width='12' height='20' rx='4'/><rect x='86' y='40' width='12' height='20' rx='4'/></g></svg>`;
 
-/** Deterministic Pollinations URL — matches backend prompt exactly */
-function exerciseImageUrl(name) {
-  const seed = name.toLowerCase().split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-  const prompt = encodeURIComponent(`person doing ${name} exercise gym photorealistic`);
-  return `https://image.pollinations.ai/prompt/${prompt}?width=300&height=300&seed=${seed}&nologo=true`;
+/** @param {string} name */
+function freshUrl(name) {
+  const seed = name.toLowerCase().split('').reduce((/** @type {number} */ a, /** @type {string} */ c) => a + c.charCodeAt(0), 0);
+  const prompt = encodeURIComponent(`man doing ${name} exercise in gym, fitness, correct form, realistic photo`);
+  return `https://image.pollinations.ai/prompt/${prompt}?width=512&height=512&seed=${seed}&nologo=true`;
 }
 
-/** Small thumbnail used in the exercise list */
+/**
+ * @param {{ name: string, storedUrl?: string }} props
+ */
 function ExerciseThumb({ name, storedUrl }) {
-  const initialSrc = storedUrl || exerciseImageUrl(name);
-  const [src, setSrc] = useState(initialSrc);
+  const [src, setSrc] = useState(storedUrl || freshUrl(name));
   const [loaded, setLoaded] = useState(false);
-  const timerRef = useRef(null);
+  // Use a ref so the timeout closure always reads the latest loaded value
+  const loadedRef = useRef(false);
+  const retriedRef = useRef(false);
 
-  // Auto-fallback after 10s if still loading
   useEffect(() => {
-    timerRef.current = setTimeout(() => {
-      if (!loaded) setSrc(FALLBACK_SVG);
-    }, 10000);
-    return () => clearTimeout(timerRef.current);
+    const timer = setTimeout(() => {
+      if (!loadedRef.current) setSrc(FALLBACK_SVG);
+    }, 30000);
+    return () => clearTimeout(timer);
   }, []);
 
-  const handleError = () => {
-    clearTimeout(timerRef.current);
-    setLoaded(false);
-    setSrc(FALLBACK_SVG);
+  const handleLoad = () => {
+    loadedRef.current = true;
+    setLoaded(true);
   };
 
-  const handleLoad = () => {
-    clearTimeout(timerRef.current);
-    setLoaded(true);
+  const handleError = () => {
+    // If stored URL failed, try a freshly-generated URL once before giving up
+    if (!retriedRef.current && storedUrl && src === storedUrl) {
+      retriedRef.current = true;
+      setSrc(freshUrl(name));
+    } else {
+      setSrc(FALLBACK_SVG);
+    }
   };
 
   return (
@@ -64,30 +69,34 @@ function ExerciseThumb({ name, storedUrl }) {
   );
 }
 
-/** Full-size image shown in the exercise detail panel */
+/**
+ * @param {{ name: string, storedUrl?: string }} props
+ */
 function ExerciseFullImage({ name, storedUrl }) {
-  const initialSrc = storedUrl || exerciseImageUrl(name);
-  const [src, setSrc] = useState(initialSrc);
+  const [src, setSrc] = useState(storedUrl || freshUrl(name));
   const [loaded, setLoaded] = useState(false);
-  const timerRef = useRef(null);
+  const loadedRef = useRef(false);
+  const retriedRef = useRef(false);
 
-  // Auto-fallback after 12s if still loading
   useEffect(() => {
-    timerRef.current = setTimeout(() => {
-      if (!loaded) setSrc(FALLBACK_SVG);
-    }, 12000);
-    return () => clearTimeout(timerRef.current);
+    const timer = setTimeout(() => {
+      if (!loadedRef.current) setSrc(FALLBACK_SVG);
+    }, 30000);
+    return () => clearTimeout(timer);
   }, []);
 
-  const handleError = () => {
-    clearTimeout(timerRef.current);
-    setLoaded(false);
-    setSrc(FALLBACK_SVG);
+  const handleLoad = () => {
+    loadedRef.current = true;
+    setLoaded(true);
   };
 
-  const handleLoad = () => {
-    clearTimeout(timerRef.current);
-    setLoaded(true);
+  const handleError = () => {
+    if (!retriedRef.current && storedUrl && src === storedUrl) {
+      retriedRef.current = true;
+      setSrc(freshUrl(name));
+    } else {
+      setSrc(FALLBACK_SVG);
+    }
   };
 
   return (
@@ -106,16 +115,14 @@ function ExerciseFullImage({ name, storedUrl }) {
         onLoad={handleLoad}
         onError={handleError}
       />
-      {/* gradient at bottom */}
       <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/80 via-transparent to-transparent pointer-events-none" />
     </div>
   );
 }
 
 export default function WorkoutDetailModal({ workout, onClose, onComplete, isCompleted }) {
-  const [selectedEx, setSelectedEx] = useState(null);   // index of clicked exercise
+  const [selectedEx, setSelectedEx] = useState(null);
 
-  // Lock body scroll while modal is open
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -129,7 +136,6 @@ export default function WorkoutDetailModal({ workout, onClose, onComplete, isCom
 
   return (
     <AnimatePresence>
-      {/* Backdrop */}
       <motion.div
         key="backdrop"
         className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm"
@@ -139,7 +145,6 @@ export default function WorkoutDetailModal({ workout, onClose, onComplete, isCom
         onClick={onClose}
       />
 
-      {/* Modal panel */}
       <motion.div
         key="panel"
         className="fixed inset-0 z-50 flex items-end sm:items-center justify-center pointer-events-none"
@@ -154,7 +159,6 @@ export default function WorkoutDetailModal({ workout, onClose, onComplete, isCom
           onClick={(e) => e.stopPropagation()}
         >
           <AnimatePresence mode="wait">
-            {/* ── EXERCISE DETAIL VIEW ─────────────────────────── */}
             {ex ? (
               <motion.div
                 key={`ex-${selectedEx}`}
@@ -164,7 +168,6 @@ export default function WorkoutDetailModal({ workout, onClose, onComplete, isCom
                 exit={{ x: '100%', opacity: 0 }}
                 transition={{ type: 'spring', damping: 28, stiffness: 320 }}
               >
-                {/* Header */}
                 <div className="flex-shrink-0 flex items-center gap-3 px-4 pt-4 pb-3 border-b border-zinc-800">
                   <button
                     onClick={() => setSelectedEx(null)}
@@ -178,14 +181,14 @@ export default function WorkoutDetailModal({ workout, onClose, onComplete, isCom
                   <div className="flex gap-1 ml-auto">
                     <button
                       disabled={selectedEx === 0}
-                      onClick={() => { setSelectedEx(selectedEx - 1); }}
+                      onClick={() => setSelectedEx(selectedEx - 1)}
                       className="w-7 h-7 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-400 hover:text-white disabled:opacity-30"
                     >
                       <ChevronLeft className="w-3 h-3" />
                     </button>
                     <button
                       disabled={selectedEx === exercises.length - 1}
-                      onClick={() => { setSelectedEx(selectedEx + 1); }}
+                      onClick={() => setSelectedEx(selectedEx + 1)}
                       className="w-7 h-7 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-400 hover:text-white disabled:opacity-30"
                     >
                       <ChevronRight className="w-3 h-3" />
@@ -199,12 +202,9 @@ export default function WorkoutDetailModal({ workout, onClose, onComplete, isCom
                   </button>
                 </div>
 
-                {/* Scrollable content */}
                 <div className="overflow-y-auto flex-1 min-h-0 p-4 sm:p-5 overscroll-contain">
-                  {/* Full-size image */}
                   <ExerciseFullImage name={ex.name} storedUrl={ex.image_url} />
 
-                  {/* Details */}
                   <div className="mt-4">
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <h2 className="text-xl font-bold text-white">{ex.name}</h2>
@@ -230,7 +230,6 @@ export default function WorkoutDetailModal({ workout, onClose, onComplete, isCom
                 </div>
               </motion.div>
             ) : (
-            /* ── EXERCISE LIST VIEW ────────────────────────────── */
               <motion.div
                 key="list"
                 className="flex flex-col flex-1 min-h-0"
@@ -239,7 +238,6 @@ export default function WorkoutDetailModal({ workout, onClose, onComplete, isCom
                 exit={{ x: '-100%', opacity: 0 }}
                 transition={{ type: 'spring', damping: 28, stiffness: 320 }}
               >
-                {/* Header */}
                 <div className="flex-shrink-0 px-5 pt-5 pb-4 border-b border-zinc-800">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
@@ -279,7 +277,6 @@ export default function WorkoutDetailModal({ workout, onClose, onComplete, isCom
                   )}
                 </div>
 
-                {/* Scrollable exercise list */}
                 <div className="overflow-y-auto flex-1 min-h-0 p-4 sm:p-5 overscroll-contain">
                   <p className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-3">
                     Tap an exercise to see details
@@ -324,7 +321,6 @@ export default function WorkoutDetailModal({ workout, onClose, onComplete, isCom
                   </div>
                 </div>
 
-                {/* Sticky footer */}
                 <div className="flex-shrink-0 p-4 sm:p-5 border-t border-zinc-800 bg-zinc-900">
                   {isCompleted ? (
                     <div className="flex items-center justify-center gap-2 text-amber-400 font-semibold py-2">

@@ -81,6 +81,9 @@ const handlers = {
   getSubscriptionHistory:       require('./functions/getSubscriptionHistory').getSubscriptionHistory,
   getPortalUrl:                 require('./functions/getSubscriptionHistory').getPortalUrl,
 
+  // Nutrition history
+  updateNutritionHistory:       require('./functions/updateNutritionHistory'),
+
   // Goal progress
   updateGoalProgress:           require('./functions/updateGoalProgress').updateGoalProgress,
   verifyGoalCompletion:         require('./functions/updateGoalProgress').verifyGoalCompletion,

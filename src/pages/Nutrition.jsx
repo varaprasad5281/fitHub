@@ -42,6 +42,13 @@ export default function Nutrition() {
   const [calorieTarget, setCalorieTarget] = useState(2000);
   const [generating, setGenerating] = useState(false);
   const [activeTab, setActiveTab] = useState('log');
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    if (tab === 'history') {
+      queryClient.invalidateQueries({ queryKey: ['meal-log-history'] });
+    }
+  };
   const [tempMeals, setTempMeals] = useState([]);
   const [selectedMeal, setSelectedMeal] = useState(null);
   const [savingDiet, setSavingDiet] = useState(false);
@@ -87,21 +94,11 @@ export default function Nutrition() {
   const { data: mealLogHistory } = useQuery({
     queryKey: ['meal-log-history'],
     queryFn: async () => {
-      const all = await api.entities.MealLog.list().catch(() => []);
-      const byDate = {};
-      for (const meal of all) {
-        const d = meal.date || meal.createdAt?.slice(0, 10);
-        if (!d) continue;
-        if (!byDate[d]) byDate[d] = [];
-        byDate[d].push(meal);
-      }
-      return Object.entries(byDate)
-        .sort(([a], [b]) => new Date(b) - new Date(a))
-        .slice(0, 7)
-        .map(([date, meals]) => ({ date, meals }));
+      const res = await api.functions.invoke('updateNutritionHistory', {}).catch(() => ({ data: [] }));
+      return res?.data ?? [];
     },
     initialData: [],
-    staleTime: 1000 * 60 * 2,
+    staleTime: 0,
   });
 
   // Load temp meals from localStorage on mount
@@ -185,8 +182,9 @@ export default function Nutrition() {
       // Save to DB (must succeed — no silent localStorage fallback)
       const meal = await api.entities.MealLog.create(mealData);
 
-      // Fire-and-forget: goal progress update (don't block or fail the save)
+      // Fire-and-forget: goal progress + nutrition history update
       api.functions.invoke('updateGoalProgress').catch(() => {});
+      api.functions.invoke('updateNutritionHistory', { date: mealData.date }).catch(() => {});
 
       return meal;
     },
@@ -206,14 +204,15 @@ export default function Nutrition() {
 
   const deleteMeal = useMutation({
     mutationFn: async (id) => {
-      // Check if it's a temp meal
       if (id.toString().startsWith('temp_')) {
         const updated = tempMeals.filter(m => m.id !== id);
         setTempMeals(updated);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
         return { id };
       } else {
-        return await api.entities.MealLog.delete(id);
+        const result = await api.entities.MealLog.delete(id);
+        api.functions.invoke('updateNutritionHistory', { date: today }).catch(() => {});
+        return result;
       }
     },
     onSuccess: () => {
@@ -363,7 +362,7 @@ export default function Nutrition() {
           <MacroBreakdown protein={totalProtein} carbs={totalCarbs} fats={totalFats} />
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-6">
           <TabsList className="bg-zinc-900/50 border border-zinc-800">
             <TabsTrigger value="log" className="data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-400">
               <Apple className="w-4 h-4 mr-2" /> Meal Log
@@ -580,20 +579,17 @@ export default function Nutrition() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-800/60">
-                      {mealLogHistory.map(({ date, meals: dayMeals }, idx) => {
-                        const totalCal = dayMeals.reduce((s, m) => s + (Number(m.calories) || 0), 0);
-                        const totalPro = dayMeals.reduce((s, m) => s + (Number(m.protein) || 0), 0);
-                        const totalCarb = dayMeals.reduce((s, m) => s + (Number(m.carbs) || 0), 0);
-                        const totalFat = dayMeals.reduce((s, m) => s + (Number(m.fats) || 0), 0);
+                      {mealLogHistory.map((record, idx) => {
+                        const { date, total_calories, total_protein, total_carbs, total_fats, meal_count, meal_types = [] } = record;
                         const isToday = date === today;
-                        const pct = Math.round((totalCal / calorieTarget) * 100);
+                        const pct = Math.round((total_calories / calorieTarget) * 100);
                         const formattedDate = new Date(date + 'T00:00:00').toLocaleDateString('en-US', {
                           weekday: 'short', month: 'short', day: 'numeric'
                         });
-                        const types = new Set(dayMeals.map(m => m.meal_type));
+                        const types = new Set(meal_types);
                         return (
                           <tr
-                            key={date}
+                            key={record.id || date}
                             className={`transition-colors hover:bg-zinc-800/30 ${isToday ? 'bg-amber-500/5' : ''}`}
                           >
                             <td className="px-4 py-3">
@@ -612,21 +608,21 @@ export default function Nutrition() {
                             </td>
                             <td className="px-4 py-3 text-center">
                               <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-zinc-800 text-zinc-300 font-semibold text-xs">
-                                {dayMeals.length}
+                                {meal_count}
                               </span>
                             </td>
                             <td className="px-4 py-3 text-right">
-                              <span className="text-amber-400 font-bold">{totalCal.toLocaleString()}</span>
+                              <span className="text-amber-400 font-bold">{total_calories.toLocaleString()}</span>
                               <span className="text-zinc-600 text-xs ml-1">kcal</span>
                             </td>
                             <td className="px-4 py-3 text-right">
-                              <span className="text-blue-400 font-medium">{totalPro}g</span>
+                              <span className="text-blue-400 font-medium">{total_protein}g</span>
                             </td>
                             <td className="px-4 py-3 text-right">
-                              <span className="text-green-400 font-medium">{totalCarb}g</span>
+                              <span className="text-green-400 font-medium">{total_carbs}g</span>
                             </td>
                             <td className="px-4 py-3 text-right">
-                              <span className="text-orange-400 font-medium">{totalFat}g</span>
+                              <span className="text-orange-400 font-medium">{total_fats}g</span>
                             </td>
                             <td className="px-4 py-3 text-center">
                               <div className="flex flex-col items-center gap-1">
@@ -651,28 +647,28 @@ export default function Nutrition() {
                           <td className="px-4 py-3 text-zinc-500 text-xs font-semibold uppercase tracking-wider">Avg / day</td>
                           <td className="px-4 py-3 text-center">
                             <span className="text-zinc-400 font-medium text-xs">
-                              {Math.round(mealLogHistory.reduce((s, { meals: m }) => s + m.length, 0) / mealLogHistory.length)}
+                              {Math.round(mealLogHistory.reduce((s, r) => s + (r.meal_count || 0), 0) / mealLogHistory.length)}
                             </span>
                           </td>
                           <td className="px-4 py-3 text-right">
                             <span className="text-amber-400 font-bold">
-                              {Math.round(mealLogHistory.reduce((s, { meals: m }) => s + m.reduce((ms, meal) => ms + (Number(meal.calories) || 0), 0), 0) / mealLogHistory.length).toLocaleString()}
+                              {Math.round(mealLogHistory.reduce((s, r) => s + (r.total_calories || 0), 0) / mealLogHistory.length).toLocaleString()}
                             </span>
                             <span className="text-zinc-600 text-xs ml-1">kcal</span>
                           </td>
                           <td className="px-4 py-3 text-right">
                             <span className="text-blue-400 font-medium">
-                              {Math.round(mealLogHistory.reduce((s, { meals: m }) => s + m.reduce((ms, meal) => ms + (Number(meal.protein) || 0), 0), 0) / mealLogHistory.length)}g
+                              {Math.round(mealLogHistory.reduce((s, r) => s + (r.total_protein || 0), 0) / mealLogHistory.length)}g
                             </span>
                           </td>
                           <td className="px-4 py-3 text-right">
                             <span className="text-green-400 font-medium">
-                              {Math.round(mealLogHistory.reduce((s, { meals: m }) => s + m.reduce((ms, meal) => ms + (Number(meal.carbs) || 0), 0), 0) / mealLogHistory.length)}g
+                              {Math.round(mealLogHistory.reduce((s, r) => s + (r.total_carbs || 0), 0) / mealLogHistory.length)}g
                             </span>
                           </td>
                           <td className="px-4 py-3 text-right">
                             <span className="text-orange-400 font-medium">
-                              {Math.round(mealLogHistory.reduce((s, { meals: m }) => s + m.reduce((ms, meal) => ms + (Number(meal.fats) || 0), 0), 0) / mealLogHistory.length)}g
+                              {Math.round(mealLogHistory.reduce((s, r) => s + (r.total_fats || 0), 0) / mealLogHistory.length)}g
                             </span>
                           </td>
                           <td />

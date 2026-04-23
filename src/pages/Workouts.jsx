@@ -40,8 +40,11 @@ export default function Workouts() {
     api.analytics.track({ eventName: 'workouts_viewed', properties: { page: 'workouts' } });
   }, []);
 
-  // Split into active and completed
-  const activeWorkouts = workouts.filter(w => !w.is_completed);
+  // One active workout at a time (most recently generated)
+  const currentWorkout = workouts
+    .filter(w => !w.is_completed)
+    .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))[0] || null;
+
   const completedWorkouts = workouts
     .filter(w => w.is_completed)
     .sort((a, b) => (b.completed_date || '').localeCompare(a.completed_date || ''));
@@ -99,6 +102,11 @@ export default function Workouts() {
   const generateWorkout = async () => {
     setGenerating(true);
     try {
+      // Delete any existing active workouts so the new one replaces them
+      const activeAll = workouts.filter(w => !w.is_completed);
+      if (activeAll.length > 0) {
+        await Promise.all(activeAll.map(w => api.entities.Workout.delete(w.id)));
+      }
       await api.functions.invoke('generatePersonalizedWorkout', {});
       queryClient.invalidateQueries({ queryKey: ['workouts', user?.email] });
       toast.success('Your personal coach created a new workout!');
@@ -122,32 +130,41 @@ export default function Workouts() {
       <div className="max-w-4xl mx-auto">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Dumbbell className="w-5 h-5 text-amber-400" />
-              <p className="text-amber-400 text-sm font-semibold uppercase tracking-[0.15em]">Workouts</p>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white">Your Training Plan</h1>
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-1">
+            <Dumbbell className="w-5 h-5 text-amber-400" />
+            <p className="text-amber-400 text-sm font-semibold uppercase tracking-[0.15em]">Workouts</p>
           </div>
-          <Button
-            onClick={generateWorkout}
-            disabled={generating}
-            className="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-semibold rounded-full px-5 sm:px-6"
-          >
-            {generating ? (
-              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating...</>
-            ) : (
-              <><Sparkles className="w-4 h-4 mr-2" /> Generate Workout</>
-            )}
-          </Button>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">Your Training Plan</h1>
+          <p className="text-zinc-500 mt-1">Generate a personalised workout and regenerate anytime</p>
         </div>
 
-        {/* Active workouts */}
-        {activeWorkouts.length === 0 ? (
+        {/* Current workout */}
+        {currentWorkout ? (
+          <div className="mb-6">
+            <WorkoutCard
+              workout={currentWorkout}
+              onComplete={() => completeWorkout.mutate(currentWorkout.id)}
+              isCompleted={false}
+            />
+            <div className="mt-4">
+              <Button
+                onClick={generateWorkout}
+                disabled={generating}
+                className="w-full bg-amber-500/20 border border-amber-500/50 text-amber-400 hover:bg-amber-500/30 hover:border-amber-500 rounded-full touch-target font-medium"
+              >
+                {generating ? (
+                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating...</>
+                ) : (
+                  <><Sparkles className="w-4 h-4 mr-2" /> Regenerate Workout</>
+                )}
+              </Button>
+            </div>
+          </div>
+        ) : (
           <div className="rounded-2xl border border-zinc-800/50 bg-zinc-900/30 p-12 text-center mb-6">
             <Dumbbell className="w-12 h-12 text-zinc-700 mx-auto mb-4" />
-            <p className="text-zinc-500 mb-4">No active workouts. Generate your next session!</p>
+            <p className="text-zinc-500 mb-4">No active workout. Generate your next session!</p>
             <Button
               onClick={generateWorkout}
               disabled={generating}
@@ -155,17 +172,6 @@ export default function Workouts() {
             >
               {generating ? 'Generating...' : 'Generate Workout'}
             </Button>
-          </div>
-        ) : (
-          <div className="space-y-6 mb-6">
-            {activeWorkouts.map((workout) => (
-              <WorkoutCard
-                key={workout.id}
-                workout={workout}
-                onComplete={() => completeWorkout.mutate(workout.id)}
-                isCompleted={false}
-              />
-            ))}
           </div>
         )}
 

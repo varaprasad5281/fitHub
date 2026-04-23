@@ -1,21 +1,22 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Loader2, RefreshCw } from 'lucide-react';
 
 const MUSCLES = {
-  squat: ['Quads', 'Glutes', 'Hamstrings'],
+  squat:    ['Quads', 'Glutes', 'Hamstrings'],
   deadlift: ['Hamstrings', 'Glutes', 'Lower Back'],
-  pushup: ['Chest', 'Triceps', 'Shoulders'],
-  pullup: ['Lats', 'Biceps', 'Upper Back'],
-  curl: ['Biceps', 'Forearms'],
+  pushup:   ['Chest', 'Triceps', 'Shoulders'],
+  pullup:   ['Lats', 'Biceps', 'Upper Back'],
+  curl:     ['Biceps', 'Forearms'],
   shoulder: ['Shoulders', 'Traps'],
-  plank: ['Core', 'Shoulders', 'Glutes'],
-  jump: ['Quads', 'Calves', 'Glutes'],
-  run: ['Quads', 'Hamstrings', 'Calves'],
-  tricep: ['Triceps', 'Shoulders'],
-  generic: ['Full Body'],
+  plank:    ['Core', 'Shoulders', 'Glutes'],
+  jump:     ['Quads', 'Calves', 'Glutes'],
+  run:      ['Quads', 'Hamstrings', 'Calves'],
+  tricep:   ['Triceps', 'Shoulders'],
+  generic:  ['Full Body'],
 };
 
+/** @param {string} name */
 const classify = (name) => {
   const n = name.toLowerCase();
   if (n.includes('squat') || n.includes('lunge') || n.includes('leg press') || n.includes('goblet') || n.includes('bulgarian')) return 'squat';
@@ -33,57 +34,58 @@ const classify = (name) => {
 
 const FALLBACK_SVG = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' style='background:%2318181b'><g fill='%23f59e0b' opacity='0.7'><rect x='10' y='44' width='80' height='12' rx='6'/><rect x='8' y='36' width='14' height='28' rx='5'/><rect x='78' y='36' width='14' height='28' rx='5'/><rect x='2' y='40' width='12' height='20' rx='4'/><rect x='86' y='40' width='12' height='20' rx='4'/></g></svg>`;
 
+/** @param {string} name */
 function buildPollinationsUrl(name) {
-  const seed = name.toLowerCase().split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-  const prompt = encodeURIComponent(`person doing ${name} exercise gym photorealistic`);
-  return `https://image.pollinations.ai/prompt/${prompt}?width=512&height=512&seed=${seed}&nologo=true`;
+  const seed = name.toLowerCase().split('').reduce((/** @type {number} */ a, /** @type {string} */ c) => a + c.charCodeAt(0), 0);
+  const prompt = encodeURIComponent(`man doing ${name} exercise in gym, fitness, correct form, realistic photo`);
+  return `https://image.pollinations.ai/prompt/${prompt}?width=768&height=768&seed=${seed}&nologo=true`;
 }
 
+/**
+ * @param {{ exercise: any, onClose: () => void }} props
+ */
 export default function ExerciseDemoModal({ exercise, onClose }) {
   const type = classify(exercise.name);
   const muscles = MUSCLES[type];
 
-  // Use stored image_url if available, otherwise generate Pollinations URL
-  const initialSrc = exercise.image_url || buildPollinationsUrl(exercise.name);
-  const [src, setSrc] = useState(initialSrc);
+  const [src, setSrc] = useState(exercise.image_url || buildPollinationsUrl(exercise.name));
   const [loaded, setLoaded] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
-  const timerRef = useRef(null);
-
-  const startLoad = (newSrc) => {
-    clearTimeout(timerRef.current);
-    setLoaded(false);
-    setTimedOut(false);
-    setSrc(newSrc);
-    timerRef.current = setTimeout(() => {
-      setTimedOut(true);
-      setSrc(FALLBACK_SVG);
-    }, 12000);
-  };
+  const loadedRef = useRef(false);
+  const retriedRef = useRef(false);
 
   useEffect(() => {
-    timerRef.current = setTimeout(() => {
-      if (!loaded) {
+    const timer = setTimeout(() => {
+      if (!loadedRef.current) {
         setTimedOut(true);
         setSrc(FALLBACK_SVG);
       }
-    }, 12000);
-    return () => clearTimeout(timerRef.current);
+    }, 30000);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleLoad = () => {
-    clearTimeout(timerRef.current);
+    loadedRef.current = true;
     setLoaded(true);
     setTimedOut(false);
   };
 
   const handleError = () => {
-    clearTimeout(timerRef.current);
-    setSrc(FALLBACK_SVG);
+    // If the stored URL failed, try a freshly-generated URL once
+    if (!retriedRef.current && exercise.image_url && src === exercise.image_url) {
+      retriedRef.current = true;
+      setSrc(buildPollinationsUrl(exercise.name));
+    } else {
+      setSrc(FALLBACK_SVG);
+    }
   };
 
   const regenerate = () => {
-    startLoad(buildPollinationsUrl(exercise.name) + `&t=${Date.now()}`);
+    loadedRef.current = false;
+    retriedRef.current = true;
+    setLoaded(false);
+    setTimedOut(false);
+    setSrc(buildPollinationsUrl(exercise.name) + `&t=${Date.now()}`);
   };
 
   return (
@@ -131,12 +133,11 @@ export default function ExerciseDemoModal({ exercise, onClose }) {
               key={src}
               src={src}
               alt={exercise.name}
-              className={`w-full h-full object-cover transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+              className={`w-full h-full object-cover transition-opacity duration-700 ${loaded ? 'opacity-100' : 'opacity-0'}`}
               onLoad={handleLoad}
               onError={handleError}
             />
 
-            {/* Regenerate button */}
             {loaded && (
               <button
                 onClick={regenerate}

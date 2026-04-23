@@ -26,4 +26,5 @@ module.exports = {
   UserReport: require('./UserReport'),
   IPLoginHistory: require('./IPLoginHistory'),
   CoachingSession: require('./CoachingSession'),
+  NutritionHistory: require('./NutritionHistory'),
 };

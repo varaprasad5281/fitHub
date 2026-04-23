@@ -13,6 +13,7 @@ import CompatibilityInitializer from "@/components/CompatibilityInitializer";
 import InteractionAudit, { useInteractionAudit } from "@/components/debug/InteractionAudit";
 import { InteractionAuditPanel } from "@/components/InteractionGuardian";
 import { LanguageProvider, useLanguage } from "@/components/i18n/LanguageContext";
+import { GOLD } from "@/components/config/constants";
 import { useAuth } from "@/lib/AuthContext";
 
 const publicPages = ["Home", "Features", "Pricing", "Contact", "Terms", "Privacy"];
