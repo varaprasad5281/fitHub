@@ -1,19 +1,21 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
 import { toast } from "sonner";
 import { useCurrency } from "@/components/hooks/useCurrency";
 import { Loader2 } from "lucide-react";
 import { api } from '@/api/client';
 import { withActionDebug } from '@/components/debug/ActionDebugger';
 
-export default function PricingSection({ fullPage = false, onUpgrade }) {
+/**
+ * @param {{ fullPage?: boolean, onUpgrade?: (period: string) => void }} props
+ */
+export default function PricingSection({ fullPage = false }) {
   const [billing, setBilling] = useState('monthly');
-  const { currency, formatPrice, loading } = useCurrency();
+  const { formatPrice } = useCurrency();
   const [isUpgrading, setIsUpgrading] = useState(false);
 
+  /** @param {string} billingPeriod */
   const handleUpgrade = async (billingPeriod) => {
     if (window.self !== window.top) {
       toast.error('Checkout only works from published apps. Please open this app in a new tab.');
@@ -62,7 +64,7 @@ export default function PricingSection({ fullPage = false, onUpgrade }) {
       window.location.href = response.data.url;
     }, {
       setLoading: setIsUpgrading,
-      onError: (error) => {
+      onError: (/** @type {any} */ error) => {
         toast.error((error && error.message) || 'Failed to start checkout. Please try again.');
       }
     })();
@@ -91,6 +93,7 @@ export default function PricingSection({ fullPage = false, onUpgrade }) {
     {
       name: "7% Elite",
       priceGBP: billing === 'monthly' ? 24.99 : 16.58,
+      wasGBP: billing === 'monthly' ? 36.99 : 24.99,
       period: "/month",
       yearlyBillingGBP: 199,
       savingsGBP: 100,
@@ -202,14 +205,36 @@ export default function PricingSection({ fullPage = false, onUpgrade }) {
 
               <div className="mb-6">
                 <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">{plan.name}</h3>
-                <div className="flex items-baseline gap-1 mb-1">
-                    <span className="text-4xl sm:text-5xl font-black text-white">{formatPrice(plan.priceGBP)}</span>
-                    <span className="text-zinc-500 text-base sm:text-lg">{plan.period}</span>
+                {plan.trial ? (
+                  <div className="mb-1">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-4xl sm:text-5xl font-black text-green-400">Free</span>
+                      <span className="text-green-500/70 text-sm font-semibold">7-day trial</span>
+                    </div>
+                    <p className="text-zinc-500 text-xs mt-1">
+                      then {formatPrice(plan.priceGBP)}/month
+                      {billing === 'yearly' && plan.yearlyBillingGBP && (
+                        <span className="text-green-400 font-semibold ml-1">· Save {formatPrice(plan.savingsGBP)}/yr on annual</span>
+                      )}
+                    </p>
                   </div>
-                  {plan.yearlyBillingGBP && billing === 'yearly' && (
-                    <p className="text-green-400 text-xs font-semibold mb-3">Billed {formatPrice(plan.yearlyBillingGBP)}/year · Save {formatPrice(plan.savingsGBP)}</p>
-                  )}
-                <p className="text-zinc-400 text-sm italic leading-relaxed">"{plan.quote}"</p>
+                ) : (
+                  <div className="mb-1">
+                    {plan.wasGBP && (
+                      <span className="text-zinc-400 text-2xl sm:text-3xl font-bold decoration-red-500 decoration-2 line-through mr-1">
+                        {formatPrice(plan.wasGBP)}
+                      </span>
+                    )}
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-4xl sm:text-5xl font-black text-white">{formatPrice(plan.priceGBP)}</span>
+                      <span className="text-zinc-500 text-base sm:text-lg">{plan.period}</span>
+                    </div>
+                    {plan.yearlyBillingGBP && billing === 'yearly' && (
+                      <p className="text-green-400 text-xs font-semibold mt-1">Billed {formatPrice(plan.yearlyBillingGBP)}/year · Save {formatPrice(plan.savingsGBP)}</p>
+                    )}
+                  </div>
+                )}
+                <p className="text-zinc-400 text-sm italic leading-relaxed mt-2">"{plan.quote}"</p>
               </div>
 
               <ul className="space-y-3 mb-6">
