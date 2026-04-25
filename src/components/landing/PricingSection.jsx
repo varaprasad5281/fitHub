@@ -37,29 +37,21 @@ export default function PricingSection({ fullPage = false, onUpgrade }) {
         }
       }
 
-      const response = await api.functions.invoke('createCheckout', { 
+      const idempotencyKey = `checkout_${userEmail}_${billingPeriod}_${Date.now()}`;
+      const appOrigin = window.location.origin;
+      const data = await api.functions.invoke('createCheckout', {
         billingPeriod,
         userEmail,
-        timestamp: Date.now()
+        idempotencyKey,
+        successUrl: `${appOrigin}/subscription?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+        cancelUrl: `${appOrigin}/subscription?checkout=cancelled`,
       });
 
-      if (response.status === 409) {
-         throw new Error(response.data?.error || 'You already have an active subscription');
-       }
+      if (!data || !data.url) {
+        throw new Error('Could not connect to checkout. Please try again.');
+      }
 
-       if (response.status === 429) {
-         throw new Error('Too many requests. Please wait a minute and try again.');
-       }
-
-       if (response.status !== 200) {
-         throw new Error(response.data?.error || 'Server error. Please try again.');
-       }
-
-       if (!response.data?.url) {
-         throw new Error('Could not connect to checkout. Please try again.');
-       }
-
-      window.location.href = response.data.url;
+      window.location.href = data.url;
     }, {
       setLoading: setIsUpgrading,
       onError: (error) => {
