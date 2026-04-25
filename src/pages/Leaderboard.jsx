@@ -202,7 +202,7 @@ export default function Leaderboard() {
               <p className="text-amber-400 text-xs sm:text-sm font-semibold uppercase tracking-[0.15em]">Leaderboard</p>
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Unlock Your Rank 🏆</h1>
-            <p className="text-zinc-500">See where you'd compete among the 7% — upgrade Pro to claim your position</p>
+            <p className="text-zinc-500">See where you stand among the 7% — upgrade to Elite to claim your position</p>
           </div>
           <LeaderboardPreview
             topLeaders={leaderboard.slice(0, 5)}

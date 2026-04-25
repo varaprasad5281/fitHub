@@ -11,6 +11,7 @@ import CalorieProgress from "@/components/nutrition/CalorieProgress";
 import MacroBreakdown from "@/components/nutrition/MacroBreakdown";
 import MealPlanCard from "@/components/nutrition/MealPlanCard";
 import MealDetailView from "@/components/nutrition/MealDetailView";
+import NutritionPreview from "@/components/conversion/NutritionPreview";
 import { toast } from "sonner";
 import { createPageUrl } from "@/utils";
 import { Link } from "react-router-dom";
@@ -56,6 +57,18 @@ export default function Nutrition() {
   const [addingMealType, setAddingMealType] = useState(null);
   const queryClient = useQueryClient();
   const today = new Date().toISOString().split('T')[0];
+
+  const { data: subscriptions = [] } = useQuery({
+    queryKey: ['subscription'],
+    queryFn: () => (/** @type {any} */ (api.entities)).Subscription.list(),
+    initialData: [],
+    staleTime: 1000 * 60 * 5,
+  });
+  const sub = subscriptions[0];
+  const isPro   = sub?.plan === 'pro_monthly'   || sub?.plan === 'pro_yearly';
+  const isElite  = sub?.plan === 'elite_monthly' || sub?.plan === 'elite_yearly';
+  const isActive = sub?.status === 'active' || sub?.status === 'trial' || (sub?.status === 'cancelled' && sub?.end_date && new Date(sub.end_date) > new Date());
+  const hasNutritionAccess = (isPro || isElite) && isActive;
 
   const { data: profiles } = useQuery({
     queryKey: ['profile'],
@@ -191,9 +204,13 @@ export default function Nutrition() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['meals', today] });
       queryClient.invalidateQueries({ queryKey: ['meal-log-history'] });
+      queryClient.invalidateQueries({ queryKey: ['points'] });
+      queryClient.invalidateQueries({ queryKey: ['userPoints'] });
       refetchMeals();
       setShowForm(false);
       toast.success('Meal logged!');
+      // Recalculate daily points — awards bonuses for 3 meals logged / calorie target met
+      api.functions.invoke('calculateDailyPoints').catch(() => {});
       api.analytics.track({
         eventName: 'meal_logged',
         properties: { meal_type: variables.meal_type }
@@ -328,6 +345,23 @@ export default function Nutrition() {
       mealsByType: byType,
     };
   }, [meals, tempMeals]);
+
+  if (!hasNutritionAccess) {
+    return (
+      <div className="min-h-screen bg-zinc-950 p-4 sm:p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-1">
+              <Apple className="w-5 h-5 text-amber-400" />
+              <p className="text-amber-400 text-xs sm:text-sm font-semibold uppercase tracking-[0.15em]">Your Nutrition</p>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">Your Nutrition</h1>
+          </div>
+          <NutritionPreview />
+        </div>
+      </div>
+    );
+  }
 
   // Show skeleton while initial data loads
   if (mealsLoading && meals.length === 0) {

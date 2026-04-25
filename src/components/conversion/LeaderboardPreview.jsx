@@ -22,7 +22,7 @@ export default function LeaderboardPreview({ topLeaders = [], estimatedRank = nu
   const navigate = useNavigate();
 
   const handleUpgrade = () => {
-    navigate(createPageUrl('Pricing'));
+    navigate(createPageUrl('Subscription'));
   };
 
   // Mock top leaders if not provided (for dev)
@@ -43,10 +43,10 @@ export default function LeaderboardPreview({ topLeaders = [], estimatedRank = nu
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-2">
           <Crown className="w-4 h-4 text-amber-400" />
-          <p className="text-xs font-semibold text-amber-400 uppercase tracking-wider">Global Leaderboard Preview</p>
+          <p className="text-xs font-semibold text-amber-400 uppercase tracking-wider">Elite Feature Preview</p>
         </div>
         <h3 className="text-xl font-bold text-white mb-1">Top 5 Leaders</h3>
-        <p className="text-sm text-zinc-500">Unlock the full leaderboard to compete with the 7%</p>
+        <p className="text-sm text-zinc-500">Upgrade to Elite to compete on the global leaderboard</p>
       </div>
 
       {/* Leaders Cards (Blurred/Locked) */}
@@ -60,10 +60,10 @@ export default function LeaderboardPreview({ topLeaders = [], estimatedRank = nu
             className="relative"
           >
             {/* Locked overlay */}
-            <div className="absolute inset-0 rounded-lg bg-black/40 backdrop-blur-sm z-10 flex items-center justify-center group cursor-not-allowed">
+            <div className="absolute inset-0 rounded-lg bg-black/40 backdrop-blur-sm z-10 flex items-center justify-center cursor-not-allowed">
               <div className="flex flex-col items-center gap-1">
-                <Lock className="w-4 h-4 text-amber-400" />
-                <span className="text-xs font-semibold text-amber-400">Unlock</span>
+                <Lock className="w-5 h-5 text-amber-400" />
+                <span className="text-xs font-semibold text-amber-400">Unlock with Elite</span>
               </div>
             </div>
 
@@ -157,7 +157,7 @@ export default function LeaderboardPreview({ topLeaders = [], estimatedRank = nu
           onClick={handleUpgrade}
           className="w-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-semibold py-3 h-auto rounded-xl flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:shadow-amber-500/30 transition-all duration-200"
         >
-          Unlock Leaderboard & Pro Features
+          Unlock Leaderboard
           <ArrowRight className="w-4 h-4" />
         </Button>
       </motion.div>
