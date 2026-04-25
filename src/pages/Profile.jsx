@@ -86,6 +86,14 @@ export default function Profile() {
         window.history.replaceState({}, '', window.location.pathname);
       }
       api.analytics.track({ eventName: 'profile_viewed', properties: { authenticated: true } });
+
+      // Auto-calculate today's points on every profile visit (idempotent — server ignores duplicate calls for same day)
+      api.functions.invoke('calculateDailyPoints')
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: ['points'] });
+          queryClient.invalidateQueries({ queryKey: ['userPoints'] });
+        })
+        .catch(() => {});
     }
   }, [user]);
 

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Dumbbell, Loader2, Sparkles, History, X, CheckCircle, Clock, Flame } from "lucide-react";
 import WorkoutCard from "@/components/workout/WorkoutCard";
 import WorkoutDetailModal from "@/components/workout/WorkoutDetailModal";
+import WorkoutPreview from "@/components/conversion/WorkoutPreview";
 import { toast } from "sonner";
 import { useAuth } from '@/lib/AuthContext';
 
@@ -35,6 +36,17 @@ export default function Workouts() {
     queryFn: () => api.entities.Points.list(),
     staleTime: 1000 * 60 * 2,
   });
+
+  const { data: subscriptions = [] } = useQuery({
+    queryKey: ['subscription'],
+    queryFn: () => api.entities.Subscription.list(),
+    staleTime: 1000 * 60 * 5,
+  });
+  const sub = subscriptions[0];
+  const isPro   = sub?.plan === 'pro_monthly'   || sub?.plan === 'pro_yearly';
+  const isElite  = sub?.plan === 'elite_monthly' || sub?.plan === 'elite_yearly';
+  const isActive = sub?.status === 'active' || sub?.status === 'trial' || (sub?.status === 'cancelled' && sub?.end_date && new Date(sub.end_date) > new Date());
+  const hasWorkoutAccess = (isPro || isElite) && isActive;
 
   useEffect(() => {
     api.analytics.track({ eventName: 'workouts_viewed', properties: { page: 'workouts' } });
@@ -94,7 +106,10 @@ export default function Workouts() {
       api.analytics.track({ eventName: 'workout_completed', properties: { points_earned: pointsEarned } });
       toast.success(`Workout completed! +${pointsEarned} points`);
       queryClient.invalidateQueries({ queryKey: ['points'] });
+      queryClient.invalidateQueries({ queryKey: ['userPoints'] });
       queryClient.invalidateQueries({ queryKey: ['workouts', user?.email] });
+      // Recalculate daily points so the workout-completion bonus is counted
+      api.functions.invoke('calculateDailyPoints').catch(() => {});
     },
     onError: () => toast.error('Failed to mark workout as complete'),
   });
@@ -121,6 +136,23 @@ export default function Workouts() {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!hasWorkoutAccess) {
+    return (
+      <div className="min-h-screen bg-zinc-950 p-4 sm:p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-1">
+              <Dumbbell className="w-5 h-5 text-amber-400" />
+              <p className="text-amber-400 text-sm font-semibold uppercase tracking-[0.15em]">Workouts</p>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">Your Training Plan</h1>
+          </div>
+          <WorkoutPreview />
+        </div>
       </div>
     );
   }

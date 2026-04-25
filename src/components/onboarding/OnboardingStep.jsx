@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Check, Loader2 } from "lucide-react";
 
-export default function OnboardingStep({ step, totalSteps, title, subtitle, children, onNext, onBack, isLast, canProceed, saving }) {
+export default function OnboardingStep({ step, totalSteps, title, subtitle, children, onNext, onBack, isLast, canProceed, saving, nextLabel }) {
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -56,6 +56,8 @@ export default function OnboardingStep({ step, totalSteps, title, subtitle, chil
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 Setting up...
               </>
+            ) : nextLabel ? (
+              <>{nextLabel} <ArrowRight className="ml-2 w-4 h-4" /></>
             ) : isLast ? (
               <>Complete <Check className="ml-2 w-4 h-4" /></>
             ) : (
