@@ -74,7 +74,15 @@ export default function ChallengeCard({ challenge, hasPro }) {
         </div>
       )}
 
-      {!isParticipating && hasPro && (
+      {challenge.status === 'completed' || daysLeft === 0 ? (
+        <div className="w-full py-2 text-center text-zinc-500 text-sm font-semibold">
+          🏁 Challenge Ended
+        </div>
+      ) : isParticipating ? (
+        <div className="w-full py-2 text-center text-amber-400 text-sm font-semibold">
+          ✓ You're participating
+        </div>
+      ) : hasPro ? (
         <Button
           onClick={() => joinChallengeMutation.mutate()}
           disabled={joinChallengeMutation.isPending}
@@ -82,12 +90,7 @@ export default function ChallengeCard({ challenge, hasPro }) {
         >
           {joinChallengeMutation.isPending ? 'Joining...' : 'Join Challenge'}
         </Button>
-      )}
-      {isParticipating && (
-        <div className="w-full py-2 text-center text-amber-400 text-sm font-semibold">
-          ✓ You're participating
-        </div>
-      )}
+      ) : null}
     </div>
   );
 }

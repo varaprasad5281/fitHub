@@ -8,6 +8,7 @@ import WorkoutDetailModal from "@/components/workout/WorkoutDetailModal";
 import WorkoutPreview from "@/components/conversion/WorkoutPreview";
 import { toast } from "sonner";
 import { useAuth } from '@/lib/AuthContext';
+import { activeSub, hasProAccess } from '@/lib/subscriptionUtils';
 
 const MAX_HISTORY = 7;
 
@@ -37,16 +38,12 @@ export default function Workouts() {
     staleTime: 1000 * 60 * 2,
   });
 
-  const { data: subscriptions = [] } = useQuery({
+  const { data: subscriptions = [], isLoading: subLoading } = useQuery({
     queryKey: ['subscription'],
     queryFn: () => api.entities.Subscription.list(),
     staleTime: 1000 * 60 * 5,
   });
-  const sub = subscriptions[0];
-  const isPro   = sub?.plan === 'pro_monthly'   || sub?.plan === 'pro_yearly';
-  const isElite  = sub?.plan === 'elite_monthly' || sub?.plan === 'elite_yearly';
-  const isActive = sub?.status === 'active' || sub?.status === 'trial' || (sub?.status === 'cancelled' && sub?.end_date && new Date(sub.end_date) > new Date());
-  const hasWorkoutAccess = (isPro || isElite) && isActive;
+  const hasWorkoutAccess = hasProAccess(activeSub(subscriptions));
 
   useEffect(() => {
     api.analytics.track({ eventName: 'workouts_viewed', properties: { page: 'workouts' } });
@@ -76,13 +73,18 @@ export default function Workouts() {
         completed_date: today,
       });
 
-      // Award points
+      // Award points + record transaction so breakdown is correct in profile
       if (pts) {
         await api.entities.Points.update(pts.id, {
           total_points: (pts.total_points || 0) + pointsEarned,
           weekly_points: (pts.weekly_points || 0) + pointsEarned,
         });
       }
+      await api.entities.PointsTransaction.create({
+        points_awarded: pointsEarned,
+        source: `workout_completion_${workout?.difficulty || 'intermediate'}`,
+        transaction_date: today,
+      });
 
       // Log completion record
       await api.entities.WorkoutCompletion.create({
@@ -108,7 +110,15 @@ export default function Workouts() {
       queryClient.invalidateQueries({ queryKey: ['points'] });
       queryClient.invalidateQueries({ queryKey: ['userPoints'] });
       queryClient.invalidateQueries({ queryKey: ['workouts', user?.email] });
-      // Recalculate daily points so the workout-completion bonus is counted
+      queryClient.invalidateQueries({ queryKey: ['streak'] });
+      // Update streak + recalculate daily points
+      api.functions.invoke('updateStreak').then(res => {
+        if (res?.bonus_points > 0) {
+          toast.success(`🔥 ${res.current_count}-day streak! +${res.bonus_points} bonus points`);
+        }
+        queryClient.invalidateQueries({ queryKey: ['userPoints'] });
+        queryClient.invalidateQueries({ queryKey: ['points'] });
+      }).catch(() => {});
       api.functions.invoke('calculateDailyPoints').catch(() => {});
     },
     onError: () => toast.error('Failed to mark workout as complete'),
@@ -132,7 +142,7 @@ export default function Workouts() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || subLoading) {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
@@ -183,7 +193,7 @@ export default function Workouts() {
               <Button
                 onClick={generateWorkout}
                 disabled={generating}
-                className="w-full bg-amber-500/20 border border-amber-500/50 text-amber-400 hover:bg-amber-500/30 hover:border-amber-500 rounded-full touch-target font-medium"
+                className="w-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-semibold rounded-full touch-target shadow-lg shadow-amber-500/20"
               >
                 {generating ? (
                   <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating...</>
@@ -200,9 +210,13 @@ export default function Workouts() {
             <Button
               onClick={generateWorkout}
               disabled={generating}
-              className="bg-zinc-800 hover:bg-zinc-700 text-white rounded-full px-6"
+              className="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-semibold rounded-full px-8 shadow-lg shadow-amber-500/20"
             >
-              {generating ? 'Generating...' : 'Generate Workout'}
+              {generating ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating...</>
+              ) : (
+                <><Sparkles className="w-4 h-4 mr-2" /> Generate Workout</>
+              )}
             </Button>
           </div>
         )}

@@ -37,7 +37,12 @@ module.exports = async (req, res) => {
   }
 
   const today = new Date().toISOString().split('T')[0];
-  const todayTransactions = await PointsTransaction.find({ created_by: user.email, transaction_date: today });
+  // Exclude the 0-pt idempotency marker ('daily_calc') so it doesn't inflate todayPoints
+  const todayTransactions = await PointsTransaction.find({
+    created_by: user.email,
+    transaction_date: today,
+    source: { $ne: 'daily_calc' },
+  });
   const todayPoints = todayTransactions.reduce((s, t) => s + t.points_awarded, 0);
 
   const breakdown = { workouts: 0, goals: 0, leaderboard: 0, calories: 0, streaks: 0 };
@@ -45,7 +50,8 @@ module.exports = async (req, res) => {
     if (t.source.startsWith('workout_')) breakdown.workouts += t.points_awarded;
     if (t.source === 'goal_completed') breakdown.goals += t.points_awarded;
     if (t.source.startsWith('leaderboard_')) breakdown.leaderboard += t.points_awarded;
-    if (t.source === 'calorie_adherence') breakdown.calories += t.points_awarded;
+    // Both calorie-target adherence and meals-logged bonus count as calorie/nutrition bonus
+    if (t.source === 'calorie_adherence' || t.source === 'meals_logged') breakdown.calories += t.points_awarded;
     if (t.source === 'streak_bonus') breakdown.streaks += t.points_awarded;
   });
 

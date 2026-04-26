@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { api } from '@/api/client';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Sparkles, Lightbulb, Loader2, History, X, Star } from "lucide-react";
+import { activeSub, hasProAccess } from '@/lib/subscriptionUtils';
 import CoachingPreview from '@/components/conversion/CoachingPreview';
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -23,16 +24,13 @@ export default function Coaching() {
     staleTime: 1000 * 60 * 5,
   });
 
-  const { data: subscriptions = [] } = useQuery({
+  const { data: subscriptions = [], isLoading: subLoading } = useQuery({
     queryKey: ['subscription'],
     queryFn: () => api.entities.Subscription.list(),
     staleTime: 1000 * 60 * 5,
   });
-  const sub = subscriptions[0];
-  const isPro  = sub?.plan === 'pro_monthly'   || sub?.plan === 'pro_yearly';
-  const isElite = sub?.plan === 'elite_monthly' || sub?.plan === 'elite_yearly';
-  const isActive = sub?.status === 'active' || sub?.status === 'trial' || (sub?.status === 'cancelled' && sub?.end_date && new Date(sub.end_date) > new Date());
-  const hasCoachingAccess = (isPro || isElite) && isActive;
+  const sub = activeSub(subscriptions);
+  const hasCoachingAccess = hasProAccess(sub);
 
   const generateCoachingMutation = useMutation({
     mutationFn: async () => {
@@ -83,7 +81,7 @@ export default function Coaching() {
     (c) => c.session_type === 'daily' && c.session_date !== today && c.feedback === 'helpful'
   );
 
-  if (isLoading || (isFetching && coaching.length === 0)) {
+  if (isLoading || subLoading || (isFetching && coaching.length === 0)) {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />

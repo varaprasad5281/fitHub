@@ -17,6 +17,7 @@ import { createPageUrl } from "@/utils";
 import { Link } from "react-router-dom";
 import { initCSRFProtection } from "@/components/utils/csrfToken";
 import ErrorBoundary from '@/components/ErrorBoundary';
+import { activeSub, hasProAccess } from '@/lib/subscriptionUtils';
 
 // BMR calculation using Mifflin-St Jeor equation
 const calculateBMR = (weight, height, age, gender) => {
@@ -58,17 +59,13 @@ export default function Nutrition() {
   const queryClient = useQueryClient();
   const today = new Date().toISOString().split('T')[0];
 
-  const { data: subscriptions = [] } = useQuery({
+  const { data: subscriptions = [], isLoading: subLoading } = useQuery({
     queryKey: ['subscription'],
     queryFn: () => (/** @type {any} */ (api.entities)).Subscription.list(),
     initialData: [],
     staleTime: 1000 * 60 * 5,
   });
-  const sub = subscriptions[0];
-  const isPro   = sub?.plan === 'pro_monthly'   || sub?.plan === 'pro_yearly';
-  const isElite  = sub?.plan === 'elite_monthly' || sub?.plan === 'elite_yearly';
-  const isActive = sub?.status === 'active' || sub?.status === 'trial' || (sub?.status === 'cancelled' && sub?.end_date && new Date(sub.end_date) > new Date());
-  const hasNutritionAccess = (isPro || isElite) && isActive;
+  const hasNutritionAccess = hasProAccess(activeSub(subscriptions));
 
   const { data: profiles } = useQuery({
     queryKey: ['profile'],
@@ -345,6 +342,8 @@ export default function Nutrition() {
       mealsByType: byType,
     };
   }, [meals, tempMeals]);
+
+  if (subLoading) return null;
 
   if (!hasNutritionAccess) {
     return (
