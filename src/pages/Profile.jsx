@@ -127,10 +127,7 @@ export default function Profile() {
 
   const { data: pointsData = {} } = useQuery({
     queryKey: ['userPoints'],
-    queryFn: async () => {
-      const { data } = await api.functions.invoke('getUserPointsAndLevel');
-      return data;
-    },
+    queryFn: () => api.functions.invoke('getUserPointsAndLevel'),
     enabled: !!user,
     staleTime: 1000 * 30,
     refetchInterval: 1000 * 60,

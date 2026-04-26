@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { api } from '@/api/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Users, Trash2, MessageCircle, Lock, Loader2, UserPlus } from 'lucide-react';
+import { activeSub, hasEliteAccess as checkElite } from '@/lib/subscriptionUtils';
 import SocialsPreview from '@/components/conversion/SocialsPreview';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -87,10 +88,7 @@ export default function SocialsPage() {
     enabled: !!friends && friends.length > 0,
   });
 
-  const sub = subscription[0];
-  const isElite = sub?.plan === 'elite_monthly' || sub?.plan === 'elite_yearly';
-  const isActive = sub?.status === 'active' || sub?.status === 'trial' || (sub?.status === 'cancelled' && sub?.end_date && new Date(sub.end_date) > new Date());
-  const hasEliteAccess = isElite && isActive;
+  const hasEliteAccess = checkElite(activeSub(Array.isArray(subscription) ? subscription : []));
   const hasChat = hasEliteAccess;
 
   const handleUnfriend = async (friendEmail) => {

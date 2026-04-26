@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { api } from '@/api/client';
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Trophy, Crown, Lock, Loader2, Users, TrendingUp } from "lucide-react";
+import { activeSub, hasEliteAccess } from '@/lib/subscriptionUtils';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Link } from "react-router-dom";
@@ -87,23 +88,11 @@ export default function Leaderboard() {
     enabled: !!user,
   });
 
-  const subscription = subscriptions[0];
-  const isElite = subscription?.plan === 'elite_monthly' || subscription?.plan === 'elite_yearly';
-
-  // CRITICAL: Only active status grants access. Pending, past_due, expired = BLOCKED
-  const isActive = subscription?.status === 'active' || subscription?.status === 'trial';
-
-  // Grace period: cancelled but end_date is in future
-  const isGracePeriod = subscription?.status === 'cancelled' &&
-                        subscription?.end_date &&
-                        new Date(subscription.end_date) > new Date();
-
-  // Block access if expired, past_due, or pending (payment not yet confirmed)
+  const subscription = activeSub(subscriptions);
   const isPending = subscription?.status === 'pending';
-  const isBlocked = subscription?.status === 'expired' || subscription?.status === 'past_due' || isPending;
 
-  // Leaderboard is Elite-only
-  const hasAccess = !isBlocked && isElite && (isActive || isGracePeriod);
+  // Leaderboard is Elite-only; use shared utility for consistent access check
+  const hasAccess = !isPending && hasEliteAccess(subscription);
 
   // Check for upsell triggers
   useEffect(() => {

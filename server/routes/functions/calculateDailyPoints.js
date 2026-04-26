@@ -49,11 +49,28 @@ module.exports = async (req, res) => {
   // Cap daily points
   pointsAwarded = Math.min(pointsAwarded, POINTS.DAILY_MAX);
 
-  if (pointsAwarded > 0) {
-    // Record transaction
-    await PointsTransaction.create({ created_by: user.email, points_awarded: pointsAwarded, source: 'daily_calc', transaction_date: today });
+  // Always write the idempotency marker (0 pts) so subsequent calls skip recalculation
+  await PointsTransaction.create({
+    created_by: user.email,
+    points_awarded: 0,
+    source: 'daily_calc',
+    transaction_date: today,
+  });
 
-    // Update totals
+  if (pointsAwarded > 0) {
+    // Create one transaction per source so the breakdown in getUserPointsAndLevel works correctly
+    await Promise.all(
+      sources.map(src =>
+        PointsTransaction.create({
+          created_by: user.email,
+          points_awarded: src.points,
+          source: src.source,          // e.g. 'workout_completion', 'calorie_adherence'
+          transaction_date: today,
+        })
+      )
+    );
+
+    // Update running totals
     await Points.findOneAndUpdate(
       { created_by: user.email },
       { $inc: { total_points: pointsAwarded, weekly_points: pointsAwarded } },

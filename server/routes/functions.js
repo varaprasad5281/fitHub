@@ -84,6 +84,9 @@ const handlers = {
   // Nutrition history
   updateNutritionHistory:       require('./functions/updateNutritionHistory'),
 
+  // Streak tracking
+  updateStreak:                 require('./functions/updateStreak'),
+
   // Goal progress
   updateGoalProgress:           require('./functions/updateGoalProgress').updateGoalProgress,
   verifyGoalCompletion:         require('./functions/updateGoalProgress').verifyGoalCompletion,
