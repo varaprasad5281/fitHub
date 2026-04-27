@@ -19,50 +19,50 @@ export default function FriendRequests() {
   const { data: incoming = [], isLoading: incomingLoading } = useQuery({
     queryKey: ['friendRequests', 'incoming'],
     queryFn: async () => {
-      const response = await api.functions.invoke('getFriendsList', {
-        type: 'pending'
-      });
-      return response?.data?.friends?.filter(f => !f.is_requester) || [];
+      const response = await api.functions.invoke('getFriendsList', { type: 'pending' });
+      return (response?.friends || []).filter(f => !f.is_requester);
     },
-    staleTime: 1000 * 60
+    staleTime: 1000 * 30,
+    refetchOnMount: true,
   });
 
   const { data: outgoing = [], isLoading: outgoingLoading } = useQuery({
     queryKey: ['friendRequests', 'outgoing'],
     queryFn: async () => {
-      const response = await api.functions.invoke('getFriendsList', {
-        type: 'pending'
-      });
-      return response?.data?.friends?.filter(f => f.is_requester) || [];
+      const response = await api.functions.invoke('getFriendsList', { type: 'pending' });
+      return (response?.friends || []).filter(f => f.is_requester);
     },
-    staleTime: 1000 * 60
+    staleTime: 1000 * 30,
+    refetchOnMount: true,
   });
 
   const acceptMutation = useMutation({
-    mutationFn: async (requestId) => {
+    mutationFn: async (request) => {
       await api.functions.invoke('friendRequest', {
         action: 'accept',
-        request_id: requestId
+        target_email: request.email,
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['friendRequests'] });
       queryClient.invalidateQueries({ queryKey: ['friends'] });
-      toast.success('Friend added. Accountability just got stronger.');
-    }
+      queryClient.invalidateQueries({ queryKey: ['friend-requests-notifications'] });
+      toast.success('Friend added! Accountability just got stronger.');
+    },
   });
 
   const declineMutation = useMutation({
-    mutationFn: async (requestId) => {
+    mutationFn: async (request) => {
       await api.functions.invoke('friendRequest', {
-        action: 'decline',
-        request_id: requestId
+        action: 'reject',
+        target_email: request.email,
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['friendRequests'] });
+      queryClient.invalidateQueries({ queryKey: ['friend-requests-notifications'] });
       toast.success('Request declined.');
-    }
+    },
   });
 
   return (
@@ -109,22 +109,23 @@ export default function FriendRequests() {
                   )}
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-white truncate">
-                      {request.friend_name}
+                      {request.friend_name || request.username || request.email}
                     </p>
+                    <p className="text-xs text-zinc-500 truncate">{request.email}</p>
                   </div>
                 </div>
 
                 <div className="flex gap-2 ml-2">
                   <Button
-                    onClick={() => acceptMutation.mutate(request.id)}
-                    disabled={acceptMutation.isPending}
+                    onClick={() => acceptMutation.mutate(request)}
+                    disabled={acceptMutation.isPending || declineMutation.isPending}
                     className="h-8 px-3 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs"
                   >
                     <Check className="w-3 h-3" />
                   </Button>
                   <Button
-                    onClick={() => declineMutation.mutate(request.id)}
-                    disabled={declineMutation.isPending}
+                    onClick={() => declineMutation.mutate(request)}
+                    disabled={acceptMutation.isPending || declineMutation.isPending}
                     variant="outline"
                     className="h-8 px-3 border-red-500/30 text-red-400 hover:bg-red-500/10 rounded-lg text-xs"
                   >

@@ -47,7 +47,10 @@ export default function SocialsPreview() {
             >
               {/* Locked overlay */}
               <div className="absolute inset-0 rounded-xl bg-black/40 backdrop-blur-sm z-10 flex items-center justify-center cursor-not-allowed">
-                <Lock className="w-4 h-4 text-amber-400" />
+                <div className="flex flex-col items-center gap-1">
+                  <Lock className="w-5 h-5 text-amber-400" />
+                  <span className="text-xs font-semibold text-amber-400">Unlock with Elite</span>
+                </div>
               </div>
 
               {/* Card content behind overlay */}
@@ -81,7 +84,10 @@ export default function SocialsPreview() {
               className="relative"
             >
               <div className="absolute inset-0 rounded-xl bg-black/40 backdrop-blur-sm z-10 flex items-center justify-center cursor-not-allowed">
-                <Lock className="w-4 h-4 text-amber-400" />
+                <div className="flex flex-col items-center gap-1">
+                  <Lock className="w-5 h-5 text-amber-400" />
+                  <span className="text-xs font-semibold text-amber-400">Unlock with Elite</span>
+                </div>
               </div>
               <div className="p-3 rounded-xl border border-zinc-800 bg-zinc-900/50 flex items-center gap-3 opacity-50 blur-[2px]">
                 <div className="w-7 h-7 rounded-full bg-zinc-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">

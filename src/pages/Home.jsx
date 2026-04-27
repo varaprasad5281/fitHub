@@ -15,6 +15,7 @@ const HowItWorksSection = lazyWithPreload(() => import("@/components/landing/How
 const PricingSection = lazyWithPreload(() => import("@/components/landing/PricingSection"));
 const SocialProofSection = lazyWithPreload(() => import("@/components/landing/SocialProofSection"));
 const FAQSection = lazyWithPreload(() => import("@/components/landing/FAQSection"));
+const MobileAppSection = lazyWithPreload(() => import("@/components/landing/MobileAppSection"));
 const NewsletterSection = lazyWithPreload(() => import("@/components/landing/NewsletterSection"));
 const FooterSection = lazyWithPreload(() => import("@/components/landing/FooterSection"));
 
@@ -131,6 +132,7 @@ function Home() {
          <HowItWorksSection />
          <PricingSection />
          <SocialProofSection />
+         <MobileAppSection />
          <FAQSection />
          <NewsletterSection />
          <FooterSection />
