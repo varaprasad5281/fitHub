@@ -98,7 +98,7 @@ export default function Coaching() {
               <Sparkles className="w-5 h-5 text-amber-400" />
               <p className="text-amber-400 text-xs sm:text-sm font-semibold uppercase tracking-[0.15em]">Coaching</p>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Unlock Your Coach 🧠</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Unlock Your Coach</h1>
             <p className="text-zinc-500">Get personalised daily coaching — upgrade Pro to access</p>
           </div>
           <CoachingPreview />

@@ -81,8 +81,8 @@ export default function Leaderboard() {
   // Friend requests data
   const { data: friendRequests = [], isLoading: requestsLoading } = useQuery({
     queryKey: ['friend-requests'],
-    queryFn: () => api.entities.FriendRequest.filter({ 
-      recipient_email: user?.email,
+    queryFn: () => api.entities.FriendRequest.filter({
+      receiver_email: user?.email,
       status: 'pending'
     }),
     enabled: !!user,

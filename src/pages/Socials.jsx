@@ -39,7 +39,7 @@ export default function SocialsPage() {
   const { data: friendRequests = [], isLoading: requestsLoading } = useQuery({
     queryKey: ['friend-requests'],
     queryFn: () => api.entities.FriendRequest.filter({
-      recipient_email: user?.email,
+      receiver_email: user?.email,
       status: 'pending'
     }),
     enabled: !!user,
