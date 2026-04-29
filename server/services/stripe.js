@@ -4,10 +4,11 @@ let _stripe = null;
 
 function getStripe() {
   if (!_stripe) {
-    if (!process.env.STRIPE_SECRET_KEY) {
+    const key = process.env.STRIPE_SECRET_KEY;
+    if (!key) {
       throw new Error('STRIPE_SECRET_KEY is not set in environment variables');
     }
-    _stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+    _stripe = new Stripe(key, { apiVersion: '2023-10-16' });
   }
   return _stripe;
 }

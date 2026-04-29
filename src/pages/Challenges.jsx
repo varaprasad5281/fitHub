@@ -23,10 +23,10 @@ export default function Challenges() {
     refetchOnMount: true,
   });
 
-  const { data: subscription } = useQuery({
+  const { data: subscription = [], isLoading: subLoading } = useQuery({
     queryKey: ['subscription'],
     queryFn: () => api.entities.Subscription.list(),
-    initialData: [],
+    staleTime: 1000 * 60 * 5,
   });
 
   const sub = subscription[0];

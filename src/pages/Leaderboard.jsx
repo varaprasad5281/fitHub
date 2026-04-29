@@ -35,30 +35,21 @@ export default function Leaderboard() {
     queryFn: () => api.auth.me(),
   });
 
-  const { data: subscriptions, isLoading: subLoading } = useQuery({
+  const { data: subscriptions = [], isLoading: subLoading } = useQuery({
     queryKey: ['subscription'],
     queryFn: () => api.entities.Subscription.list(),
-    initialData: [],
     staleTime: 1000 * 60 * 5,
   });
 
   // PERFORMANCE: Use cached backend endpoint with real-time updates
    const { data: leaderboardData, isLoading: leaderboardLoading } = useQuery({
-     queryKey: ['leaderboard-cached', timeframe, category],
-     queryFn: async () => {
-       const { data } = await api.functions.invoke('getLeaderboardCachedSecure', {
-         timeframe,
-         category
-       });
-       return data;
-     },
-     enabled: true,
-     initialData: { leaderboard: [], user_rank: 0 },
-     staleTime: 1000 * 30, // Refresh every 30s for real-time feel
-     gcTime: 1000 * 60 * 10,
-     refetchOnWindowFocus: true,
-     refetchInterval: 1000 * 30, // Auto-refresh every 30s
-   });
+    queryKey: ['leaderboard-cached', timeframe, category],
+    queryFn: () => api.functions.invoke('getLeaderboardCachedSecure', { timeframe, category }),
+    staleTime: 1000 * 30,
+    gcTime: 1000 * 60 * 10,
+    refetchOnWindowFocus: true,
+    refetchInterval: 1000 * 30,
+  });
 
    // Real-time updates on points changes
    useEffect(() => {

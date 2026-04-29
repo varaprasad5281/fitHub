@@ -15,6 +15,7 @@ const schema = new mongoose.Schema({
   updated_date:     Date,
 }, { timestamps: true });
 
-schema.index({ created_by: 1, createdAt: -1 });
+// One session per user per type per day
+schema.index({ created_by: 1, session_type: 1, session_date: 1 }, { unique: true, sparse: true });
 
 module.exports = mongoose.model('CoachingSession', schema);

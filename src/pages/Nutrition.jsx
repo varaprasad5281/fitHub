@@ -62,7 +62,6 @@ export default function Nutrition() {
   const { data: subscriptions = [], isLoading: subLoading } = useQuery({
     queryKey: ['subscription'],
     queryFn: () => (/** @type {any} */ (api.entities)).Subscription.list(),
-    initialData: [],
     staleTime: 1000 * 60 * 5,
   });
   const hasNutritionAccess = hasProAccess(activeSub(subscriptions));

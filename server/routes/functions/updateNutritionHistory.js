@@ -1,6 +1,9 @@
 const MealLog = require('../../models/MealLog');
 const NutritionHistory = require('../../models/NutritionHistory');
 
+const MAX_DAYS = 7;
+
+/** Upsert one day's aggregated totals — one record per (user, date) */
 async function upsertDate(userEmail, date, logs) {
   const total_calories = logs.reduce((s, m) => s + (Number(m.calories) || 0), 0);
   const total_protein  = logs.reduce((s, m) => s + (Number(m.protein)  || 0), 0);
@@ -15,18 +18,36 @@ async function upsertDate(userEmail, date, logs) {
   );
 }
 
+/** Delete any records beyond the most recent MAX_DAYS per user */
+async function pruneOldRecords(userEmail) {
+  const recent = await NutritionHistory.find({ created_by: userEmail })
+    .sort({ date: -1 })
+    .limit(MAX_DAYS)
+    .select('_id')
+    .lean();
+
+  if (recent.length < MAX_DAYS) return; // nothing to prune yet
+
+  const keepIds = recent.map(r => r._id);
+  await NutritionHistory.deleteMany({
+    created_by: userEmail,
+    _id: { $nin: keepIds },
+  });
+}
+
 module.exports = async (req, res) => {
   const userEmail = req.user.email;
   const { date } = req.body;
 
-  // Single-date update (called after create/delete)
+  // Single-date update (called after a meal is created / deleted)
   if (date) {
     const logs = await MealLog.find({ created_by: userEmail, date }).lean();
     const record = await upsertDate(userEmail, date, logs);
+    await pruneOldRecords(userEmail);
     return res.json({ data: record, success: true });
   }
 
-  // Sync all: group every meal log by date and upsert NutritionHistory for each
+  // Sync-all: group every meal log by date, upsert one record per day
   const allLogs = await MealLog.find({ created_by: userEmail }).lean();
   const byDate = {};
   for (const log of allLogs) {
@@ -40,9 +61,12 @@ module.exports = async (req, res) => {
     Object.entries(byDate).map(([d, logs]) => upsertDate(userEmail, d, logs))
   );
 
+  // Enforce 7-record cap
+  await pruneOldRecords(userEmail);
+
   const history = await NutritionHistory.find({ created_by: userEmail })
     .sort({ date: -1 })
-    .limit(7)
+    .limit(MAX_DAYS)
     .lean();
 
   res.json({ data: history, success: true });

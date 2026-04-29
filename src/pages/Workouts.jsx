@@ -60,49 +60,8 @@ export default function Workouts() {
 
   const completeWorkout = useMutation({
     mutationFn: async (workoutId) => {
-      const workout = workouts.find(w => w.id === workoutId);
-      const pts = points[0];
-      const today = new Date().toISOString().split('T')[0];
-
-      const difficultyPoints = { beginner: 25, intermediate: 50, advanced: 100 };
-      const pointsEarned = difficultyPoints[workout?.difficulty] || 50;
-
-      // Mark workout as completed
-      await api.entities.Workout.update(workoutId, {
-        is_completed: true,
-        completed_date: today,
-      });
-
-      // Award points + record transaction so breakdown is correct in profile
-      if (pts) {
-        await api.entities.Points.update(pts.id, {
-          total_points: (pts.total_points || 0) + pointsEarned,
-          weekly_points: (pts.weekly_points || 0) + pointsEarned,
-        });
-      }
-      await api.entities.PointsTransaction.create({
-        points_awarded: pointsEarned,
-        source: `workout_completion_${workout?.difficulty || 'intermediate'}`,
-        transaction_date: today,
-      });
-
-      // Log completion record
-      await api.entities.WorkoutCompletion.create({
-        workout_id: workoutId,
-        completed_date: today,
-      });
-
-      // Enforce max 7 completed — delete oldest beyond the limit
-      const allCompleted = workouts
-        .filter(w => w.is_completed || w.id === workoutId)
-        .sort((a, b) => (b.completed_date || '').localeCompare(a.completed_date || ''));
-
-      if (allCompleted.length >= MAX_HISTORY) {
-        const toDelete = allCompleted.slice(MAX_HISTORY);
-        await Promise.all(toDelete.map(w => api.entities.Workout.delete(w.id)));
-      }
-
-      return pointsEarned;
+      const result = await api.functions.invoke('completeWorkout', { workout_id: workoutId });
+      return result?.points_earned ?? 0;
     },
     onSuccess: (pointsEarned) => {
       api.analytics.track({ eventName: 'workout_completed', properties: { points_earned: pointsEarned } });
