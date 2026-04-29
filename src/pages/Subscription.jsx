@@ -8,6 +8,7 @@ import CancelModal from "@/components/subscription/CancelModal";
 import { createPageUrl } from "@/utils";
 import PricingSection from "@/components/landing/PricingSection";
 import { withActionDebug } from '@/components/debug/ActionDebugger';
+import { activeSub } from '@/lib/subscriptionUtils';
 
 export default function Subscription() {
   const [cancelling, setCancelling] = useState(false);
@@ -19,13 +20,34 @@ export default function Subscription() {
       eventName: 'subscription_page_viewed',
       properties: { page: 'subscription' }
     });
+
+    // When landing here after a successful Stripe checkout, verify payment directly
+    // with Stripe and update the subscription immediately — no webhook dependency.
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('session_id');
+    if (params.get('checkout') === 'success' && sessionId) {
+      window.history.replaceState({}, '', window.location.pathname);
+      api.functions.invoke('verifyCheckoutSession', { session_id: sessionId })
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: ['subscription'] });
+          toast.success('Payment successful! Your plan is now active 🎉');
+        })
+        .catch(() => {
+          // Fallback: just refetch — webhook may have already updated it
+          queryClient.invalidateQueries({ queryKey: ['subscription'] });
+          toast.success('Subscription activated!');
+        });
+    } else if (params.get('checkout') === 'success') {
+      window.history.replaceState({}, '', window.location.pathname);
+      queryClient.invalidateQueries({ queryKey: ['subscription'] });
+      toast.success('Subscription activated!');
+    }
   }, []);
 
-  const { data: subscriptions, isLoading } = useQuery({
+  const { data: subscriptions = [], isLoading, refetch: refetchSubscription } = useQuery({
     queryKey: ['subscription'],
     queryFn: () => api.entities.Subscription.list(),
-    initialData: [],
-    staleTime: 1000 * 60, // 1 minute
+    staleTime: 1000 * 60,
   });
 
   const { data: history } = useQuery({
@@ -38,7 +60,7 @@ export default function Subscription() {
     staleTime: 1000 * 60 * 5,
   });
 
-  const subscription = subscriptions[0];
+  const subscription = activeSub(subscriptions);
   const isPro = subscription?.plan === 'pro_monthly' || subscription?.plan === 'pro_yearly';
   const isElite = subscription?.plan === 'elite_monthly' || subscription?.plan === 'elite_yearly';
   const isActive = subscription?.status === 'active';

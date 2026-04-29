@@ -165,20 +165,28 @@ export default function Onboarding() {
   const handleStartTrial = async () => {
     setCheckingOut(true);
     try {
+      const me = await _api.auth.me().catch(() => null);
+      const userEmail = reg.email?.trim() || me?.email;
+      if (!userEmail) throw new Error('Email not available');
+
+      const idempotencyKey = `checkout_${userEmail}_pro_monthly_${Date.now()}`;
+
       const response = await _api.functions.invoke('createCheckout', {
         billingPeriod: 'pro_monthly',
-        userEmail: reg.email || (await _api.auth.me())?.email,
-        timestamp: Date.now(),
+        userEmail,
+        idempotencyKey,
         successUrl: `${window.location.origin}/Subscription?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
         cancelUrl: `${window.location.origin}/Onboarding`,
       });
-      if (response?.data?.url) {
-        window.location.href = response.data.url;
+
+      const url = response?.url || response?.data?.url;
+      if (url) {
+        window.location.href = url;
       } else {
-        throw new Error('No checkout URL');
+        throw new Error('No checkout URL returned');
       }
-    } catch {
-      toast.error('Failed to start checkout. Please try again.');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to start checkout. Please try again.');
       setCheckingOut(false);
     }
   };

@@ -41,6 +41,7 @@ const handlers = {
 
   // Stripe / subscriptions
   createCheckout:               require('./functions/createCheckout'),
+  verifyCheckoutSession:        require('./functions/verifyCheckoutSession'),
   cancelSubscription:           require('./functions/cancelSubscription'),
 
   // Social
@@ -83,6 +84,9 @@ const handlers = {
 
   // Nutrition history
   updateNutritionHistory:       require('./functions/updateNutritionHistory'),
+
+  // Workout completion (one per day, keep last 7)
+  completeWorkout:              require('./functions/completeWorkout'),
 
   // Streak tracking
   updateStreak:                 require('./functions/updateStreak'),

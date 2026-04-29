@@ -24,10 +24,10 @@ export default function SocialsPage() {
     queryFn: () => api.auth.me(),
   });
 
-  const { data: subscription } = useQuery({
+  const { data: subscription = [], isLoading: subLoading } = useQuery({
     queryKey: ['subscription'],
     queryFn: () => api.entities.Subscription.list(),
-    initialData: [],
+    staleTime: 1000 * 60 * 5,
   });
 
   const { data: friends = [], isLoading: friendsLoading } = useQuery({
@@ -104,7 +104,7 @@ export default function SocialsPage() {
     }
   };
 
-  if (friendsLoading || requestsLoading || chatsLoading) {
+  if (subLoading || friendsLoading || requestsLoading || chatsLoading) {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
