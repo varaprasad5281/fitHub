@@ -42,7 +42,12 @@ module.exports = async (req, res) => {
     const sub = await Subscription.findOne({ created_by: userEmail });
     if (!sub) return res.json({ received: true });
 
-    if (sub.status === 'active' || sub.status === 'trial') return res.json({ received: true });
+    // Only skip if we've already processed THIS exact Stripe subscription
+    // (prevents double-processing the same payment, but allows upgrades from starter/expired)
+    if (
+      sub.stripe_subscription_id === session.subscription &&
+      (sub.status === 'active' || sub.status === 'trial')
+    ) return res.json({ received: true });
 
     const isPro = billingPeriod.startsWith('pro_');
     const trialEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
