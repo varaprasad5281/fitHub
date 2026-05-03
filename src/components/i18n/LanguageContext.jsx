@@ -1,57 +1,24 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext } from 'react';
 import { translations } from './translations';
 
 const LanguageContext = createContext();
 
+// Language selection is intentionally disabled — the app is English-only for now.
+// Re-enable by restoring the previous LanguageProvider implementation and the
+// Profile dropdown.
+const LOCKED_LANGUAGE = 'en';
+
 export function LanguageProvider({ children }) {
-  const [language, setLanguage] = useState('en');
-  const [loading, setLoading] = useState(true);
+  // Clear any stale persisted preference from earlier multi-language builds so
+  // returning users don't see partially-translated UI.
+  if (typeof window !== 'undefined' && window.localStorage?.getItem('app_language')) {
+    try { window.localStorage.removeItem('app_language'); } catch (_) {}
+  }
 
-  // Load language preference from localStorage or user profile on mount
-  useEffect(() => {
-    const initLanguage = async () => {
-      try {
-        // First try localStorage for quick load
-        const saved = localStorage.getItem('app_language');
-        if (saved && translations[saved]) {
-          setLanguage(saved);
-          setLoading(false);
-          return;
-        }
+  const language = LOCKED_LANGUAGE;
 
-        // Then try to get from user profile
-        const isAuth = await window.__api?.auth?.isAuthenticated?.();
-        if (isAuth) {
-          const user = await window.__api?.auth?.me?.();
-          if (user) {
-            // You'll need to fetch from Profile entity
-            const { api } = await import('@/api/client');
-            const profiles = await api.entities.Profile.list();
-            const profile = profiles[0];
-            if (profile?.language && translations[profile.language]) {
-              setLanguage(profile.language);
-              localStorage.setItem('app_language', profile.language);
-            }
-          }
-        }
-      } catch (error) {
-        console.log('Language init error:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initLanguage();
-  }, []);
-
-  const changeLanguage = (newLanguage) => {
-    if (translations[newLanguage]) {
-      setLanguage(newLanguage);
-      localStorage.setItem('app_language', newLanguage);
-      // Dispatch event for other components to react
-      window.dispatchEvent(new CustomEvent('languageChanged', { detail: newLanguage }));
-    }
-  };
+  // Kept as a no-op for backwards compatibility with any caller still importing it.
+  const changeLanguage = () => {};
 
   const t = (key, fallback = key) => {
     const trans = translations[language] || translations.en;
@@ -59,7 +26,7 @@ export function LanguageProvider({ children }) {
   };
 
   return (
-    <LanguageContext.Provider value={{ language, changeLanguage, t, loading }}>
+    <LanguageContext.Provider value={{ language, changeLanguage, t, loading: false }}>
       {children}
     </LanguageContext.Provider>
   );

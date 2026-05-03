@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '@/api/client';
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Flame, Trophy, Star, TrendingUp, Target, Sparkles, Award, Loader2, Calendar, Globe, Edit2, Dumbbell, Apple, ChevronRight, Crown, User, LogOut } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Flame, Trophy, Star, TrendingUp, Target, Sparkles, Award, Loader2, Calendar, Edit2, Dumbbell, Apple, ChevronRight, Crown, User, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -12,29 +12,10 @@ import PointsBreakdown from "@/components/points/PointsBreakdown";
 import BetaBadge from "@/components/profile/BetaBadge";
 import BadgeManager from "@/components/profile/BadgeManager";
 import ProfileEdit from "@/components/profile/ProfileEdit";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { withActionDebug } from "@/components/debug/ActionDebugger";
 import { useLanguage } from "@/components/i18n/LanguageContext";
 import { useAuth } from "@/lib/AuthContext";
-
-const LANGUAGES = [
-  { code: "en", label: "English" },
-  { code: "es", label: "Español" },
-  { code: "fr", label: "Français" },
-  { code: "de", label: "Deutsch" },
-  { code: "it", label: "Italiano" },
-  { code: "pt", label: "Português" },
-  { code: "nl", label: "Nederlands" },
-  { code: "pl", label: "Polski" },
-  { code: "ru", label: "Русский" },
-  { code: "zh", label: "中文" },
-  { code: "ja", label: "日本語" },
-  { code: "ar", label: "العربية" },
-  { code: "hi", label: "हिन्दी" },
-  { code: "tr", label: "Türkçe" },
-  { code: "ko", label: "한국어" },
-];
 
 const goalLabels = {
   lose_weight: "Lose Weight",
@@ -67,7 +48,7 @@ export default function Profile() {
   const [calculating, setCalculating] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const queryClient = useQueryClient();
-  const { t, changeLanguage } = useLanguage();
+  const { t } = useLanguage();
   const { logout } = useAuth();
 
   useEffect(() => {
@@ -145,19 +126,6 @@ export default function Profile() {
   const pts = points[0];
   // Get the most recent active subscription
   const activeSubscription = subscriptions.find(s => s.status === 'active' || s.status === 'trial') || subscriptions[0];
-
-  const saveLanguage = useMutation({
-    mutationFn: async (lang) => {
-      if (profile) {
-        await api.entities.Profile.update(profile.id, { language: lang });
-        changeLanguage(lang);
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['profile'] });
-      toast.success('Language preference saved');
-    },
-  });
 
   const calculateDailyPoints = async () => {
     await withActionDebug('Recalculate Points', async () => {
@@ -403,22 +371,6 @@ export default function Profile() {
                     </Link>
                   </div>
                   <BadgeManager />
-                </div>
-
-                {/* Language preference */}
-                <div className="pt-4 border-t border-zinc-800">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Globe className="w-3.5 h-3.5 text-amber-400" />
-                    <span className="text-zinc-500 text-xs uppercase tracking-wider font-semibold">{t("profile.language")}</span>
-                  </div>
-                  <Select value={profile.language || 'en'} onValueChange={(val) => saveLanguage.mutate(val)} disabled={saveLanguage.isPending}>
-                    <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white text-xs h-8">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {LANGUAGES.map(l => <SelectItem key={l.code} value={l.code}>{l.label}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
                 </div>
               </motion.div>
             )}
