@@ -115,6 +115,9 @@ const handlers = {
 // Stripe webhook — raw body, no auth
 router.post('/stripeWebhook', require('./functions/stripeWebhook'));
 
+// Public functions — no auth required (user is not logged in for these)
+router.post('/sendPasswordReset', require('./functions/sendPasswordReset'));
+
 // All other functions require auth
 router.use(protect);
 

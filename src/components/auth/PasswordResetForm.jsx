@@ -22,7 +22,7 @@ export default function PasswordResetForm({ onClose }) {
     try {
       const response = await api.functions.invoke('sendPasswordReset', { email });
       
-      if (response.data.success) {
+      if (response.success) {
         setSent(true);
         toast.success('Password reset email sent');
       }
