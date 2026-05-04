@@ -88,7 +88,7 @@ export default function CoachingCard({ coaching, onFeedback, onFavourite }) {
             <Star className={`w-4 h-4 ${coaching.favourited ? 'fill-amber-400' : ''}`} />
           </Button>
         )}
-        {!coaching.feedback && (
+        {!coaching.feedback && onFeedback && (
           <>
             <span className="text-xs text-zinc-500">Helpful?</span>
             <div className="flex gap-2 ml-auto">

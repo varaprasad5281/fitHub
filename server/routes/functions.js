@@ -32,6 +32,7 @@ const handlers = {
   // Coaching
   generateDailyCoaching:        require('./functions/generateDailyCoaching'),
   generateWeeklyCoaching:       require('./functions/generateDailyCoaching'),
+  resolveCoachingReview:        require('./functions/resolveCoachingReview'),
 
   // Leaderboard
   getLeaderboard:               require('./functions/getLeaderboard'),
