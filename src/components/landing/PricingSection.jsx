@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import { useCurrency } from "@/components/hooks/useCurrency";
 import { Loader2 } from "lucide-react";
 import { api } from '@/api/client';
-import { withActionDebug } from '@/components/debug/ActionDebugger';
 
 /**
  * @param {{ fullPage?: boolean, onUpgrade?: (period: string) => void }} props
@@ -13,7 +12,8 @@ import { withActionDebug } from '@/components/debug/ActionDebugger';
 export default function PricingSection({ fullPage = false }) {
   const [billing, setBilling] = useState('monthly');
   const { formatPrice } = useCurrency();
-  const [isUpgrading, setIsUpgrading] = useState(false);
+  // Track which specific plan is loading — null means nothing is loading
+  const [upgradingPlan, setUpgradingPlan] = useState(/** @type {string|null} */(null));
 
   /** @param {string} billingPeriod */
   const handleUpgrade = async (billingPeriod) => {
@@ -22,21 +22,25 @@ export default function PricingSection({ fullPage = false }) {
       return;
     }
 
-    setIsUpgrading(true);
-
-    await withActionDebug('Checkout ' + billingPeriod, async () => {
-      const isAuth = await api.auth.isAuthenticated();
-      
+    setUpgradingPlan(billingPeriod);
+    try {
+      const isAuth = api.auth.isAuthenticated();
       let userEmail;
+
       if (isAuth) {
         const user = await api.auth.me();
-        userEmail = user ? user.email : null;
+        userEmail = user?.email;
       } else {
         userEmail = prompt('Enter your email to proceed with checkout:');
         if (!userEmail || !userEmail.includes('@')) {
           toast.error('Valid email required to proceed');
           return;
         }
+      }
+
+      if (!userEmail) {
+        toast.error('Could not get email. Please log in and try again.');
+        return;
       }
 
       const idempotencyKey = `checkout_${userEmail}_${billingPeriod}_${Date.now()}`;
@@ -49,17 +53,15 @@ export default function PricingSection({ fullPage = false }) {
         cancelUrl: `${appOrigin}/subscription?checkout=cancelled`,
       });
 
-      if (!data || !data.url) {
+      if (!data?.url) {
         throw new Error('Could not connect to checkout. Please try again.');
       }
 
       window.location.href = data.url;
-    }, {
-      setLoading: setIsUpgrading,
-      onError: (/** @type {any} */ error) => {
-        toast.error((error && error.message) || 'Failed to start checkout. Please try again.');
-      }
-    })();
+    } catch (err) {
+      toast.error((err instanceof Error ? err.message : null) || 'Failed to start checkout. Please try again.');
+      setUpgradingPlan(null);
+    }
   };
 
   const plans = [
@@ -253,17 +255,21 @@ export default function PricingSection({ fullPage = false }) {
                   ? (billing === 'monthly' ? 'pro_monthly' : 'pro_yearly')
                   : (billing === 'monthly' ? 'elite_monthly' : 'elite_yearly')
                 )}
-                disabled={isUpgrading}
+                disabled={upgradingPlan === (plan.name === "7% Pro"
+                  ? (billing === 'monthly' ? 'pro_monthly' : 'pro_yearly')
+                  : (billing === 'monthly' ? 'elite_monthly' : 'elite_yearly'))}
                 className={`w-full h-10 sm:h-12 rounded-xl font-semibold text-sm sm:text-base transition-all ${
                   plan.highlight
                     ? 'bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black shadow-[0_4px_20px_rgba(251,191,36,0.3)] hover:shadow-[0_6px_30px_rgba(251,191,36,0.5)] disabled:opacity-50 disabled:cursor-wait'
                     : 'bg-white text-black hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-wait'
                 }`}
               >
-                {isUpgrading ? (
+                {upgradingPlan === (plan.name === "7% Pro"
+                  ? (billing === 'monthly' ? 'pro_monthly' : 'pro_yearly')
+                  : (billing === 'monthly' ? 'elite_monthly' : 'elite_yearly')) ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin inline" />
-                    Processing
+                    Processing…
                   </>
                 ) : (
                   plan.cta

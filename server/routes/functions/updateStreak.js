@@ -1,6 +1,7 @@
 const Streak = require('../../models/Streak');
 const Points = require('../../models/Points');
 const PointsTransaction = require('../../models/PointsTransaction');
+const { notify } = require('../../utils/notify');
 
 const MILESTONE_DAYS = [7, 14, 30, 60, 100, 200, 365];
 
@@ -62,6 +63,10 @@ module.exports = async (req, res) => {
       { created_by: userEmail },
       { $inc: { total_points: bonusPoints, weekly_points: bonusPoints } },
       { upsert: true }
+    );
+    notify(userEmail,
+      `🔥 ${newCount}-day streak milestone! You're on fire — +${bonusPoints} bonus points awarded.`,
+      'streak_milestone'
     );
   }
 

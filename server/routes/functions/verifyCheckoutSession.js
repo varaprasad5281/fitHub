@@ -1,5 +1,6 @@
 const stripe = require('../../services/stripe');
 const Subscription = require('../../models/Subscription');
+const { notify } = require('../../utils/notify');
 
 const PLAN_NAMES = {
   pro_monthly:    '7% Pro',
@@ -56,6 +57,19 @@ module.exports = async (req, res) => {
     },
     { upsert: true, new: true }
   );
+
+  const planLabel = PLAN_NAMES[billingPeriod] || billingPeriod;
+  if (isPro) {
+    notify(userEmail,
+      `🎉 Welcome to ${planLabel}! Your 7-day free trial has started. Enjoy full access to workouts, nutrition tracking, and coaching.`,
+      'subscription'
+    );
+  } else {
+    notify(userEmail,
+      `👑 You're now on ${planLabel}! Leaderboards, social features, and elite coaching are all unlocked.`,
+      'subscription'
+    );
+  }
 
   console.log(`[verifyCheckout] Subscription activated: ${userEmail} → ${billingPeriod}`);
   return res.json({ success: true, plan: billingPeriod, status: isPro ? 'trial' : 'active' });

@@ -41,7 +41,7 @@ export default function IntegrityNotice({ integrity }) {
           <>
             <p className="mt-2 text-sm">Integrity Score: {integrity.integrity_score}/100</p>
             <p className="text-xs text-zinc-500 mt-1">
-              Questions? <a href={`mailto:support@7percent.com?subject=Leaderboard+Review`} className="underline">Contact support</a>
+              Questions? <a href={`mailto:team@7percent.info?subject=Leaderboard+Review`} className="underline">Contact support</a>
             </p>
           </>
         )}
