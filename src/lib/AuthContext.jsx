@@ -19,16 +19,28 @@ export const AuthProvider = ({ children }) => {
   const checkAppState = async () => {
     setIsLoadingAuth(true);
     setAuthError(null);
+
+    // Fast-path: no token in localStorage → definitely not authenticated.
+    // Skip the network call so the UI resolves instantly after logout.
+    if (!auth.isAuthenticated()) {
+      setUser(null);
+      setIsAuthenticated(false);
+      setIsLoadingAuth(false);
+      return;
+    }
+
     try {
       const currentUser = await auth.me();
       if (currentUser) {
         setUser(currentUser);
         setIsAuthenticated(true);
       } else {
+        setUser(null);
         setIsAuthenticated(false);
       }
     } catch (error) {
       console.error('Auth check failed:', error);
+      setUser(null);
       setIsAuthenticated(false);
       if (error.status === 401 || error.status === 403) {
         setAuthError({ type: 'auth_required', message: 'Authentication required' });
@@ -53,9 +65,11 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    auth.logout();
+    auth.logout();                              // removes auth_token from localStorage
+    localStorage.removeItem('auth_token');      // belt-and-suspenders explicit clear
+    sessionStorage.clear();                     // clear any session data
     queryClientInstance.clear();
-    window.location.href = '/';
+    window.location.replace('/');
   };
 
   // Kept for backward compatibility with components that call navigateToLogin

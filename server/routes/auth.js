@@ -6,6 +6,7 @@ const Points = require('../models/Points');
 const Subscription = require('../models/Subscription');
 const IPLoginHistory = require('../models/IPLoginHistory');
 const { protect } = require('../middleware/auth');
+const { notify } = require('../utils/notify');
 
 const router = express.Router();
 
@@ -32,6 +33,12 @@ router.post('/register', async (req, res) => {
       Points.create({ created_by: user.email }),
       Subscription.create({ created_by: user.email }),
     ]);
+
+    // Welcome notification
+    notify(user.email,
+      `Welcome to 7%, ${full_name}! 🎉 Start by logging your first workout or meal to earn points.`,
+      'welcome'
+    );
 
     const token = signToken(user._id);
     res.status(201).json({ token, user: { id: user._id, email: user.email, full_name: user.full_name } });

@@ -6,7 +6,7 @@
 export const APP_CONFIG = {
   name: '7%',
   tagline: 'Most people quit. The 7% stay disciplined.',
-  supportEmail: 'support@7percent.app'
+  supportEmail: 'team@7percent.info'
 };
 
 export const ROUTES = {

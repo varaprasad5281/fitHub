@@ -57,7 +57,7 @@ export default function Terms() {
               <strong>7% Pro:</strong> £12.99/month or £99/year. Billed via Stripe. Subscriptions auto-renew unless cancelled. Cancellation takes effect at the end of the current billing period.
             </p>
             <p className="text-zinc-400 leading-relaxed">
-              <strong>Refunds:</strong> We offer refunds within 7 days of purchase if you're not satisfied. Contact us at support@7percent.info.
+              <strong>Refunds:</strong> We offer refunds within 7 days of purchase if you're not satisfied. Contact us at team@7percent.info.
             </p>
           </section>
 

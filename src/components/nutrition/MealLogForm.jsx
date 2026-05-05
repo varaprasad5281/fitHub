@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, X, Sparkles } from "lucide-react";
+import { Plus, X, Sparkles, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { sanitizeHtml, sanitizeNumber } from "@/components/utils/sanitize";
@@ -20,6 +20,7 @@ export default function MealLogForm({ onSave, onCancel, initialMeal }) {
     fats: initialMeal?.fats || '',
   });
   const [calculating, setCalculating] = useState(false);
+  const [macrosGenerated, setMacrosGenerated] = useState(false);
 
   const handleCalculateMacros = async () => {
     if (!meal.meal_name?.trim()) {
@@ -51,6 +52,7 @@ export default function MealLogForm({ onSave, onCancel, initialMeal }) {
       if (!calories) throw new Error('AI returned no calorie data');
 
       setMeal(prev => ({ ...prev, calories, protein, carbs, fats }));
+      setMacrosGenerated(true);
       toast.success('Macros calculated!');
     } catch (error) {
       console.error('Macro calculation failed:', error);
@@ -146,21 +148,21 @@ export default function MealLogForm({ onSave, onCancel, initialMeal }) {
               <Input
                 placeholder="e.g., Chicken Caesar Salad"
                 value={meal.meal_name}
-                onChange={(e) => setMeal({ ...meal, meal_name: e.target.value })}
+                onChange={(e) => { setMeal({ ...meal, meal_name: e.target.value }); setMacrosGenerated(false); }}
                 maxLength={100}
                 className="bg-zinc-800 border-zinc-700 text-white rounded-xl h-11 flex-1"
               />
               <Button
                 type="button"
                 onClick={handleCalculateMacros}
-                disabled={calculating || !meal.meal_name?.trim()}
-                className="bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border border-amber-500/50 rounded-xl h-11 px-3"
+                disabled={calculating || !meal.meal_name?.trim() || macrosGenerated}
+                className={`rounded-xl h-11 px-3 border ${macrosGenerated ? 'bg-green-500/20 border-green-500/50 text-green-400 cursor-default' : 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border-amber-500/50'}`}
               >
-                <Sparkles className="w-4 h-4" />
+                {macrosGenerated ? <CheckCircle2 className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
               </Button>
             </div>
             <p className="text-zinc-600 text-xs mt-1">
-              {calculating ? 'Calculating macros...' : 'Click sparkle to auto-calculate'}
+              {calculating ? 'Calculating macros...' : macrosGenerated ? '✓ Macros calculated' : 'Click sparkle to auto-calculate'}
             </p>
           </div>
 

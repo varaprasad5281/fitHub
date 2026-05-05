@@ -2,6 +2,7 @@ const Workout = require('../../models/Workout');
 const WorkoutCompletion = require('../../models/WorkoutCompletion');
 const Points = require('../../models/Points');
 const PointsTransaction = require('../../models/PointsTransaction');
+const { notify } = require('../../utils/notify');
 
 const MAX_HISTORY = 7;
 const DIFFICULTY_POINTS = { beginner: 25, intermediate: 50, advanced: 100 };
@@ -62,6 +63,11 @@ module.exports = async (req, res) => {
     const toDelete = allCompleted.slice(MAX_HISTORY).map(w => w._id);
     await Workout.deleteMany({ _id: { $in: toDelete } });
   }
+
+  notify(userEmail,
+    `💪 Workout complete — "${workout.workout_name || 'Session'}"! You earned +${pointsEarned} points.`,
+    'workout_completed'
+  );
 
   return res.json({ success: true, points_earned: pointsEarned });
 };

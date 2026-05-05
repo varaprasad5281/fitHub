@@ -1,11 +1,16 @@
 /**
  * Replaces: generateDailyCoaching
+ *
+ * If today's daily session already has a 'helpful' rating → generate a candidate
+ * session (daily_candidate) so the user can compare and decide.
+ * Otherwise, upsert the active daily session as normal.
  */
 const Profile = require("../../models/Profile");
 const Points = require("../../models/Points");
 const Subscription = require("../../models/Subscription");
 const CoachingSession = require("../../models/CoachingSession");
 const { invokeLLM } = require("../../services/ai");
+const { notify } = require("../../utils/notify");
 
 module.exports = async (req, res) => {
   try {
@@ -46,9 +51,17 @@ Today's Date: ${new Date().toDateString()}`;
       },
     });
 
-    // Upsert: one session per user per day — update if exists, create if not
+    // If today's active session was already liked, create a candidate for review
+    // instead of overwriting the liked plan directly.
+    const existingDaily = await CoachingSession.findOne({
+      created_by: user.email,
+      session_type: "daily",
+      session_date: today,
+    });
+    const sessionType = existingDaily?.feedback === "helpful" ? "daily_candidate" : "daily";
+
     const session = await CoachingSession.findOneAndUpdate(
-      { created_by: user.email, session_type: "daily", session_date: today },
+      { created_by: user.email, session_type: sessionType, session_date: today },
       {
         $set: {
           category: parsed.category || "general",
@@ -58,11 +71,12 @@ Today's Date: ${new Date().toDateString()}`;
           blueprint: parsed.blueprint,
           updated_date: new Date(),
         },
+        $unset: { feedback: "" },
       },
       { upsert: true, new: true },
     );
 
-    // Keep only the 7 most recent daily sessions — delete anything older
+    // Keep only the 7 most recent daily sessions (candidates don't count toward limit)
     const allDaily = await CoachingSession.find(
       { created_by: user.email, session_type: "daily" },
       { _id: 1 },
@@ -73,11 +87,21 @@ Today's Date: ${new Date().toDateString()}`;
       await CoachingSession.deleteMany({ _id: { $in: toDelete } });
     }
 
-    res.json({ success: true, session });
+    if (sessionType === 'daily_candidate') {
+      notify(user.email,
+        '💡 A new coaching plan is ready for you to review. Like it to replace your current one.',
+        'coaching_ready'
+      );
+    } else {
+      notify(user.email,
+        '💡 Your daily coaching plan has been updated. Check it out for today\'s advice!',
+        'coaching_ready'
+      );
+    }
+
+    res.json({ success: true, session, is_candidate: sessionType === "daily_candidate" });
   } catch (err) {
     console.error("[generateDailyCoaching]", err.message);
-    res
-      .status(500)
-      .json({ error: "Failed to generate coaching", message: err.message });
+    res.status(500).json({ error: "Failed to generate coaching", message: err.message });
   }
 };

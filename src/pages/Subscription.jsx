@@ -140,6 +140,17 @@ export default function Subscription() {
     setShowCancelModal(true);
   };
 
+  const handleDowngradeContact = () => {
+    toast.info('To downgrade your plan, please contact our support team.', {
+      description: 'Email us at team@7percent.info and we\'ll process your request within 24 hours.',
+      duration: 8000,
+      action: {
+        label: 'Email Support',
+        onClick: () => window.open('mailto:team@7percent.info?subject=Plan%20Downgrade%20Request', '_blank'),
+      },
+    });
+  };
+
   const handleConfirmCancel = async () => {
     await withActionDebug('Cancel Subscription', async () => {
       await api.functions.invoke('cancelSubscription');
@@ -308,21 +319,17 @@ export default function Subscription() {
               <div className="space-y-3">
                 {isElite && (
                   <button
-                    onClick={() => handleUpgrade('pro_monthly')}
-                    disabled={isUpgrading}
-                    className="w-full flex items-center justify-center gap-2 h-11 rounded-xl border border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800 transition-colors font-medium text-sm disabled:opacity-50"
+                    onClick={handleDowngradeContact}
+                    className="w-full flex items-center justify-center gap-2 h-11 rounded-xl border border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800 transition-colors font-medium text-sm"
                   >
-                    {isUpgrading && <Loader2 className="w-4 h-4 animate-spin" />}
                     Downgrade to Pro (Monthly)
                   </button>
                 )}
                 {isElite && (
                   <button
-                    onClick={() => handleUpgrade('pro_yearly')}
-                    disabled={isUpgrading}
-                    className="w-full flex items-center justify-center gap-2 h-11 rounded-xl border border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800 transition-colors font-medium text-sm disabled:opacity-50"
+                    onClick={handleDowngradeContact}
+                    className="w-full flex items-center justify-center gap-2 h-11 rounded-xl border border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800 transition-colors font-medium text-sm"
                   >
-                    {isUpgrading && <Loader2 className="w-4 h-4 animate-spin" />}
                     Downgrade to Pro (Yearly)
                   </button>
                 )}
@@ -335,7 +342,7 @@ export default function Subscription() {
                   </button>
                 ) : (isPro || isElite) && (
                   <button
-                    onClick={handleCancelClick}
+                    onClick={handleDowngradeContact}
                     className="w-full flex items-center justify-center h-11 rounded-xl border border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800 transition-colors font-medium text-sm"
                   >
                     Downgrade to Free

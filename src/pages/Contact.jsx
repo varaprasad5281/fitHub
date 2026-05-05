@@ -31,8 +31,8 @@ export default function Contact() {
     }
 
     await withActionDebug('Send Contact Message', async () => {
-      await api.integrations.Core.SendEmail({
-        to: 'info7percent.info',
+      await api.functions.invoke('sendEmail', {
+        to: 'team@7percent.info',
         from_name: formData.name,
         subject: `Contact Form: ${formData.subject}`,
         body: `From: ${formData.name} (${formData.email})\n\n${formData.message}`
@@ -70,8 +70,8 @@ export default function Contact() {
                 <Mail className="w-6 h-6 text-amber-400 mt-1 shrink-0" />
                 <div>
                   <h3 className="text-white font-semibold mb-1">Email</h3>
-                  <a href="mailto:info7percent.info" className="text-amber-400 hover:text-amber-300 transition-colors">
-                    info7percent.info
+                  <a href="mailto:team@7percent.info" className="text-amber-400 hover:text-amber-300 transition-colors">
+                    team@7percent.info
                   </a>
                 </div>
               </div>
@@ -183,7 +183,7 @@ export default function Contact() {
           <div className="space-y-6">
             <div>
               <h3 className="text-white font-semibold mb-2">How do I contact support?</h3>
-              <p className="text-zinc-400">Use the form above or email info7percent.info directly. We typically respond within 24 hours.</p>
+              <p className="text-zinc-400">Use the form above or email team@7percent.info directly. We typically respond within 24 hours.</p>
             </div>
             <div>
               <h3 className="text-white font-semibold mb-2">What if I need immediate help?</h3>

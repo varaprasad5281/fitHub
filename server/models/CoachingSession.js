@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const schema = new mongoose.Schema({
   created_by:       { type: String, required: true },
-  session_type:     { type: String, enum: ['daily', 'weekly', 'goal', 'motivational'] },
+  session_type:     { type: String, enum: ['daily', 'daily_candidate', 'weekly', 'goal', 'motivational'] },
   session_date:     { type: String },          // YYYY-MM-DD
   content:          String,                    // raw AI text (fallback)
   category:         String,                    // workout | nutrition | recovery | general
