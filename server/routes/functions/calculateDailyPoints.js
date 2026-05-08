@@ -7,6 +7,7 @@ const MealLog = require('../../models/MealLog');
 const WorkoutCompletion = require('../../models/WorkoutCompletion');
 const Profile = require('../../models/Profile');
 const { POINTS, NUTRITION } = require('../../utils/constants');
+const checkAndAwardBadges = require('../../utils/checkAndAwardBadges');
 
 module.exports = async (req, res) => {
   const user = req.user;
@@ -78,5 +79,8 @@ module.exports = async (req, res) => {
     );
   }
 
-  res.json({ success: true, points_awarded: pointsAwarded, sources });
+  // Check and award any newly-unlocked badges
+  const newBadges = await checkAndAwardBadges(user.email);
+
+  res.json({ success: true, points_awarded: pointsAwarded, sources, new_badges: newBadges });
 };

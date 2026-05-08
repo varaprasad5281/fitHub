@@ -3,6 +3,7 @@ const WorkoutCompletion = require('../../models/WorkoutCompletion');
 const Points = require('../../models/Points');
 const PointsTransaction = require('../../models/PointsTransaction');
 const { notify } = require('../../utils/notify');
+const checkAndAwardBadges = require('../../utils/checkAndAwardBadges');
 
 const MAX_HISTORY = 7;
 const DIFFICULTY_POINTS = { beginner: 25, intermediate: 50, advanced: 100 };
@@ -69,5 +70,8 @@ module.exports = async (req, res) => {
     'workout_completed'
   );
 
-  return res.json({ success: true, points_earned: pointsEarned });
+  // Check and award any newly-unlocked badges (awaited so errors appear in server logs)
+  const newBadges = await checkAndAwardBadges(userEmail);
+
+  return res.json({ success: true, points_earned: pointsEarned, new_badges: newBadges });
 };

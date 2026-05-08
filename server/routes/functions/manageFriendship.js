@@ -6,6 +6,7 @@ const Friendship = require('../../models/Friendship');
 const Profile = require('../../models/Profile');
 const Points = require('../../models/Points');
 const User = require('../../models/User');
+const checkAndAwardBadges = require('../../utils/checkAndAwardBadges');
 
 // ── friendRequest ──────────────────────────────────────────────────────────────
 // action: 'send' | 'accept' | 'reject' | 'remove'
@@ -36,6 +37,9 @@ async function friendRequest(req, res) {
       { new: true }
     );
     if (!req_) return res.status(404).json({ error: 'Friend request not found' });
+    // Check badges for both users (both now have +1 friend)
+    checkAndAwardBadges(userEmail).catch(() => {});
+    checkAndAwardBadges(target_email).catch(() => {});
     return res.json({ data: req_ });
   }
 
@@ -71,6 +75,9 @@ async function manageFriendRequest(req, res) {
     if (action === 'accept') {
       friendship.status = 'accepted';
       await friendship.save();
+      // Check badges for both sides of the friendship
+      checkAndAwardBadges(friendship.requester_email).catch(() => {});
+      checkAndAwardBadges(friendship.receiver_email).catch(() => {});
     } else {
       await friendship.deleteOne();
     }

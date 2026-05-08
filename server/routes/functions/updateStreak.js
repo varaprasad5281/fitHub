@@ -2,6 +2,7 @@ const Streak = require('../../models/Streak');
 const Points = require('../../models/Points');
 const PointsTransaction = require('../../models/PointsTransaction');
 const { notify } = require('../../utils/notify');
+const checkAndAwardBadges = require('../../utils/checkAndAwardBadges');
 
 const MILESTONE_DAYS = [7, 14, 30, 60, 100, 200, 365];
 
@@ -70,10 +71,14 @@ module.exports = async (req, res) => {
     );
   }
 
+  // Check and award any newly-unlocked badges
+  const newBadges = await checkAndAwardBadges(userEmail);
+
   return res.json({
     success: true,
     current_count: newCount,
     longest_count: newLongest,
     bonus_points: bonusPoints,
+    new_badges: newBadges,
   });
 };
