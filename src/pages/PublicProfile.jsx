@@ -2,7 +2,8 @@ import React, { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '@/api/client';
 import { useQuery } from "@tanstack/react-query";
-import { User, Flame, Trophy, Award } from "lucide-react";
+import { Flame, Trophy, Award } from "lucide-react";
+import GenderAvatar from "@/components/profile/GenderAvatar";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -88,15 +89,15 @@ export default function PublicProfile() {
           <div className="flex items-start gap-6 mb-6">
             <div className="w-24 h-24 rounded-full bg-zinc-800 overflow-hidden flex items-center justify-center flex-shrink-0">
               {profile.profile_picture_url ? (
-                <img 
-                  src={profile.profile_picture_url} 
-                  alt={profile.username || 'Profile'} 
-                  className="w-full h-full object-cover" 
+                <img
+                  src={profile.profile_picture_url}
+                  alt={profile.username || 'Profile'}
+                  className="w-full h-full object-cover"
                   loading="eager"
                   decoding="async"
                 />
               ) : (
-                <User className="w-8 h-8 text-zinc-600" />
+                <GenderAvatar gender={profile.gender} className="w-12 h-12 text-zinc-500" />
               )}
             </div>
             <div className="flex-1">
