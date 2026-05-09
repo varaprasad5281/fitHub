@@ -87,7 +87,7 @@ export default function NotificationCenter() {
 
         <SheetContent className="bg-zinc-950 border-zinc-800 flex flex-col">
           <SheetHeader className="flex-shrink-0">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between pr-8">
               <SheetTitle className="text-white">Notifications</SheetTitle>
               {unreadCount > 0 && (
                 <button

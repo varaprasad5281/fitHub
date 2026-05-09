@@ -10,6 +10,7 @@ import DailyChallenge from "@/components/challenges/DailyChallenge";
 import PointsProgressCard from "@/components/points/PointsProgressCard";
 import PointsBreakdown from "@/components/points/PointsBreakdown";
 import BetaBadge from "@/components/profile/BetaBadge";
+import GenderAvatar from "@/components/profile/GenderAvatar";
 import BadgeManager from "@/components/profile/BadgeManager";
 import ProfileEdit from "@/components/profile/ProfileEdit";
 import { toast } from "sonner";
@@ -187,10 +188,8 @@ export default function Profile() {
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-black font-black text-2xl shrink-0 overflow-hidden">
                 {profile?.profile_picture_url ? (
                   <img src={profile.profile_picture_url} alt="Profile" className="w-full h-full object-cover" />
-                ) : user?.full_name ? (
-                  user.full_name[0].toUpperCase()
                 ) : (
-                  <User className="w-7 h-7" />
+                  <GenderAvatar gender={profile?.gender} className="w-9 h-9" />
                 )}
               </div>
               <div>
