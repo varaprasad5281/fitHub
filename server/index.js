@@ -73,8 +73,18 @@ app.use('/api/functions', require('./routes/functions'));
 // Health check
 app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
-// 404
-app.use((req, res) => res.status(404).json({ error: 'Route not found' }));
+// Serve built React frontend in production
+if (process.env.NODE_ENV === 'production') {
+  const clientDist = path.join(__dirname, '..', 'dist');
+  app.use(express.static(clientDist));
+  // All non-API routes go to React
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(clientDist, 'index.html'));
+  });
+} else {
+  // 404 for API-only dev mode
+  app.use('/api/*', (req, res) => res.status(404).json({ error: 'Route not found' }));
+}
 
 // Global error handler
 app.use((err, req, res, next) => {
