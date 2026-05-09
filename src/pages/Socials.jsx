@@ -88,6 +88,27 @@ export default function SocialsPage() {
     onError: () => toast.error('Failed to decline request'),
   });
 
+  // Current user's own points + profile for leaderboard self-comparison
+  const { data: myPoints } = useQuery({
+    queryKey: ['my-points'],
+    queryFn: async () => {
+      const pts = await api.entities.Points.list();
+      return pts?.[0] || {};
+    },
+    staleTime: 1000 * 60,
+    enabled: !!user,
+  });
+
+  const { data: myProfile } = useQuery({
+    queryKey: ['my-profile'],
+    queryFn: async () => {
+      const profiles = await api.entities.Profile.list();
+      return profiles?.[0] || {};
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled: !!user,
+  });
+
   const hasEliteAccess = checkElite(activeSub(Array.isArray(subscription) ? subscription : []));
 
   if (subLoading) {
@@ -116,8 +137,17 @@ export default function SocialsPage() {
     );
   }
 
-  // Sort friends by weekly_points descending for leaderboard
-  const rankedFriends = [...friends].sort((a, b) => (b.weekly_points || 0) - (a.weekly_points || 0));
+  // Build leaderboard: current user + all friends, sorted by weekly_points
+  const myEntry = {
+    email: user?.email,
+    username: myProfile?.username || user?.email?.split('@')[0] || 'You',
+    avatar_url: myProfile?.profile_picture_url || null,
+    level: myPoints?.level || 1,
+    weekly_points: myPoints?.weekly_points || 0,
+    isMe: true,
+  };
+  const leaderboard = [myEntry, ...friends]
+    .sort((a, b) => (b.weekly_points || 0) - (a.weekly_points || 0));
 
   return (
     <div className="min-h-screen bg-zinc-950 p-4 sm:p-6 pb-20 sm:pb-8">
@@ -303,21 +333,18 @@ export default function SocialsPage() {
                 <div className="space-y-2">
                   {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-14 rounded-lg" />)}
                 </div>
-              ) : friends.length === 0 ? (
-                <div className="text-center py-12">
-                  <Trophy className="w-12 h-12 text-zinc-700 mx-auto mb-4" />
-                  <p className="text-zinc-500">Add friends to see the leaderboard</p>
-                </div>
               ) : (
                 <div className="space-y-2">
-                  {rankedFriends.map((friend, idx) => (
+                  {leaderboard.map((entry, idx) => (
                     <motion.div
-                      key={friend.id || friend.email}
+                      key={entry.email}
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: idx * 0.05 }}
                       className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${
-                        idx === 0
+                        entry.isMe
+                          ? 'bg-zinc-800/80 border-zinc-500/50 ring-1 ring-zinc-500/30'
+                          : idx === 0
                           ? 'bg-amber-500/10 border-amber-500/30'
                           : idx === 1
                           ? 'bg-zinc-800/60 border-zinc-600/40'
@@ -331,19 +358,24 @@ export default function SocialsPage() {
                       }`}>
                         {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`}
                       </span>
-                      {friend.avatar_url ? (
-                        <img src={friend.avatar_url} alt={friend.username} className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
+                      {entry.avatar_url ? (
+                        <img src={entry.avatar_url} alt={entry.username} className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
                       ) : (
-                        <div className="w-9 h-9 rounded-full bg-zinc-700 flex items-center justify-center text-sm font-bold text-white flex-shrink-0">
-                          {(friend.username || friend.email || '?')[0].toUpperCase()}
+                        <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0 ${entry.isMe ? 'bg-amber-600' : 'bg-zinc-700'}`}>
+                          {(entry.username || entry.email || '?')[0].toUpperCase()}
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-white truncate">{friend.username || friend.email}</p>
-                        <p className="text-xs text-zinc-500">Level {friend.level || 1}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-semibold text-white truncate">{entry.username || entry.email}</p>
+                          {entry.isMe && (
+                            <span className="text-[10px] font-bold bg-zinc-600 text-zinc-300 px-1.5 py-0.5 rounded-full flex-shrink-0">YOU</span>
+                          )}
+                        </div>
+                        <p className="text-xs text-zinc-500">Level {entry.level || 1}</p>
                       </div>
                       <div className="text-right flex-shrink-0">
-                        <p className="text-sm font-bold text-amber-400">{(friend.weekly_points || 0).toLocaleString()}</p>
+                        <p className="text-sm font-bold text-amber-400">{(entry.weekly_points || 0).toLocaleString()}</p>
                         <p className="text-xs text-zinc-600">pts this week</p>
                       </div>
                     </motion.div>

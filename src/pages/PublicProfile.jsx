@@ -51,9 +51,26 @@ export default function PublicProfile() {
     enabled: !!userEmail,
   });
 
+  const { data: featuredBadges = [] } = useQuery({
+    queryKey: ['public-featured-badges', userEmail],
+    queryFn: async () => {
+      if (!userEmail) return [];
+      const res = await api.functions.invoke('getBadges', { action: 'featured', email: userEmail });
+      return res?.data || [];
+    },
+    enabled: !!userEmail,
+  });
+
   const profile = profiles[0];
   const streak = streaks[0];
   const point = points[0];
+
+  const RARITY_STYLES = {
+    common:    { border: 'border-zinc-600', label: 'text-zinc-400',   bg: 'bg-zinc-800/60'   },
+    rare:      { border: 'border-blue-500', label: 'text-blue-400',   bg: 'bg-blue-900/30'   },
+    epic:      { border: 'border-purple-500', label: 'text-purple-400', bg: 'bg-purple-900/30' },
+    legendary: { border: 'border-amber-400', label: 'text-amber-400',  bg: 'bg-amber-900/30'  },
+  };
 
   if (userLoading) {
     return (
@@ -142,6 +159,33 @@ export default function PublicProfile() {
             </div>
           </div>
         </div>
+
+        {/* Featured Badges */}
+        {featuredBadges.length > 0 && (
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 mb-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Award className="w-4 h-4 text-amber-400" />
+              <h3 className="text-sm font-bold text-white uppercase tracking-wide">Featured Badges</h3>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              {featuredBadges.map((badge) => {
+                const r = RARITY_STYLES[badge.rarity_level] || RARITY_STYLES.common;
+                return (
+                  <div
+                    key={badge._id || badge.badge_code}
+                    className={`rounded-xl border ${r.border} ${r.bg} p-4 flex flex-col items-center gap-1.5 text-center`}
+                  >
+                    <span className="text-3xl">{badge.icon || '🏅'}</span>
+                    <p className="text-white font-semibold text-xs leading-tight">{badge.name}</p>
+                    <p className={`text-[10px] font-semibold uppercase tracking-wide ${r.label}`}>
+                      {badge.rarity_level}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Profile Details */}
         <div className="space-y-4">

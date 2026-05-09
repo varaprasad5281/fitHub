@@ -41,7 +41,7 @@ function EarnedCard({ badge, onFeature, featured }) {
       <p className={`text-xs font-semibold uppercase tracking-wide ${r.label}`}>{badge.rarity_level}</p>
       <p className="text-zinc-500 text-xs leading-snug">{badge.description}</p>
       <button
-        onClick={() => onFeature.mutate({ badgeId: badge._id, featured: !featured })}
+        onClick={() => onFeature.mutate({ badge_code: badge.badge_code, featured: !featured })}
         className={`mt-1 text-xs px-3 py-1 rounded-full border transition-colors ${
           featured
             ? 'border-amber-500 text-amber-400 hover:bg-amber-500/10'
@@ -124,14 +124,18 @@ export default function Badges() {
   const stats = badgeData?.stats || {};
 
   const featureMutation = useMutation({
-    mutationFn: async ({ badgeId, featured }) => {
-      const featuredCount = allBadges.filter(b => b.earned && b.is_featured).length;
-      if (featured && featuredCount >= 3) throw new Error('Max 3 badges can be featured');
-      await api.entities.UserBadge.update(badgeId, { is_featured: featured });
+    mutationFn: async ({ badge_code, featured }) => {
+      // Client-side guard (server also enforces max 3)
+      if (featured) {
+        const featuredCount = allBadges.filter(b => b.earned && b.is_featured).length;
+        if (featuredCount >= 3) throw new Error('Max 3 badges can be featured. Unfeature one first.');
+      }
+      const res = await api.functions.invoke('getBadges', { action: 'feature', badge_code, featured });
+      if (res?.error) throw new Error(res.error);
     },
-    onSuccess: () => {
+    onSuccess: (_, { featured }) => {
       queryClient.invalidateQueries({ queryKey: ['badges-progress'] });
-      toast.success('Badge updated!');
+      toast.success(featured ? 'Badge featured on your profile!' : 'Badge unfeatured.');
     },
     onError: (err) => toast.error(err.message || 'Failed to update badge'),
   });
@@ -213,7 +217,7 @@ export default function Badges() {
           {[
             { id: 'earned',   label: `Earned (${applyFilter(earned).length})`   },
             { id: 'locked',   label: `Locked (${applyFilter(locked).length})`   },
-            { id: 'featured', label: `Featured (${featured.length})`            },
+            { id: 'featured', label: `Featured (${featured.length}/3)`          },
           ].map(t => (
             <button
               key={t.id}
@@ -267,18 +271,36 @@ export default function Badges() {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {featured.length === 0 ? (
-                <div className="col-span-full text-center py-12 text-zinc-500">
-                  Feature up to 3 badges to display on your profile.
-                </div>
-              ) : (
-                featured.map(badge => (
-                  <motion.div key={badge._id} initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }}>
-                    <EarnedCard badge={badge} onFeature={featureMutation} featured />
-                  </motion.div>
-                ))
-              )}
+            <div>
+              {/* Slot indicator */}
+              <div className="flex items-center gap-2 mb-4">
+                {[0, 1, 2].map(i => (
+                  <div
+                    key={i}
+                    className={`h-1.5 flex-1 rounded-full transition-colors ${
+                      i < featured.length ? 'bg-amber-500' : 'bg-zinc-700'
+                    }`}
+                  />
+                ))}
+                <span className="text-xs text-zinc-500 ml-1 whitespace-nowrap">
+                  {featured.length}/3 slots used
+                </span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {featured.length === 0 ? (
+                  <div className="col-span-full text-center py-12">
+                    <Award className="w-10 h-10 text-zinc-700 mx-auto mb-3" />
+                    <p className="text-zinc-500 font-semibold mb-1">No featured badges yet.</p>
+                    <p className="text-zinc-600 text-sm">Go to Earned, hit "Feature" on any badge — it'll appear here and on your public profile.</p>
+                  </div>
+                ) : (
+                  featured.map(badge => (
+                    <motion.div key={badge._id} initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }}>
+                      <EarnedCard badge={badge} onFeature={featureMutation} featured />
+                    </motion.div>
+                  ))
+                )}
+              </div>
             </div>
           )}
         </AnimatePresence>

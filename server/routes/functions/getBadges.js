@@ -1,9 +1,11 @@
 /**
- * getBadges   — action: 'all' | 'me' | 'progress'
+ * getBadges   — action: 'all' | 'me' | 'progress' | 'feature' | 'featured'
  *
  * action: 'me'       → only earned badges (with badge details)
  * action: 'all'      → every badge with earned flag
- * action: 'progress' → every badge with earned flag + real progress % toward requirement
+ * action: 'progress' → every badge with earned flag + real progress % + is_featured
+ * action: 'feature'  → toggle is_featured on a UserBadge (max 3)
+ * action: 'featured' → return up to 3 featured badges for any user (public profile)
  */
 
 const Badge = require('../../models/Badge');
@@ -48,6 +50,44 @@ module.exports = async (req, res) => {
   const userEmail = req.user.email;
   const { action = 'all' } = req.body;
 
+  // ── action: 'feature' ────────────────────────────────────────────────────
+  // Toggle is_featured for one of the current user's earned badges (max 3)
+  if (action === 'feature') {
+    const { badge_code, featured } = req.body;
+    if (!badge_code) return res.status(400).json({ error: 'badge_code required' });
+
+    if (featured) {
+      const featuredCount = await UserBadge.countDocuments({ created_by: userEmail, is_featured: true });
+      if (featuredCount >= 3) {
+        return res.status(400).json({ error: 'You can only feature up to 3 badges. Unfeature one first.' });
+      }
+    }
+
+    await UserBadge.findOneAndUpdate(
+      { created_by: userEmail, badge_code },
+      { is_featured: !!featured }
+    );
+    return res.json({ success: true });
+  }
+
+  // ── action: 'featured' ───────────────────────────────────────────────────
+  // Returns up to 3 featured badges for any user email — used by PublicProfile
+  if (action === 'featured') {
+    const targetEmail = req.body.email || userEmail;
+    const featuredUserBadges = await UserBadge.find({ created_by: targetEmail, is_featured: true })
+      .populate('badge_id')
+      .lean();
+
+    const data = featuredUserBadges
+      .filter(ub => ub.badge_id)   // guard against orphaned badge refs
+      .map(ub => ({
+        ...ub.badge_id,
+        earned_date: ub.earned_date,
+        is_featured: true,
+      }));
+
+    return res.json({ data });
+  }
 
   // ── action: 'me' ─────────────────────────────────────────────────────────
   if (action === 'me') {
@@ -71,13 +111,17 @@ module.exports = async (req, res) => {
       fetchUserStats(userEmail),
     ]);
 
-    const earnedCodes = new Set(userBadges.map(ub => ub.badge_code));
+    // Build a map keyed by badge_code for O(1) lookup of earned + featured state
+    const userBadgeMap = {};
+    userBadges.forEach(ub => { userBadgeMap[ub.badge_code] = ub; });
 
     const badgesWithProgress = allBadges.map(badge => {
       const plain = badge.toObject();
-      const earned = earnedCodes.has(badge.badge_code);
+      const ub = userBadgeMap[badge.badge_code];
+      const earned = !!ub;
       const progress = earned ? 100 : computeProgress(plain, stats);
-      return { ...plain, earned, progress };
+      const is_featured = ub?.is_featured || false;
+      return { ...plain, earned, progress, is_featured };
     });
 
     return res.json({ data: badgesWithProgress, stats });
