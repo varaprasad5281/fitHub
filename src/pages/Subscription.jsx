@@ -46,7 +46,21 @@ export default function Subscription() {
 
   const { data: subscriptions = [], isLoading, refetch: refetchSubscription } = useQuery({
     queryKey: ['subscription'],
-    queryFn: () => api.entities.Subscription.list(),
+    queryFn: async () => {
+      const list = await api.entities.Subscription.list();
+      // Auto-heal: if the user has a Stripe subscription but plan is 'starter',
+      // sync the real plan from Stripe in the background.
+      const active = list.find(s => s.stripe_subscription_id &&
+        (s.plan === 'starter' || !s.plan));
+      if (active) {
+        api.functions.invoke('syncSubscription')
+          .then(result => {
+            if (result?.success) queryClient.invalidateQueries({ queryKey: ['subscription'] });
+          })
+          .catch(() => {});
+      }
+      return list;
+    },
     staleTime: 1000 * 60,
   });
 
@@ -351,7 +365,7 @@ export default function Subscription() {
               </div>
             </div>
 
-            {!isPro && !isElite && (
+            {!isTrial && (
               <button
                 onClick={handleCancelClick}
                 className="w-full flex items-center justify-center h-11 rounded-xl border border-red-500/30 bg-transparent text-red-400 hover:bg-red-500/10 transition-colors font-medium text-sm"

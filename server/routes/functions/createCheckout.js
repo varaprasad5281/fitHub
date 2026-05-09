@@ -33,13 +33,25 @@ module.exports = async (req, res) => {
   const isPro = billingPeriod.startsWith('pro_');
   const origin = req.headers.origin || req.headers.referer?.split('/').slice(0, 3).join('/') || '';
 
-  // Block second free trials for Pro plans
+  // Determine trial eligibility for Pro plans
+  let eligibleForTrial = false;
   if (isPro) {
     const sub = await Subscription.findOne({ created_by: userEmail });
-    if (sub?.had_trial) {
+
+    const isCurrentlyActive = sub && (
+      sub.status === 'active' || sub.status === 'trial' ||
+      (sub.status === 'cancelled' && sub.end_date && new Date(sub.end_date) > new Date())
+    ) && (sub.plan === 'pro_monthly' || sub.plan === 'pro_yearly' ||
+          sub.plan === 'elite_monthly' || sub.plan === 'elite_yearly');
+
+    if (isCurrentlyActive) {
+      // User already has a live paid subscription — don't create a new checkout
       idempotencyStore.delete(idempotencyKey);
-      return res.status(400).json({ error: 'You have already used your free trial. Please subscribe directly.' });
+      return res.status(400).json({ error: 'You already have an active subscription. Manage it from the Subscription page.' });
     }
+
+    // Allow checkout — but only grant a trial if they haven't had one before
+    eligibleForTrial = !sub?.had_trial;
   }
 
   const sessionConfig = {
@@ -57,7 +69,7 @@ module.exports = async (req, res) => {
     },
   };
 
-  if (isPro) {
+  if (isPro && eligibleForTrial) {
     sessionConfig.subscription_data = {
       trial_period_days: 7,
       metadata: { user_email: userEmail, billing_period: billingPeriod },

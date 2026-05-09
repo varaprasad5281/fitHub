@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Mail, Loader2, CheckCircle } from 'lucide-react';
@@ -21,13 +21,14 @@ export default function PasswordResetForm({ onClose }) {
     setLoading(true);
     try {
       const response = await api.functions.invoke('sendPasswordReset', { email });
-      
+
       if (response.success) {
         setSent(true);
         toast.success('Password reset email sent');
       }
     } catch (error) {
-      toast.error(error.message || 'Failed to send reset email');
+      const msg = error instanceof Error ? error.message : 'Failed to send reset email';
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

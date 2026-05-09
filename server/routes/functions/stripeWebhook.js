@@ -6,6 +6,8 @@ const stripe = require('../../services/stripe');
 const Subscription = require('../../models/Subscription');
 const Notification = require('../../models/Notification');
 const { sendEmail } = require('../../services/email');
+const { buildEmail } = require('../../utils/emailTemplate');
+const { PRICE_MAP } = require('../../utils/constants');
 
 const PLAN_NAMES = {
   pro_monthly: '7% Pro',
@@ -13,6 +15,11 @@ const PLAN_NAMES = {
   elite_monthly: '7% Elite',
   elite_yearly: '7% Elite',
 };
+
+// Reverse map: Stripe price_id → billing_period key
+const PRICE_TO_PLAN = Object.fromEntries(
+  Object.entries(PRICE_MAP).filter(([, v]) => v).map(([k, v]) => [v, k])
+);
 
 module.exports = async (req, res) => {
   const signature = req.headers['stripe-signature'];
@@ -54,25 +61,57 @@ module.exports = async (req, res) => {
     const planName = PLAN_NAMES[billingPeriod] || billingPeriod;
 
     await Subscription.findOneAndUpdate({ created_by: userEmail }, {
-      plan: billingPeriod,
-      status: isPro ? 'trial' : 'active',
-      stripe_subscription_id: session.subscription,
-      stripe_customer_id: session.customer,
-      start_date: new Date().toISOString().split('T')[0],
-      subscription_active: true,
-      trial_start: isPro ? new Date().toISOString() : null,
-      trial_end: isPro ? trialEnd.toISOString() : null,
-      ...(isPro ? { had_trial: true } : {}),
+      $set: {
+        plan: billingPeriod,
+        status: isPro ? 'trial' : 'active',
+        stripe_subscription_id: session.subscription,
+        stripe_customer_id: session.customer,
+        start_date: new Date().toISOString().split('T')[0],
+        subscription_active: true,
+        ...(isPro ? {
+          trial_start: new Date().toISOString(),
+          trial_end: trialEnd.toISOString(),
+          had_trial: true,        // permanently mark this email as trial-used
+        } : {}),
+      },
     });
 
     const emailSubject = isPro
       ? `Your 7-day free trial has started — welcome to ${planName}!`
       : `Welcome to ${planName}!`;
-    const emailBody = isPro
-      ? `Welcome to 7%!\n\nYour 7-day free trial is now active. No payment has been charged yet.\n\nTrial ends: ${trialEnd.toLocaleDateString('en-GB')}\n\nCancel anytime before your trial ends.\n\nThe 7% Team`
-      : `Welcome to 7%!\n\nYour ${planName} subscription is now active.\n\nLet's stay disciplined.\n\nThe 7% Team`;
 
-    sendEmail({ to: userEmail, subject: emailSubject, body: emailBody }).catch(() => {});
+    const emailPlain = isPro
+      ? `Your 7-day free trial is now active. No payment has been charged yet.\nTrial ends: ${trialEnd.toLocaleDateString('en-GB')}\nCancel anytime before your trial ends.\n— The 7% Team`
+      : `Your ${planName} subscription is now active. Let's stay disciplined.\n— The 7% Team`;
+
+    const emailHtml = isPro
+      ? buildEmail({
+          title: `Welcome to ${planName}! 🎉`,
+          preheader: 'Your 7-day free trial is now active.',
+          body: `
+            <p style="margin:0 0 16px 0;color:#ffffff;font-weight:600;font-size:16px;">Your free trial is live!</p>
+            <p style="margin:0 0 16px 0;">Your <strong style="color:#f59e0b;">7-day free trial</strong> is now active. No payment has been charged yet.</p>
+            <div style="background:#1c1c1e;border:1px solid #27272a;border-radius:12px;padding:16px 20px;margin:20px 0;">
+              <p style="margin:0 0 8px 0;font-size:13px;color:#71717a;text-transform:uppercase;letter-spacing:0.1em;">Trial Details</p>
+              <p style="margin:0 0 6px 0;color:#ffffff;">Plan: <strong>${planName}</strong></p>
+              <p style="margin:0;color:#ffffff;">Trial ends: <strong>${trialEnd.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</strong></p>
+            </div>
+            <p style="margin:0;font-size:13px;color:#71717a;">Cancel anytime before your trial ends and you won't be charged a penny.</p>
+          `,
+          footer: 'Manage your subscription anytime from the Subscription page in the app.',
+        })
+      : buildEmail({
+          title: `Welcome to ${planName}! 👑`,
+          preheader: `Your ${planName} subscription is now active.`,
+          body: `
+            <p style="margin:0 0 16px 0;color:#ffffff;font-weight:600;font-size:16px;">You're in the top 7%.</p>
+            <p style="margin:0 0 16px 0;">Your <strong style="color:#f59e0b;">${planName}</strong> subscription is now active. All premium features are unlocked.</p>
+            <p style="margin:0;font-size:13px;color:#71717a;">Stay consistent. Most people quit — you didn't.</p>
+          `,
+          footer: 'Manage your subscription anytime from the Subscription page in the app.',
+        });
+
+    sendEmail({ to: userEmail, subject: emailSubject, body: emailPlain, html: emailHtml }).catch(() => {});
     console.log('Subscription activated for:', userEmail);
   }
 
@@ -100,6 +139,12 @@ module.exports = async (req, res) => {
       subscription_current_period_end: new Date(stripeSub.current_period_end * 1000),
     };
     if (endDate) updateData.end_date = endDate;
+
+    // Also sync the plan from the Stripe price ID so the DB never drifts
+    const priceId = stripeSub.items?.data?.[0]?.price?.id;
+    const billingPeriod = PRICE_TO_PLAN[priceId];
+    if (billingPeriod) updateData.plan = billingPeriod;
+
     await sub.updateOne(updateData);
   }
 
@@ -115,6 +160,14 @@ module.exports = async (req, res) => {
   if (event.type === 'invoice.paid') {
     const invoice = event.data.object;
     if (!invoice.subscription) return res.json({ received: true });
+
+    // A $0 invoice fired at trial start should NOT flip status to 'active' —
+    // the subscription is still in its trial period.
+    if (invoice.amount_paid === 0 && invoice.billing_reason === 'subscription_create') {
+      console.log('[webhook] Skipping $0 trial-start invoice — keeping trial status');
+      return res.json({ received: true });
+    }
+
     const periodEnd = invoice.lines?.data[0]?.period?.end;
     await Subscription.findOneAndUpdate({ stripe_subscription_id: invoice.subscription }, {
       status: 'active', subscription_active: true, payment_failures: 0,

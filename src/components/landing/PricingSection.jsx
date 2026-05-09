@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useCurrency } from "@/components/hooks/useCurrency";
 import { Loader2 } from "lucide-react";
 import { api } from '@/api/client';
+import { activeSub } from '@/lib/subscriptionUtils';
 
 /**
  * @param {{ fullPage?: boolean, onUpgrade?: (period: string) => void }} props
@@ -12,6 +14,21 @@ import { api } from '@/api/client';
 export default function PricingSection({ fullPage = false }) {
   const [billing, setBilling] = useState('monthly');
   const { formatPrice } = useCurrency();
+
+  // Detect if the logged-in user has already used their free trial
+  const { data: authUser } = useQuery({
+    queryKey: ['user'],
+    queryFn: () => api.auth.me(),
+    retry: false,
+    staleTime: 1000 * 60 * 5,
+  });
+  const { data: subscriptions = [] } = useQuery({
+    queryKey: ['subscription'],
+    queryFn: () => api.entities.Subscription.list(),
+    enabled: !!authUser,
+    staleTime: 1000 * 60 * 5,
+  });
+  const hasUsedTrial = activeSub(subscriptions)?.had_trial === true;
   // Track which specific plan is loading — null means nothing is loading
   const [upgradingPlan, setUpgradingPlan] = useState(/** @type {string|null} */(null));
 
@@ -79,10 +96,13 @@ export default function PricingSection({ fullPage = false }) {
       ],
       noFeatures: [],
       limits: null,
-      cta: billing === 'monthly' ? "Start Free Trial" : "Start Free Trial. Save 36%",
+      cta: hasUsedTrial
+        ? (billing === 'monthly' ? "Subscribe Now" : "Subscribe & Save 36%")
+        : (billing === 'monthly' ? "Start Free Trial" : "Start Free Trial. Save 36%"),
       highlight: false,
-      badge: "7 DAY FREE TRIAL",
-      trial: true
+      badge: hasUsedTrial ? null : "7 DAY FREE TRIAL",
+      trial: !hasUsedTrial,
+      trialUsed: hasUsedTrial,
     },
     {
       name: "7% Elite",
@@ -277,7 +297,11 @@ export default function PricingSection({ fullPage = false }) {
               </Button>
 
               <p className="text-center text-zinc-600 text-xs mt-3">
-                {plan.trial ? '7-day free trial • Cancel anytime' : 'Cancel anytime • No commitment'}
+                {plan.trialUsed
+                  ? 'Free trial already used — billed immediately'
+                  : plan.trial
+                    ? '7-day free trial • Cancel anytime'
+                    : 'Cancel anytime • No commitment'}
               </p>
             </motion.div>
           ))}

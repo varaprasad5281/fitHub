@@ -9,6 +9,7 @@
 const crypto = require('crypto');
 const User = require('../../models/User');
 const { sendEmail } = require('../../services/email');
+const { buildEmail } = require('../../utils/emailTemplate');
 
 module.exports = async (req, res) => {
   const { email } = req.body;
@@ -30,12 +31,36 @@ module.exports = async (req, res) => {
 
   const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/reset-password?token=${token}`;
 
-  await sendEmail({
-    to: email,
-    subject: 'Reset your 7% password',
-    from_name: '7% Team',
-    body: `Hi ${user.full_name},\n\nYou requested a password reset. Click the link below to set a new password:\n\n${resetUrl}\n\nThis link expires in 1 hour. If you didn't request this, you can safely ignore this email.\n\n— The 7% Team`,
-  });
+  // Always log the reset URL to the server console — useful when SMTP isn't available
+  console.log(`[sendPasswordReset] Reset URL for ${email}:`);
+  console.log(`  ${resetUrl}`);
+
+  try {
+    await sendEmail({
+      to: email,
+      subject: 'Reset your 7% password',
+      from_name: '7% Team',
+      body: `Hi ${user.full_name},\n\nYou requested a password reset. Click the link below:\n\n${resetUrl}\n\nThis link expires in 1 hour. If you didn't request this, ignore this email.\n\n— The 7% Team`,
+      html: buildEmail({
+        title: 'Reset Your Password',
+        preheader: 'Click the button below to set a new password for your 7% account.',
+        body: `
+          <p style="margin:0 0 16px 0;color:#ffffff;font-weight:600;font-size:16px;">Hi ${user.full_name},</p>
+          <p style="margin:0 0 16px 0;">We received a request to reset the password for your <strong style="color:#f59e0b;">7%</strong> account.</p>
+          <p style="margin:0 0 24px 0;">Click the button below to choose a new password. This link is valid for <strong style="color:#ffffff;">1 hour</strong>.</p>
+          <p style="margin:24px 0 0 0;font-size:13px;color:#52525b;">If you didn't request a password reset, you can safely ignore this email — your password won't change.</p>
+        `,
+        buttonText: 'Reset My Password',
+        buttonUrl: resetUrl,
+        footer: 'This password reset link expires in 1 hour and can only be used once.',
+      }),
+    });
+  } catch (emailErr) {
+    console.error('[sendPasswordReset] SMTP error:', emailErr.message);
+    return res.status(500).json({
+      error: `Email delivery failed: ${emailErr.message}`,
+    });
+  }
 
   res.json({ success: true });
 };

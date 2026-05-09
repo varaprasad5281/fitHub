@@ -43,6 +43,7 @@ const handlers = {
   // Stripe / subscriptions
   createCheckout:               require('./functions/createCheckout'),
   verifyCheckoutSession:        require('./functions/verifyCheckoutSession'),
+  syncSubscription:             require('./functions/syncSubscription'),
   cancelSubscription:           require('./functions/cancelSubscription'),
 
   // Social

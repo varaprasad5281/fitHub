@@ -1,69 +1,71 @@
 /**
- * Email service — replaces base44.integrations.Core.SendEmail()
- * Uses Nodemailer. Configure SMTP_* env vars or swap for SendGrid/Resend.
+ * Email service using Nodemailer.
+ * Configure SMTP_HOST / SMTP_PORT / SMTP_USER / SMTP_PASS in server/.env
  */
 
 const nodemailer = require('nodemailer');
 
-let transporter;
+let transporter = null;
 
-async function getTransporter() {
-  if (transporter) return transporter;
+function createTransporter() {
+  const host = process.env.SMTP_HOST;
+  const port = parseInt(process.env.SMTP_PORT || '587', 10);
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
 
-  if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-    // Use real SMTP (Gmail or any provider)
-    const port = parseInt(process.env.SMTP_PORT || '587');
-    transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port,
-      secure: port === 465,
-      requireTLS: port !== 465,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
-  } else {
-    // No SMTP configured — spin up a free Ethereal test account
-    // Emails won't be delivered but you can preview them at the URL logged below
+  if (!host || !user || !pass) return null;
+
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465,   // SSL on 465, STARTTLS on 587
+    auth: { user, pass },
+    tls: {
+      rejectUnauthorized: false,  // accept IONOS/self-signed certs
+    },
+    connectionTimeout: 15000,
+    socketTimeout: 20000,
+  });
+}
+
+/**
+ * @param {{ to: string, subject: string, body: string, html?: string, from_name?: string }} opts
+ */
+async function sendEmail({ to, subject, body, html, from_name = '7% Team' }) {
+  if (!transporter) {
+    transporter = createTransporter();
+  }
+
+  // Fallback to Ethereal test account when SMTP is not configured
+  if (!transporter) {
     const testAccount = await nodemailer.createTestAccount();
     transporter = nodemailer.createTransport({
       host: 'smtp.ethereal.email',
       port: 587,
-      auth: {
-        user: testAccount.user,
-        pass: testAccount.pass,
-      },
+      auth: { user: testAccount.user, pass: testAccount.pass },
     });
-    console.log('[email] No SMTP configured — using Ethereal test inbox:', testAccount.web);
+    console.log('[email] No SMTP configured — using Ethereal:', testAccount.web);
   }
 
-  return transporter;
-}
+  const fromAddr = process.env.SMTP_USER || 'team@7percent.info';
 
-/**
- * @param {{ to: string, subject: string, body: string, from_name?: string }} opts
- */
-async function sendEmail({ to, subject, body, from_name = '7%' }) {
   try {
-    const transport = await getTransporter();
-    const fromAddr = process.env.SMTP_USER || 'noreply@7percent.app';
-    const info = await transport.sendMail({
+    const info = await transporter.sendMail({
       from: `"${from_name}" <${fromAddr}>`,
       to,
       subject,
-      text: body,
+      text: body,   // plain-text fallback for email clients that don't render HTML
+      html: html || undefined,
     });
-    // If using Ethereal, log the preview URL so you can read the email
+
     const previewUrl = nodemailer.getTestMessageUrl(info);
     if (previewUrl) {
-      console.log('[email] Preview:', previewUrl);
+      console.log('[email] Ethereal preview:', previewUrl);
     } else {
-      console.log('[email] Sent to', to, '|', subject);
+      console.log('[email] Sent to', to, '—', subject);
     }
   } catch (err) {
     console.error('[email] Send failed:', err.message);
-    // Reset transporter so next call retries with fresh config
     transporter = null;
     throw err;
   }

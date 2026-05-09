@@ -25,7 +25,6 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'Invalid session ID', detail: err.message });
   }
 
-  // Must be complete and belong to this user
   if (session.status !== 'complete' && session.payment_status !== 'paid') {
     return res.json({ success: false, message: 'Payment not completed' });
   }
@@ -37,24 +36,43 @@ module.exports = async (req, res) => {
   if (!billingPeriod) return res.status(400).json({ error: 'Missing billing_period metadata' });
 
   const isPro = billingPeriod.startsWith('pro_');
-  const trialEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
   const stripeSubId = typeof session.subscription === 'string'
     ? session.subscription
     : session.subscription?.id;
 
+  // Idempotency — if we already processed this exact Stripe subscription and
+  // the subscription is live, return success without re-writing.
+  const existing = await Subscription.findOne({ created_by: userEmail });
+  if (
+    existing?.stripe_subscription_id === stripeSubId &&
+    (existing.status === 'active' || existing.status === 'trial')
+  ) {
+    console.log(`[verifyCheckout] Already processed for ${userEmail} — returning cached result`);
+    return res.json({ success: true, plan: existing.plan, status: existing.status });
+  }
+
+  const trialEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  const newStatus = isPro ? 'trial' : 'active';
+
+  // Use explicit $set so undefined values don't accidentally unset existing fields
+  const updateFields = {
+    plan: billingPeriod,
+    status: newStatus,
+    stripe_subscription_id: stripeSubId,
+    stripe_customer_id: session.customer,
+    start_date: new Date().toISOString().split('T')[0],
+    subscription_active: true,
+  };
+
+  if (isPro) {
+    updateFields.trial_start = new Date().toISOString();
+    updateFields.trial_end = trialEnd.toISOString();
+    updateFields.had_trial = true;
+  }
+
   await Subscription.findOneAndUpdate(
     { created_by: userEmail },
-    {
-      plan: billingPeriod,
-      status: isPro ? 'trial' : 'active',
-      stripe_subscription_id: stripeSubId,
-      stripe_customer_id: session.customer,
-      start_date: new Date().toISOString().split('T')[0],
-      subscription_active: true,
-      trial_start: isPro ? new Date().toISOString() : undefined,
-      trial_end: isPro ? trialEnd.toISOString() : undefined,
-      had_trial: isPro ? true : undefined,
-    },
+    { $set: updateFields },
     { upsert: true, new: true }
   );
 
@@ -71,6 +89,6 @@ module.exports = async (req, res) => {
     );
   }
 
-  console.log(`[verifyCheckout] Subscription activated: ${userEmail} → ${billingPeriod}`);
-  return res.json({ success: true, plan: billingPeriod, status: isPro ? 'trial' : 'active' });
+  console.log(`[verifyCheckout] Subscription activated: ${userEmail} → ${billingPeriod} (${newStatus})`);
+  return res.json({ success: true, plan: billingPeriod, status: newStatus });
 };
