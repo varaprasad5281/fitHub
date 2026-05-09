@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useState, useEffect, memo } from 'react';
+import React, { Suspense, useState, useEffect, memo } from 'react';
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { api } from '@/api/client';

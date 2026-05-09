@@ -6,7 +6,6 @@ import { Trophy, Crown, Lock, Loader2, Users, TrendingUp } from "lucide-react";
 import { activeSub, hasEliteAccess } from '@/lib/subscriptionUtils';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import PodiumDisplay from "@/components/leaderboard/PodiumDisplay";
 

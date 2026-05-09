@@ -81,6 +81,5 @@ module.exports = async (req, res) => {
   idempotencyStore.set(idempotencyKey, successResponse);
   setTimeout(() => idempotencyStore.delete(idempotencyKey), 60 * 60 * 1000);
 
-  console.log(`[CHECKOUT] Session ${session.id} for ${userEmail} (${billingPeriod})`);
   res.json({ sessionId: session.id, url: session.url });
 };

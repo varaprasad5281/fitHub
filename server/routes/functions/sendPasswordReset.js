@@ -31,10 +31,6 @@ module.exports = async (req, res) => {
 
   const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/reset-password?token=${token}`;
 
-  // Always log the reset URL to the server console — useful when SMTP isn't available
-  console.log(`[sendPasswordReset] Reset URL for ${email}:`);
-  console.log(`  ${resetUrl}`);
-
   try {
     await sendEmail({
       to: email,

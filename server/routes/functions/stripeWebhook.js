@@ -37,7 +37,6 @@ module.exports = async (req, res) => {
     return res.status(401).json({ error: 'Invalid signature' });
   }
 
-  console.log('Webhook event:', event.type);
 
   // ── checkout.session.completed ──────────────────────────────────────────
   if (event.type === 'checkout.session.completed') {
@@ -112,7 +111,6 @@ module.exports = async (req, res) => {
         });
 
     sendEmail({ to: userEmail, subject: emailSubject, body: emailPlain, html: emailHtml }).catch(() => {});
-    console.log('Subscription activated for:', userEmail);
   }
 
   // ── customer.subscription.updated ──────────────────────────────────────
@@ -164,8 +162,7 @@ module.exports = async (req, res) => {
     // A $0 invoice fired at trial start should NOT flip status to 'active' —
     // the subscription is still in its trial period.
     if (invoice.amount_paid === 0 && invoice.billing_reason === 'subscription_create') {
-      console.log('[webhook] Skipping $0 trial-start invoice — keeping trial status');
-      return res.json({ received: true });
+        return res.json({ received: true });
     }
 
     const periodEnd = invoice.lines?.data[0]?.period?.end;

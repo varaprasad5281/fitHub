@@ -63,7 +63,7 @@ export default function FooterSection() {
             <ul className="space-y-2 text-sm mb-4">
               <li>
                 <a href="mailto:hello@7percent.info" className="text-zinc-500 hover:text-amber-400 transition-colors">
-                  hello@7percent.info
+                  team@7percent.info
                 </a>
               </li>
             </ul>

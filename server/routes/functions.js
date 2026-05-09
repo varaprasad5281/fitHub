@@ -119,6 +119,7 @@ router.post('/stripeWebhook', require('./functions/stripeWebhook'));
 
 // Public functions — no auth required (user is not logged in for these)
 router.post('/sendPasswordReset', require('./functions/sendPasswordReset'));
+router.post('/sendEmail', require('./functions/sendEmail'));
 
 // All other functions require auth
 router.use(protect);
