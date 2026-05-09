@@ -206,8 +206,8 @@ export default function PricingSection({ fullPage = false }) {
               }`}
             >
               {plan.badge && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <span className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                  <span className={`px-3 sm:px-4 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wide sm:tracking-wider ${
                     plan.trial
                       ? 'bg-gradient-to-r from-green-400 to-emerald-500 text-black'
                       : 'bg-gradient-to-r from-amber-400 to-amber-500 text-black'

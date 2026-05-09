@@ -157,18 +157,28 @@ export default function SocialsPage() {
 
         {/* Tabs */}
          <Tabs defaultValue="friends" className="mb-8">
-            <TabsList className="bg-zinc-900/50 border border-zinc-800 mb-6">
-              <TabsTrigger value="friends" className="data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-400">
-                <Users className="w-4 h-4 mr-2" /> Friends ({friends.length})
+            <TabsList className="w-full bg-zinc-900/50 border border-zinc-800 mb-6 grid grid-cols-4 rounded-xl overflow-hidden p-0">
+              <TabsTrigger value="friends" className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 rounded-none h-full py-2.5 data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-400 data-[state=active]:shadow-none">
+                <Users className="w-4 h-4 flex-shrink-0" />
+                <span className="text-[10px] sm:text-sm leading-tight">
+                  <span className="hidden sm:inline">Friends </span>
+                  <span className="text-[10px] sm:text-xs opacity-70">({friends.length})</span>
+                </span>
               </TabsTrigger>
-              <TabsTrigger value="requests" className="data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-400">
-                <UserPlus className="w-4 h-4 mr-2" /> Requests ({friendRequests.length})
+              <TabsTrigger value="requests" className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 rounded-none h-full py-2.5 data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-400 data-[state=active]:shadow-none">
+                <UserPlus className="w-4 h-4 flex-shrink-0" />
+                <span className="text-[10px] sm:text-sm leading-tight">
+                  <span className="hidden sm:inline">Requests </span>
+                  <span className="text-[10px] sm:text-xs opacity-70">({friendRequests.length})</span>
+                </span>
               </TabsTrigger>
-              <TabsTrigger value="leaderboard" className="data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-400">
-                <Users className="w-4 h-4 mr-2" /> Leaderboard
+              <TabsTrigger value="leaderboard" className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 rounded-none h-full py-2.5 data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-400 data-[state=active]:shadow-none">
+                <Users className="w-4 h-4 flex-shrink-0" />
+                <span className="text-[10px] sm:text-sm leading-tight">Board</span>
               </TabsTrigger>
-              <TabsTrigger value="chat" className="data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-400">
-                <MessageCircle className="w-4 h-4 mr-2" /> Chat
+              <TabsTrigger value="chat" className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 rounded-none h-full py-2.5 data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-400 data-[state=active]:shadow-none">
+                <MessageCircle className="w-4 h-4 flex-shrink-0" />
+                <span className="text-[10px] sm:text-sm leading-tight">Chat</span>
               </TabsTrigger>
             </TabsList>
 

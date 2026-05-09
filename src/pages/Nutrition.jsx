@@ -395,17 +395,23 @@ export default function Nutrition() {
         </div>
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-6">
-          <TabsList className="bg-zinc-900/50 border border-zinc-800">
-            <TabsTrigger value="log" className="data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-400">
-              <Apple className="w-4 h-4 mr-2" /> Meal Log
+          <TabsList className="w-full bg-zinc-900/50 border border-zinc-800 grid grid-cols-3 rounded-xl overflow-hidden p-0">
+            <TabsTrigger value="log" className="flex items-center justify-center gap-1.5 rounded-none h-full data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-400 data-[state=active]:shadow-none">
+              <Apple className="w-4 h-4 flex-shrink-0" />
+              <span className="hidden xs:inline sm:inline">Meal Log</span>
+              <span className="xs:hidden sm:hidden text-[11px] font-medium">Log</span>
             </TabsTrigger>
-            <TabsTrigger value="plan" className="data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-400">
-              <Calendar className="w-4 h-4 mr-2" /> Meal Plan
+            <TabsTrigger value="plan" className="flex items-center justify-center gap-1.5 rounded-none h-full data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-400 data-[state=active]:shadow-none">
+              <Calendar className="w-4 h-4 flex-shrink-0" />
+              <span className="hidden sm:inline">Meal Plan</span>
+              <span className="sm:hidden text-[11px] font-medium">Plan</span>
             </TabsTrigger>
-            <TabsTrigger value="history" className="data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-400">
-              <History className="w-4 h-4 mr-2" /> History
+            <TabsTrigger value="history" className="flex items-center justify-center gap-1.5 rounded-none h-full data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-400 data-[state=active]:shadow-none">
+              <History className="w-4 h-4 flex-shrink-0" />
+              <span className="hidden sm:inline">History</span>
+              <span className="sm:hidden text-[11px] font-medium">History</span>
             </TabsTrigger>
-            </TabsList>
+          </TabsList>
 
           <TabsContent value="log" className="mt-6">
             <div className="flex justify-end mb-4">
@@ -463,57 +469,54 @@ export default function Nutrition() {
           </TabsContent>
 
           <TabsContent value="plan" className="mt-6">
-            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-6 sm:p-8 mb-8">
-              <div className="flex items-start gap-4">
-                <div className="p-3 rounded-xl bg-amber-500/20">
-                   <Zap className="w-6 h-6 text-amber-400" />
-                 </div>
-                <div className="flex-1">
-                  <h2 className="text-lg font-bold text-white mb-2">Generate Meal Plan</h2>
-                  <p className="text-zinc-400 text-sm mb-3">
-                     Get a personalized 3-course meal plan (breakfast, lunch, dinner) tailored to your calorie target and dietary preferences.
-                   </p>
-                  {profile && (
-                    <div className="flex items-center gap-3 mb-4">
-                      <Settings2 className="w-4 h-4 text-zinc-500 flex-shrink-0" />
-                      <Select
-                        value={profile.dietary_preference || 'no_preference'}
-                        onValueChange={handleDietaryChange}
-                        disabled={savingDiet}
-                      >
-                        <SelectTrigger className="w-48 bg-zinc-800/60 border-zinc-700 text-zinc-200 h-9 text-sm">
-                          <SelectValue placeholder="Dietary preference" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-zinc-900 border-zinc-700 text-zinc-200 [&_[role=option]]:text-zinc-200 [&_[role=option]:focus]:bg-amber-500/10 [&_[role=option]:focus]:text-amber-400">
-                         <SelectItem value="no_preference">No Preference</SelectItem>
-                         <SelectItem value="vegetarian">Vegetarian</SelectItem>
-                         <SelectItem value="vegan">Vegan</SelectItem>
-                         <SelectItem value="keto">Keto</SelectItem>
-                         <SelectItem value="paleo">Paleo</SelectItem>
-                         <SelectItem value="mediterranean">Mediterranean</SelectItem>
-                         <SelectItem value="gluten_free">Gluten Free</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {savingDiet && <Loader2 className="w-4 h-4 text-amber-400 animate-spin" />}
-                    </div>
-                  )}
-                  <Button
-                     onClick={handleGenerateMealPlan}
-                     disabled={generating}
-                    className="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-semibold rounded-full px-6 h-12 sm:h-11 text-base touch-target"
-                  >
-                    {generating ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating...
-                      </>
-                    ) : (
-                       <>
-                         <Zap className="w-4 h-4 mr-2" /> {todayPlan ? 'Regenerate' : 'Generate'} Meal Plan
-                       </>
-                    )}
-                  </Button>
+            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 sm:p-8 mb-8">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2.5 sm:p-3 rounded-xl bg-amber-500/20 flex-shrink-0">
+                  <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-amber-400" />
                 </div>
+                <h2 className="text-base sm:text-lg font-bold text-white">Generate Meal Plan</h2>
               </div>
+
+              <p className="text-zinc-400 text-sm mb-4 leading-relaxed">
+                Get a personalised meal plan tailored to your calorie target and dietary preferences.
+              </p>
+
+              {profile && (
+                <div className="flex flex-wrap items-center gap-2 mb-4">
+                  <Settings2 className="w-4 h-4 text-zinc-500 flex-shrink-0" />
+                  <Select
+                    value={profile.dietary_preference || 'no_preference'}
+                    onValueChange={handleDietaryChange}
+                    disabled={savingDiet}
+                  >
+                    <SelectTrigger className="flex-1 min-w-[140px] max-w-xs bg-zinc-800/60 border-zinc-700 text-zinc-200 h-9 text-sm">
+                      <SelectValue placeholder="Dietary preference" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-zinc-900 border-zinc-700 text-zinc-200 [&_[role=option]]:text-zinc-200 [&_[role=option]:focus]:bg-amber-500/10 [&_[role=option]:focus]:text-amber-400">
+                      <SelectItem value="no_preference">No Preference</SelectItem>
+                      <SelectItem value="vegetarian">Vegetarian</SelectItem>
+                      <SelectItem value="vegan">Vegan</SelectItem>
+                      <SelectItem value="keto">Keto</SelectItem>
+                      <SelectItem value="paleo">Paleo</SelectItem>
+                      <SelectItem value="mediterranean">Mediterranean</SelectItem>
+                      <SelectItem value="gluten_free">Gluten Free</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {savingDiet && <Loader2 className="w-4 h-4 text-amber-400 animate-spin flex-shrink-0" />}
+                </div>
+              )}
+
+              <Button
+                onClick={handleGenerateMealPlan}
+                disabled={generating}
+                className="w-full sm:w-auto bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-semibold rounded-full px-6 h-11 touch-target"
+              >
+                {generating ? (
+                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating...</>
+                ) : (
+                  <><Zap className="w-4 h-4 mr-2" /> {todayPlan ? 'Regenerate' : 'Generate'} Meal Plan</>
+                )}
+              </Button>
             </div>
 
             {!todayPlan ? (

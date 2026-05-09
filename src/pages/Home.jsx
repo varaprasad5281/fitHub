@@ -67,23 +67,23 @@ const DashboardGrid = memo(({ pages }) => {
           <LogOut className="w-4 h-4" /> Sign out
         </button>
       </div>
-      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-4 mx-auto w-fit">
-      {pages.map((page) => {
-        const Icon = page.icon;
-        return (
-          <Link 
-            key={page.path}
-            to={createPageUrl(page.path)}
-            className="group rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 hover:border-amber-500/50 hover:bg-zinc-800/50 transition-all"
-          >
-            <Icon className="w-6 h-6 text-amber-400 mb-2" />
-            <h3 className="text-white font-semibold text-sm mb-1 group-hover:text-amber-400 transition-colors">
-              {page.name}
-            </h3>
-            <p className="text-zinc-500 text-xs">{page.description}</p>
-          </Link>
-        );
-      })}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        {pages.map((/** @type {any} */ page) => {
+          const Icon = page.icon;
+          return (
+            <Link
+              key={page.path}
+              to={createPageUrl(page.path)}
+              className="group rounded-xl border border-zinc-800 bg-zinc-900/50 p-3 sm:p-4 hover:border-amber-500/50 hover:bg-zinc-800/50 transition-all overflow-hidden min-w-0"
+            >
+              <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-amber-400 mb-2 flex-shrink-0" />
+              <h3 className="text-white font-semibold text-xs sm:text-sm mb-0.5 group-hover:text-amber-400 transition-colors truncate">
+                {page.name}
+              </h3>
+              <p className="text-zinc-500 text-xs truncate">{page.description}</p>
+            </Link>
+          );
+        })}
       </div>
       </div>
       </div>
