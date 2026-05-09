@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { api } from '@/api/client';
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Trophy, Crown, Lock, Loader2, Users, TrendingUp } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Trophy, Crown, Lock, Loader2, Users, TrendingUp, Check, X } from "lucide-react";
 import { activeSub, hasEliteAccess } from '@/lib/subscriptionUtils';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -10,11 +10,12 @@ import { createPageUrl } from "@/utils";
 import PodiumDisplay from "@/components/leaderboard/PodiumDisplay";
 
 import { Skeleton } from "@/components/ui/skeleton";
+import { motion as m } from 'framer-motion';
 import AddFriendForm from "@/components/friends/AddFriendForm";
-import FriendRequestCard from "@/components/friends/FriendRequestCard";
 import FriendsLeaderboard from "@/components/leaderboard/FriendsLeaderboard";
 import ProUpsellModalEnhanced from "@/components/conversion/ProUpsellModalEnhanced";
 import LeaderboardPreview from "@/components/conversion/LeaderboardPreview";
+import { toast } from 'sonner';
 
 export default function Leaderboard() {
   const queryClient = useQueryClient();
@@ -61,21 +62,72 @@ export default function Leaderboard() {
      return unsubscribe;
    }, [user?.email, queryClient]);
 
-  // Friends leaderboard data
+  // Friends leaderboard data — same source as Socials page so numbers always match
   const { data: friends = [], isLoading: friendsLoading } = useQuery({
-    queryKey: ['friends'],
-    queryFn: () => api.entities.Friend.filter({ status: 'connected' }),
+    queryKey: ['friends', 'accepted'],
+    queryFn: async () => {
+      const res = await api.functions.invoke('getFriendsList', { type: 'accepted' });
+      return res?.friends || [];
+    },
+    staleTime: 0,
+    refetchOnMount: true,
     enabled: !!user,
   });
 
-  // Friend requests data
-  const { data: friendRequests = [], isLoading: requestsLoading } = useQuery({
-    queryKey: ['friend-requests'],
-    queryFn: () => api.entities.FriendRequest.filter({
-      receiver_email: user?.email,
-      status: 'pending'
-    }),
+  // Incoming friend requests
+  const { data: incomingRequests = [] } = useQuery({
+    queryKey: ['friendRequests', 'incoming'],
+    queryFn: async () => {
+      const res = await api.functions.invoke('getFriendsList', { type: 'pending' });
+      return (res?.friends || []).filter(f => !f.is_requester);
+    },
+    staleTime: 1000 * 30,
+    refetchOnMount: true,
     enabled: !!user,
+  });
+
+  // User's own points for friends leaderboard self-entry
+  const { data: myPoints } = useQuery({
+    queryKey: ['my-points'],
+    queryFn: async () => {
+      const pts = await api.entities.Points.list();
+      return pts?.[0] || {};
+    },
+    staleTime: 1000 * 60,
+    enabled: !!user,
+  });
+
+  const { data: myProfile } = useQuery({
+    queryKey: ['my-profile'],
+    queryFn: async () => {
+      const profiles = await api.entities.Profile.list();
+      return profiles?.[0] || {};
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled: !!user,
+  });
+
+  const acceptMutation = useMutation({
+    mutationFn: async (request) => {
+      await api.functions.invoke('friendRequest', { action: 'accept', target_email: request.email });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['friendRequests'] });
+      queryClient.invalidateQueries({ queryKey: ['friends'] });
+      toast.success('Friend added!');
+    },
+    onError: () => toast.error('Failed to accept request'),
+  });
+
+  const declineMutation = useMutation({
+    mutationFn: async (request) => {
+      await api.functions.invoke('friendRequest', { action: 'reject', target_email: request.email });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['friendRequests'] });
+      toast.success('Request declined.');
+    },
+    onError: () => toast.error('Failed to decline request'),
   });
 
   const subscription = activeSub(subscriptions);
@@ -331,7 +383,7 @@ export default function Leaderboard() {
             </TabsTrigger>
             <TabsTrigger value="friends" className="data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-400">
               <Users className="w-4 h-4 mr-2" /> Friends
-              {friendRequests.length > 0 && <span className="ml-2 text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">{friendRequests.length}</span>}
+              {incomingRequests.length > 0 && <span className="ml-2 text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">{incomingRequests.length}</span>}
             </TabsTrigger>
           </TabsList>
 
@@ -474,52 +526,81 @@ export default function Leaderboard() {
 
           <TabsContent value="friends" className="mt-8">
             <div className="space-y-6">
-              {/* Friend Requests Section */}
-              {friendRequests.length > 0 && (
+              {/* Incoming Friend Requests */}
+              {incomingRequests.length > 0 && (
                 <div>
-                  <h3 className="text-white font-semibold mb-3">Friend Requests ({friendRequests.length})</h3>
+                  <h3 className="text-white font-semibold mb-3">
+                    Friend Requests ({incomingRequests.length})
+                  </h3>
                   <div className="space-y-2">
-                    {friendRequests.map(req => (
-                      <FriendRequestCard 
-                        key={req.id} 
-                        request={req}
-                        onRespond={() => {
-                          queryClient.invalidateQueries({ queryKey: ['friend-requests'] });
-                          queryClient.invalidateQueries({ queryKey: ['friends'] });
-                        }}
-                      />
+                    {incomingRequests.map((req) => (
+                      <div
+                        key={req.id || req.email}
+                        className="flex items-center justify-between p-3 rounded-lg bg-zinc-800/50 border border-green-500/20"
+                      >
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
+                            {(req.username || req.email || '?')[0].toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-white truncate">
+                              {req.username || req.friend_name || req.email}
+                            </p>
+                            <p className="text-xs text-zinc-500 truncate">{req.email}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2 ml-2 shrink-0">
+                          <Button
+                            onClick={() => acceptMutation.mutate(req)}
+                            disabled={acceptMutation.isPending || declineMutation.isPending}
+                            className="h-8 px-3 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs"
+                          >
+                            <Check className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            onClick={() => declineMutation.mutate(req)}
+                            disabled={acceptMutation.isPending || declineMutation.isPending}
+                            variant="outline"
+                            className="h-8 px-3 border-red-500/30 text-red-400 hover:bg-red-500/10 rounded-lg text-xs"
+                          >
+                            <X className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>
               )}
 
               {/* Add Friend Form */}
-              <AddFriendForm 
-                onSent={() => {
-                  queryClient.invalidateQueries({ queryKey: ['friend-requests'] });
-                }}
+              <AddFriendForm
+                onSent={() => queryClient.invalidateQueries({ queryKey: ['friendRequests'] })}
               />
 
-              {/* Friends Leaderboard */}
-              {friends.length > 0 && (
-                <div>
-                  <h3 className="text-white font-semibold mb-4">Your Friends</h3>
-                  <FriendsLeaderboard 
-                    friendEmails={friends.map(f => f.friend_email)} 
-                    leaderboard={leaderboard}
-                    timeframe={timeframe}
-                    user={user}
-                    subscription={subscription}
+              {/* Friends Leaderboard — same data source as Socials page */}
+              <div>
+                <h3 className="text-white font-semibold mb-4">This Week's Circle Rankings</h3>
+                {friendsLoading ? (
+                  <div className="space-y-2">
+                    {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-14 rounded-xl" />)}
+                  </div>
+                ) : (
+                  <FriendsLeaderboard
+                    friends={[
+                      {
+                        email: user?.email,
+                        username: myProfile?.username || user?.email?.split('@')[0] || 'You',
+                        avatar_url: myProfile?.profile_picture_url || null,
+                        level: myPoints?.level || 1,
+                        weekly_points: myPoints?.weekly_points || 0,
+                        isMe: true,
+                      },
+                      ...friends,
+                    ].sort((a, b) => (b.weekly_points || 0) - (a.weekly_points || 0))}
+                    hasEliteAccess={hasAccess}
                   />
-                </div>
-              )}
-
-              {friends.length === 0 && friendRequests.length === 0 && (
-                <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/30 p-12 text-center">
-                  <Users className="w-12 h-12 text-zinc-700 mx-auto mb-4" />
-                  <p className="text-zinc-500">No friends yet. Start by adding friends!</p>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
