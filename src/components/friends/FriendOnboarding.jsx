@@ -23,8 +23,8 @@ export default function FriendOnboarding({ onComplete, onSkip }) {
   const fetchSuggestedFriends = async () => {
     setLoading(true);
     try {
-      const { data } = await api.functions.invoke('suggestedFriends');
-      setSuggested(data.suggested || []);
+      const res = await api.functions.invoke('suggestedFriends');
+      setSuggested(res?.data || []);  // server returns { data: [...] }
     } catch (error) {
       console.log('Error fetching suggestions:', error);
       toast.error('Could not load suggestions');

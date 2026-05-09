@@ -30,9 +30,10 @@ export default function FriendsList({ onChatClick }) {
       const response = await api.functions.invoke('getFriendsList', {
         type: 'accepted'
       });
-      return response?.data?.friends || [];
+      return response?.friends || [];  // server returns { success, friends: [...] }
     },
-    staleTime: 1000 * 60
+    staleTime: 0,           // always fetch fresh — friend list must be up to date
+    refetchOnMount: true,
   });
 
   const removeMutation = useMutation({
@@ -88,7 +89,7 @@ export default function FriendsList({ onChatClick }) {
       <div className="space-y-2">
         {friends.map((friend, idx) => (
           <motion.div
-            key={friend.id}
+            key={friend.id || friend.email}
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: idx * 0.05 }}
@@ -96,24 +97,29 @@ export default function FriendsList({ onChatClick }) {
           >
             <div
               className="flex items-center gap-3 flex-1 cursor-pointer"
-              onClick={() => onChatClick?.(friend.friend_email)}
+              onClick={() => onChatClick?.(friend.email)}
             >
-              {friend.profile_picture && (
+              {friend.avatar_url && (
                 <img
-                  src={friend.profile_picture}
-                  alt={friend.friend_name}
+                  src={friend.avatar_url}
+                  alt={friend.username}
                   className="w-10 h-10 rounded-full object-cover"
                 />
               )}
+              {!friend.avatar_url && (
+                <div className="w-10 h-10 rounded-full bg-zinc-700 flex items-center justify-center text-sm font-bold text-white">
+                  {(friend.username || friend.email || '?')[0].toUpperCase()}
+                </div>
+              )}
               <div>
-                <p className="text-sm font-semibold text-white">{friend.friend_name}</p>
-                <p className="text-xs text-zinc-500">{friend.friend_email}</p>
+                <p className="text-sm font-semibold text-white">{friend.username || friend.email}</p>
+                <p className="text-xs text-zinc-500">{friend.email}</p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
               <Button
-                onClick={() => onChatClick?.(friend.friend_email)}
+                onClick={() => onChatClick?.(friend.email)}
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-700"
@@ -133,14 +139,14 @@ export default function FriendsList({ onChatClick }) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-zinc-900 border-zinc-700">
                   <DropdownMenuItem
-                    onClick={() => setRemoveModalOpen(friend.friend_email)}
+                    onClick={() => setRemoveModalOpen(friend.email)}
                     className="text-red-400 hover:bg-zinc-800 cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4 mr-2" />
                     Remove
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => setBlockModalOpen(friend.friend_email)}
+                    onClick={() => setBlockModalOpen(friend.email)}
                     className="text-orange-400 hover:bg-zinc-800 cursor-pointer"
                   >
                     <AlertTriangle className="w-4 h-4 mr-2" />
@@ -157,10 +163,8 @@ export default function FriendsList({ onChatClick }) {
         isOpen={!!removeModalOpen}
         friendName={removeModalOpen}
         onConfirm={() => {
-          if (removeModalOpen) {
-            removeMutation.mutate(removeModalOpen);
-            setRemoveModalOpen(null);
-          }
+          removeMutation.mutate(removeModalOpen);
+          setRemoveModalOpen(null);
         }}
         onCancel={() => setRemoveModalOpen(null)}
         isPending={removeMutation.isPending}
@@ -170,10 +174,8 @@ export default function FriendsList({ onChatClick }) {
         isOpen={!!blockModalOpen}
         userName={blockModalOpen}
         onConfirm={() => {
-          if (blockModalOpen) {
-            blockMutation.mutate(blockModalOpen);
-            setBlockModalOpen(null);
-          }
+          blockMutation.mutate(blockModalOpen);
+          setBlockModalOpen(null);
         }}
         onCancel={() => setBlockModalOpen(null)}
         isPending={blockMutation.isPending}

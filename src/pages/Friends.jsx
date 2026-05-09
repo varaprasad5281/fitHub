@@ -64,9 +64,9 @@ export default function FriendsPage() {
             }
           }
 
-          // Load suggestions
-          const { data } = await api.functions.invoke('suggestedFriends');
-          setSuggested(data.suggested || []);
+          // Load suggestions — server returns { data: [...] }
+          const suggestRes = await api.functions.invoke('suggestedFriends');
+          setSuggested(suggestRes?.data || []);
         }
       } catch (error) {
         console.error('Auth check error:', error);

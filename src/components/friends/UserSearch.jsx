@@ -29,10 +29,10 @@ export default function UserSearch() {
       try {
         setLoading(true);
         const response = await api.functions.invoke('searchUsers', {
-          q: query,
+          query,          // server reads req.body.query
           limit: 10
         });
-        setResults(response?.data?.results || []);
+        setResults(response?.data || []);  // server returns { data: [...] }
       } catch (error) {
         console.error('Search error:', error);
         toast.error('Search failed');
@@ -50,7 +50,7 @@ export default function UserSearch() {
       setSending(true);
       await api.functions.invoke('friendRequest', {
         action: 'send',
-        receiver_email: receiverEmail
+        target_email: receiverEmail   // server reads req.body.target_email
       });
 
       setSentRequests(prev => ({
@@ -130,16 +130,16 @@ export default function UserSearch() {
                   {user.profile_picture_url && (
                     <img
                       src={user.profile_picture_url}
-                      alt={user.display_name}
+                      alt={user.username || user.full_name}
                       className="w-8 h-8 rounded-full object-cover"
                     />
                   )}
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-white truncate">
-                      {user.display_name}
+                      {user.username || user.full_name || user.created_by}
                     </p>
-                    <p className="text-xs text-zinc-500">
-                      {user.country && `${user.country}`}
+                    <p className="text-xs text-zinc-500 truncate">
+                      {user.created_by}
                     </p>
                   </div>
                 </div>

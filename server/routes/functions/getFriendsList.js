@@ -1,5 +1,6 @@
 /**
- * Replaces: getFriendsList
+ * getFriendsList
+ * type: 'accepted' | 'pending'
  */
 const Friendship = require('../../models/Friendship');
 const Profile = require('../../models/Profile');
@@ -7,13 +8,17 @@ const Points = require('../../models/Points');
 
 module.exports = async (req, res) => {
   const user = req.user;
-  const type = req.body?.type || 'accepted'; // 'accepted' | 'pending'
+  const type = req.body?.type || 'accepted';
+
+  console.log(`[getFriendsList] user=${user.email} type=${type}`);
 
   if (type === 'pending') {
     const pendingFriendships = await Friendship.find({
       $or: [{ requester_email: user.email }, { receiver_email: user.email }],
       status: 'pending',
     }).lean();
+
+    console.log(`[getFriendsList] pending count: ${pendingFriendships.length}`);
 
     const otherEmails = pendingFriendships.map(f =>
       f.requester_email === user.email ? f.receiver_email : f.requester_email
@@ -42,20 +47,23 @@ module.exports = async (req, res) => {
     return res.json({ success: true, friends });
   }
 
-  // Default: accepted friends
+  // ── accepted friends ─────────────────────────────────────────────────────
   const friendships = await Friendship.find({
     $or: [{ requester_email: user.email }, { receiver_email: user.email }],
     status: 'accepted',
   }).lean();
 
+  console.log(`[getFriendsList] accepted friendships found: ${friendships.length}`,
+    friendships.map(f => `(${f.requester_email} → ${f.receiver_email})`));
+
   const friendEmails = friendships.map((f) =>
     f.requester_email === user.email ? f.receiver_email : f.requester_email
   );
 
-  const [profiles, pointsRecords] = await Promise.all([
+  const [profiles, pointsRecords] = friendEmails.length ? await Promise.all([
     Profile.find({ created_by: { $in: friendEmails } }).lean(),
     Points.find({ created_by: { $in: friendEmails } }).lean(),
-  ]);
+  ]) : [[], []];
 
   const profileMap = {};
   profiles.forEach((p) => { profileMap[p.created_by] = p; });
@@ -63,13 +71,19 @@ module.exports = async (req, res) => {
   pointsRecords.forEach((p) => { pointsMap[p.created_by] = p; });
 
   const friends = friendEmails.map((email) => ({
+    id: friendships.find(f =>
+      f.requester_email === email || f.receiver_email === email
+    )?._id.toString(),
     email,
-    username: profileMap[email]?.username || 'Unknown',
-    avatar_url: profileMap[email]?.avatar_url || null,
+    // Profile stores picture as profile_picture_url
+    username: profileMap[email]?.username || email.split('@')[0],
+    avatar_url: profileMap[email]?.profile_picture_url || profileMap[email]?.avatar_url || null,
     level: pointsMap[email]?.level || 1,
     weekly_points: pointsMap[email]?.weekly_points || 0,
     fitness_goal: profileMap[email]?.fitness_goal,
   }));
+
+  console.log(`[getFriendsList] returning ${friends.length} accepted friends`);
 
   res.json({ success: true, friends });
 };
