@@ -298,6 +298,96 @@ const BADGES = [
     requirement_type: 'friends_count',
     requirement_value: 10,
   },
+
+  // ─── EXCLUSIVE ────────────────────────────────────────────────────────────
+  // These badges are awarded manually or by scheduled jobs — not via checkAndAwardBadges.
+  // requirement_type is null so they never show a progress bar.
+  {
+    badge_code: 'FOUNDER',
+    name: 'Beta Founder',
+    description: 'Exclusive Beta Badge — you were here from day one. A permanent mark of founding membership.',
+    icon: '🌐',
+    rarity_level: 'legendary',
+    category: 'exclusive',
+    requirement_type: null,
+    requirement_value: null,
+  },
+
+  // Weekly leaderboard — single occurrence
+  {
+    badge_code: 'LEADER_TOP3',
+    name: 'Podium',
+    description: 'Finished in the top 3 on a weekly leaderboard. Stay consistent.',
+    icon: '🏅',
+    rarity_level: 'rare',
+    category: 'exclusive',
+    requirement_type: null,
+    requirement_value: null,
+  },
+  {
+    badge_code: 'LEADER_TOP1',
+    name: 'Weekly Champion',
+    description: 'Finished #1 on a weekly leaderboard. The top belongs to you.',
+    icon: '🥇',
+    rarity_level: 'epic',
+    category: 'exclusive',
+    requirement_type: null,
+    requirement_value: null,
+  },
+
+  // Weekly leaderboard — consecutive weeks in top 3
+  {
+    badge_code: 'LEADER_TOP3_3W',
+    name: 'Hat Trick',
+    description: 'Stayed in the top 3 for 3 consecutive weeks. Momentum is a weapon.',
+    icon: '🎩',
+    rarity_level: 'rare',
+    category: 'exclusive',
+    requirement_type: null,
+    requirement_value: null,
+  },
+  {
+    badge_code: 'LEADER_TOP3_5W',
+    name: 'Podium Regular',
+    description: 'Stayed in the top 3 for 5 consecutive weeks. The leaderboard knows your name.',
+    icon: '🔱',
+    rarity_level: 'epic',
+    category: 'exclusive',
+    requirement_type: null,
+    requirement_value: null,
+  },
+  {
+    badge_code: 'LEADER_TOP3_10W',
+    name: 'Leaderboard Legend',
+    description: 'Stayed in the top 3 for 10 consecutive weeks. An era of dominance.',
+    icon: '🌌',
+    rarity_level: 'legendary',
+    category: 'exclusive',
+    requirement_type: null,
+    requirement_value: null,
+  },
+
+  // Weekly leaderboard — consecutive weeks at #1
+  {
+    badge_code: 'LEADER_TOP1_3W',
+    name: 'Triple Crown',
+    description: '#1 on the leaderboard for 3 consecutive weeks. A dynasty begins.',
+    icon: '👑',
+    rarity_level: 'epic',
+    category: 'exclusive',
+    requirement_type: null,
+    requirement_value: null,
+  },
+  {
+    badge_code: 'LEADER_TOP1_5W',
+    name: 'Untouchable',
+    description: '#1 on the leaderboard for 5 consecutive weeks. No one comes close.',
+    icon: '⚡',
+    rarity_level: 'legendary',
+    category: 'exclusive',
+    requirement_type: null,
+    requirement_value: null,
+  },
 ];
 
 async function seed() {

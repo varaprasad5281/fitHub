@@ -24,6 +24,7 @@ const CATEGORY_LABEL = {
   nutrition: '🥗 Nutrition',
   points:    '⭐ Points',
   social:    '🤝 Social',
+  exclusive: '🏅 Exclusive',
 };
 
 // ── Earned badge card ─────────────────────────────────────────────────────────
@@ -58,6 +59,7 @@ function EarnedCard({ badge, onFeature, featured }) {
 function LockedCard({ badge }) {
   const r = RARITY[badge.rarity_level] || RARITY.common;
   const progress = badge.progress ?? 0;
+  const isExclusive = badge.category === 'exclusive';
 
   return (
     <div className={`rounded-2xl border ${r.border} bg-zinc-900/60 p-5 flex flex-col items-center gap-2 text-center opacity-75`}>
@@ -65,15 +67,19 @@ function LockedCard({ badge }) {
       <p className="text-zinc-300 font-bold text-sm leading-tight">{badge.name}</p>
       <p className={`text-xs font-semibold uppercase tracking-wide ${r.label}`}>{badge.rarity_level}</p>
       <p className="text-zinc-600 text-xs leading-snug">{badge.description}</p>
-      <div className="w-full mt-1">
-        <div className="w-full h-1.5 bg-zinc-700 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-amber-500 rounded-full transition-all"
-            style={{ width: `${progress}%` }}
-          />
+      {isExclusive ? (
+        <p className="text-[10px] text-zinc-600 mt-1 italic">Awarded exclusively — cannot be earned through activity</p>
+      ) : (
+        <div className="w-full mt-1">
+          <div className="w-full h-1.5 bg-zinc-700 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-amber-500 rounded-full transition-all"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <p className="text-zinc-600 text-[10px] mt-1 text-right">{progress}% there</p>
         </div>
-        <p className="text-zinc-600 text-[10px] mt-1 text-right">{progress}% there</p>
-      </div>
+      )}
     </div>
   );
 }

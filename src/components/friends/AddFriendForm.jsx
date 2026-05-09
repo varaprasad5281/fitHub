@@ -66,7 +66,7 @@ export default function AddFriendForm({ onSent }) {
     <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
       <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
         <Search className="w-4 h-4 text-amber-400" />
-        Add Friend by Username or Email
+        Add Friend by Username
       </h3>
 
       {/* Search input */}
@@ -74,7 +74,7 @@ export default function AddFriendForm({ onSent }) {
         <Search className="absolute left-3 top-3 w-4 h-4 text-zinc-500" />
         <Input
           type="text"
-          placeholder="Search by username or email..."
+          placeholder="Search by username..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="pl-10 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-600 rounded-lg"
@@ -125,7 +125,6 @@ export default function AddFriendForm({ onSent }) {
                   )}
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-white truncate">{displayName}</p>
-                    <p className="text-xs text-zinc-500 truncate">{email}</p>
                   </div>
                 </div>
 

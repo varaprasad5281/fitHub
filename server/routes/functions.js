@@ -64,6 +64,7 @@ const handlers = {
   // Badges
   getBadges:                    require('./functions/getBadges'),
   getBadgeProgress:             (req, res) => { req.body.action = 'progress'; return require('./functions/getBadges')(req, res); },
+  awardFounderBadge:            require('./functions/awardFounderBadge'),
 
   // Challenges
   getChallenges:                require('./functions/manageChallenges').getChallenges,
