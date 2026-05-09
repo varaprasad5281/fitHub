@@ -205,7 +205,7 @@ function LayoutContent({ children, currentPageName }) {
               {!loading && !user && (
                 <>
                   <Link to="/login">
-                    <Button variant="outline" className="border-amber-500/50 text-amber-400 hover:border-amber-400 hover:text-amber-300 text-sm rounded-full touch-target transition-colors">
+                    <Button variant="outline" className="border-amber-500/50 text-amber-400 hover:bg-amber-500/10 hover:border-amber-400 hover:text-amber-300 text-sm rounded-full touch-target transition-colors">
                       Log in
                     </Button>
                   </Link>
@@ -265,13 +265,13 @@ function LayoutContent({ children, currentPageName }) {
               )}
 
               {!loading && !user && (
-                <div className="pt-4 space-y-2">
-                  <Link to="/login" onClick={() => setMenuOpen(false)}>
+                <div className="pt-4 flex flex-col gap-3">
+                  <Link to="/login" onClick={() => setMenuOpen(false)} className="block">
                     <Button variant="outline" className="w-full border-amber-500/50 text-amber-400 hover:border-amber-400 hover:text-amber-300 rounded-full touch-target transition-colors">
                       Log in
                     </Button>
                   </Link>
-                  <Link to="/register" onClick={() => setMenuOpen(false)}>
+                  <Link to="/register" onClick={() => setMenuOpen(false)} className="block">
                     <Button className={`w-full bg-gradient-to-r from-amber-400 to-amber-500 text-black font-semibold rounded-full touch-target ${GOLD.shine}`}>Start Free</Button>
                   </Link>
                 </div>
