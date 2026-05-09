@@ -17,6 +17,7 @@ export default function SocialsPage() {
   const queryClient = useQueryClient();
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedChat, setSelectedChat] = useState(null); // email string
+  const [activeTab, setActiveTab] = useState('friends');
 
   const { data: user } = useQuery({
     queryKey: ['user'],
@@ -109,6 +110,21 @@ export default function SocialsPage() {
     enabled: !!user,
   });
 
+  // Conversations list with unread counts — polls every 10 s so user sees new messages automatically
+  const { data: conversations = [] } = useQuery({
+    queryKey: ['conversations'],
+    queryFn: async () => {
+      const res = await api.functions.invoke('chatMessage', { action: 'conversations' });
+      return res?.conversations || [];
+    },
+    staleTime: 0,
+    refetchInterval: 10000,
+    refetchIntervalInBackground: true,
+    enabled: !!user,
+  });
+
+  const totalUnread = conversations.reduce((sum, c) => sum + (c.unread_count || 0), 0);
+
   const hasEliteAccess = checkElite(activeSub(Array.isArray(subscription) ? subscription : []));
 
   if (subLoading) {
@@ -182,7 +198,7 @@ export default function SocialsPage() {
         )}
 
         {/* Tabs */}
-        <Tabs defaultValue="friends" className="mb-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
           <TabsList className="w-full bg-zinc-900/50 border border-zinc-800 mb-6 grid grid-cols-4 rounded-xl overflow-hidden p-0">
             <TabsTrigger value="friends" className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 rounded-none h-full py-2.5 data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-400 data-[state=active]:shadow-none">
               <Users className="w-4 h-4 flex-shrink-0" />
@@ -205,7 +221,14 @@ export default function SocialsPage() {
               <span className="text-[10px] sm:text-sm leading-tight">Board</span>
             </TabsTrigger>
             <TabsTrigger value="chat" className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 rounded-none h-full py-2.5 data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-400 data-[state=active]:shadow-none">
-              <MessageCircle className="w-4 h-4 flex-shrink-0" />
+              <div className="relative flex-shrink-0">
+                <MessageCircle className="w-4 h-4" />
+                {totalUnread > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-bold rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5 leading-none">
+                    {totalUnread > 9 ? '9+' : totalUnread}
+                  </span>
+                )}
+              </div>
               <span className="text-[10px] sm:text-sm leading-tight">Chat</span>
             </TabsTrigger>
           </TabsList>
@@ -214,7 +237,7 @@ export default function SocialsPage() {
           <TabsContent value="friends">
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
               <h3 className="text-sm font-bold text-white uppercase tracking-wide mb-4">Your Circle</h3>
-              <FriendsList onChatClick={(email) => setSelectedChat(email)} />
+              <FriendsList onChatClick={(email) => { setSelectedChat(email); setActiveTab('chat'); }} />
             </div>
           </TabsContent>
 
@@ -390,7 +413,11 @@ export default function SocialsPage() {
             {selectedChat ? (
               <ChatWindow
                 friendEmail={selectedChat}
-                onClose={() => setSelectedChat(null)}
+                onClose={() => {
+                  setSelectedChat(null);
+                  // Refresh conversation list so unread counts update
+                  queryClient.invalidateQueries({ queryKey: ['conversations'] });
+                }}
               />
             ) : friends.length === 0 ? (
               <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-12 text-center">
@@ -400,28 +427,80 @@ export default function SocialsPage() {
               </div>
             ) : (
               <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
-                <h3 className="text-sm font-bold text-white uppercase tracking-wide mb-4">Start a Conversation</h3>
+                <h3 className="text-sm font-bold text-white uppercase tracking-wide mb-4">Messages</h3>
                 <div className="space-y-2">
-                  {friends.map((friend) => (
-                    <button
-                      key={friend.id || friend.email}
-                      onClick={() => setSelectedChat(friend.email)}
-                      className="w-full flex items-center gap-3 p-3 rounded-lg bg-zinc-800/50 border border-zinc-700/50 hover:bg-zinc-800 hover:border-zinc-600 transition-colors text-left"
-                    >
-                      {friend.avatar_url ? (
-                        <img src={friend.avatar_url} alt={friend.username} className="w-9 h-9 rounded-full object-cover" />
-                      ) : (
-                        <div className="w-9 h-9 rounded-full bg-zinc-700 flex items-center justify-center text-sm font-bold text-white">
-                          {(friend.username || friend.email || '?')[0].toUpperCase()}
+                  {/* Active conversations with last message + unread count */}
+                  {conversations.length > 0 && conversations.map((conv) => {
+                    const hasUnread = conv.unread_count > 0;
+                    const timeStr = conv.last_message_at
+                      ? new Date(conv.last_message_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                      : '';
+                    return (
+                      <button
+                        key={conv._id}
+                        onClick={() => setSelectedChat(conv.friend_email)}
+                        className={`w-full flex items-center gap-3 p-3 rounded-lg border transition-colors text-left ${
+                          hasUnread
+                            ? 'bg-zinc-800/80 border-amber-500/30 hover:border-amber-500/50'
+                            : 'bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-800 hover:border-zinc-600'
+                        }`}
+                      >
+                        <div className="relative flex-shrink-0">
+                          {conv.friend_avatar ? (
+                            <img src={conv.friend_avatar} alt={conv.friend_username} className="w-10 h-10 rounded-full object-cover" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-zinc-700 flex items-center justify-center text-sm font-bold text-white">
+                              {(conv.friend_username || conv.friend_email || '?')[0].toUpperCase()}
+                            </div>
+                          )}
+                          {hasUnread && (
+                            <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full min-w-[16px] h-[16px] flex items-center justify-center px-0.5 leading-none">
+                              {conv.unread_count > 9 ? '9+' : conv.unread_count}
+                            </span>
+                          )}
                         </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-white truncate">{friend.username || friend.email}</p>
-                        <p className="text-xs text-zinc-500 truncate">{friend.email}</p>
-                      </div>
-                      <MessageCircle className="w-4 h-4 text-zinc-500 flex-shrink-0" />
-                    </button>
-                  ))}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className={`text-sm truncate ${hasUnread ? 'font-bold text-white' : 'font-semibold text-white'}`}>
+                              {conv.friend_username || conv.friend_email}
+                            </p>
+                            {timeStr && (
+                              <span className={`text-[10px] flex-shrink-0 ${hasUnread ? 'text-amber-400 font-semibold' : 'text-zinc-600'}`}>
+                                {timeStr}
+                              </span>
+                            )}
+                          </div>
+                          <p className={`text-xs truncate ${hasUnread ? 'text-zinc-300' : 'text-zinc-500'}`}>
+                            {conv.last_message_preview || 'No messages yet'}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+
+                  {/* Friends without an existing conversation */}
+                  {friends
+                    .filter(f => !conversations.some(c => c.friend_email === f.email))
+                    .map((friend) => (
+                      <button
+                        key={friend.id || friend.email}
+                        onClick={() => setSelectedChat(friend.email)}
+                        className="w-full flex items-center gap-3 p-3 rounded-lg bg-zinc-800/30 border border-zinc-800/50 hover:bg-zinc-800/60 hover:border-zinc-700 transition-colors text-left"
+                      >
+                        {friend.avatar_url ? (
+                          <img src={friend.avatar_url} alt={friend.username} className="w-10 h-10 rounded-full object-cover" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-zinc-700 flex items-center justify-center text-sm font-bold text-white">
+                            {(friend.username || friend.email || '?')[0].toUpperCase()}
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-white truncate">{friend.username || friend.email}</p>
+                          <p className="text-xs text-zinc-600 truncate">Start a conversation</p>
+                        </div>
+                        <MessageCircle className="w-4 h-4 text-zinc-600 flex-shrink-0" />
+                      </button>
+                    ))}
                 </div>
               </div>
             )}
