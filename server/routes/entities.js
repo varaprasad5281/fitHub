@@ -13,6 +13,10 @@
 const express = require('express');
 const models = require('../models');
 const { protect } = require('../middleware/auth');
+const checkAndAwardBadges = require('../utils/checkAndAwardBadges');
+
+// Models whose creation should trigger a badge check (lowercase model name → true)
+const BADGE_CHECK_ON_CREATE = new Set(['meallog']);
 
 const router = express.Router();
 router.use(protect);
@@ -89,6 +93,13 @@ router.post('/:model', async (req, res) => {
 
     const doc = await Model.create(data);
     res.status(201).json(normalize(doc));
+
+    // Fire badge check after response is sent for models that warrant it
+    if (BADGE_CHECK_ON_CREATE.has(req.params.model.toLowerCase())) {
+      checkAndAwardBadges(req.user.email).catch(err =>
+        console.error('[entities/create] badge check failed:', err.message)
+      );
+    }
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

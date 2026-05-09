@@ -1,18 +1,56 @@
 /**
  * getBadges   — action: 'all' | 'me' | 'progress'
- * getBadgeProgress — badge progress for the current user
+ *
+ * action: 'me'       → only earned badges (with badge details)
+ * action: 'all'      → every badge with earned flag
+ * action: 'progress' → every badge with earned flag + real progress % toward requirement
  */
 
 const Badge = require('../../models/Badge');
 const UserBadge = require('../../models/UserBadge');
 const Points = require('../../models/Points');
+const WorkoutCompletion = require('../../models/WorkoutCompletion');
+const MealLog = require('../../models/MealLog');
+const Streak = require('../../models/Streak');
+const Friendship = require('../../models/Friendship');
+
+/** Fetch all stats needed for progress calculation in one pass */
+async function fetchUserStats(userEmail) {
+  const [pointsDoc, workoutsCount, mealsCount, streakDoc, friendsCount] = await Promise.all([
+    Points.findOne({ created_by: userEmail }).lean(),
+    WorkoutCompletion.countDocuments({ created_by: userEmail }),
+    MealLog.countDocuments({ created_by: userEmail }),
+    Streak.findOne({ created_by: userEmail, streak_type: 'workout' }).lean(),
+    Friendship.countDocuments({
+      $or: [{ requester_email: userEmail }, { receiver_email: userEmail }],
+      status: 'accepted',
+    }),
+  ]);
+
+  return {
+    total_points: pointsDoc?.total_points || 0,
+    workouts_completed: workoutsCount,
+    meals_logged: mealsCount,
+    streak_days: streakDoc?.longest_count || 0,
+    friends_count: friendsCount,
+  };
+}
+
+/** Compute 0–100 progress toward a badge requirement */
+function computeProgress(badge, stats) {
+  const { requirement_type, requirement_value } = badge;
+  if (!requirement_type || !requirement_value) return 0;
+  const current = stats[requirement_type] ?? 0;
+  return Math.min(100, Math.floor((current / requirement_value) * 100));
+}
 
 module.exports = async (req, res) => {
   const userEmail = req.user.email;
   const { action = 'all' } = req.body;
 
+
+  // ── action: 'me' ─────────────────────────────────────────────────────────
   if (action === 'me') {
-    // Return badges earned by this user (with badge details)
     const userBadges = await UserBadge.find({ created_by: userEmail })
       .populate('badge_id')
       .sort({ earned_date: -1 });
@@ -25,32 +63,29 @@ module.exports = async (req, res) => {
     });
   }
 
+  // ── action: 'progress' ───────────────────────────────────────────────────
   if (action === 'progress') {
-    // Return all badges with earned status and progress
-    const [allBadges, userBadges, pointsDoc] = await Promise.all([
-      Badge.find().sort({ requirement_value: 1 }),
+    const [allBadges, userBadges, stats] = await Promise.all([
+      Badge.find().sort({ category: 1, requirement_value: 1 }),
       UserBadge.find({ created_by: userEmail }),
-      Points.findOne({ created_by: userEmail }),
+      fetchUserStats(userEmail),
     ]);
 
     const earnedCodes = new Set(userBadges.map(ub => ub.badge_code));
-    const totalPoints = pointsDoc?.total_points || 0;
 
     const badgesWithProgress = allBadges.map(badge => {
+      const plain = badge.toObject();
       const earned = earnedCodes.has(badge.badge_code);
-      let progress = 0;
-      if (badge.requirement_type === 'points' && badge.requirement_value) {
-        progress = Math.min(100, Math.floor((totalPoints / badge.requirement_value) * 100));
-      }
-      return { ...badge.toObject(), earned, progress };
+      const progress = earned ? 100 : computeProgress(plain, stats);
+      return { ...plain, earned, progress };
     });
 
-    return res.json({ data: badgesWithProgress });
+    return res.json({ data: badgesWithProgress, stats });
   }
 
-  // action === 'all' — return all badges with earned flag
+  // ── action: 'all' (default) ───────────────────────────────────────────────
   const [allBadges, userBadges] = await Promise.all([
-    Badge.find().sort({ rarity_level: 1, name: 1 }),
+    Badge.find().sort({ category: 1, rarity_level: 1, requirement_value: 1 }),
     UserBadge.find({ created_by: userEmail }),
   ]);
 
