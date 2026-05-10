@@ -1,10 +1,20 @@
 import React from 'react';
-import { Shield } from 'lucide-react';
+import { Shield, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Privacy() {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-zinc-950 p-6">
       <div className="max-w-4xl mx-auto py-12">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-zinc-400 hover:text-white mb-8 transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back
+        </button>
         <div className="flex items-center gap-3 mb-8">
           <Shield className="w-8 h-8 text-amber-400" />
           <h1 className="text-4xl font-bold text-white">Privacy Policy</h1>
@@ -67,18 +77,6 @@ export default function Privacy() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-white mb-4">Third-Party Services</h2>
-            <p className="text-zinc-400 leading-relaxed mb-4">
-              We use the following third-party services:
-            </p>
-            <ul className="list-disc list-inside text-zinc-400 space-y-2 ml-4">
-              <li><strong>Stripe:</strong> Payment processing</li>
-              <li><strong>OpenAI:</strong> AI-powered features (workouts, meal plans, nudges)</li>
-              <li><strong>Base44:</strong> App infrastructure and hosting</li>
-            </ul>
-          </section>
-
-          <section>
             <h2 className="text-2xl font-bold text-white mb-4">Your Rights</h2>
             <p className="text-zinc-400 leading-relaxed mb-4">
               You have the right to:
@@ -110,8 +108,8 @@ export default function Privacy() {
             <h2 className="text-2xl font-bold text-white mb-4">Contact Us</h2>
             <p className="text-zinc-400 leading-relaxed">
               If you have questions about this Privacy Policy or your data, contact us at:{' '}
-              <a href="mailto:privacy@7percent.info" className="text-amber-400 hover:text-amber-300 underline">
-                privacy@7percent.info
+              <a href="mailto:team@7percent.info" className="text-amber-400 hover:text-amber-300 underline">
+                team@7percent.info
               </a>
             </p>
           </section>
