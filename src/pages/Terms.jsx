@@ -60,9 +60,7 @@ export default function Terms() {
 
           <section>
             <h2 className="text-2xl font-bold text-white mb-4">4. Subscription & Billing</h2>
-            <p className="text-zinc-400 leading-relaxed mb-4">
-              <strong>Free Tier:</strong> Access to core features including workout logging, basic nutrition tracking, progress monitoring, and community leaderboard viewing. No credit card required. Some advanced features are restricted to paid plans.
-            </p>
+            
             <p className="text-zinc-400 leading-relaxed mb-4">
               <strong>7% Pro:</strong> £12.99/month or £99/year. Includes all Free Tier features plus AI-generated workout plans, full nutrition tracking, coaching insights, and priority leaderboard access. Billed via Stripe. Subscriptions auto-renew unless cancelled. Cancellation takes effect at the end of the current billing period.
             </p>
