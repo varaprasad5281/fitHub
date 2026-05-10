@@ -67,18 +67,6 @@ export default function Privacy() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-white mb-4">Third-Party Services</h2>
-            <p className="text-zinc-400 leading-relaxed mb-4">
-              We use the following third-party services:
-            </p>
-            <ul className="list-disc list-inside text-zinc-400 space-y-2 ml-4">
-              <li><strong>Stripe:</strong> Payment processing</li>
-              <li><strong>OpenAI:</strong> AI-powered features (workouts, meal plans, nudges)</li>
-              <li><strong>Base44:</strong> App infrastructure and hosting</li>
-            </ul>
-          </section>
-
-          <section>
             <h2 className="text-2xl font-bold text-white mb-4">Your Rights</h2>
             <p className="text-zinc-400 leading-relaxed mb-4">
               You have the right to:
