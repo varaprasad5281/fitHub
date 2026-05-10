@@ -1,5 +1,5 @@
-/**
- * CompatibilityInit — loads polyfills on app boot
+﻿/**
+ * CompatibilityInit - loads polyfills on app boot
  * Import this in your main.jsx or AppWrapper to ensure polyfills load early
  */
 

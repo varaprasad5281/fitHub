@@ -1,4 +1,4 @@
-@tailwind base;
+﻿@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -176,7 +176,7 @@
     text-size-adjust: 100%;
   }
 
-  /* Remove tap highlight on mobile — only on non-interactive elements.
+  /* Remove tap highlight on mobile - only on non-interactive elements.
      Interactive elements get it removed individually via style prop for Safari compat. */
   a, button, [role="button"] {
     -webkit-tap-highlight-color: transparent;
@@ -214,7 +214,7 @@
     -ms-text-size-adjust: 100%;
   }
 
-  /* Better button rendering — also ensures buttons are never hidden by
+  /* Better button rendering - also ensures buttons are never hidden by
      stacking context issues on older Android WebView */
   button {
     -webkit-appearance: none;

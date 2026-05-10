@@ -1,6 +1,6 @@
-/**
+﻿/**
  * Lightweight helper to create in-app notifications.
- * All errors are swallowed — notifications are non-critical.
+ * All errors are swallowed - notifications are non-critical.
  */
 const Notification = require('../models/Notification');
 

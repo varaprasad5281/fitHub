@@ -109,8 +109,7 @@ export default function DeleteAccountModal({ email, onClose, onDeleted }) {
         {!deleteMode && (
           <Button
             onClick={onClose}
-            variant="ghost"
-            className="w-full mt-3"
+            className="w-full mt-3 bg-red-600/20 border border-red-500/50 text-red-400 hover:bg-red-600/30 hover:border-red-500 rounded-xl h-11"
           >
             Cancel
           </Button>

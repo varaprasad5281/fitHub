@@ -1,4 +1,4 @@
-const Streak = require('../../models/Streak');
+﻿const Streak = require('../../models/Streak');
 const Points = require('../../models/Points');
 const PointsTransaction = require('../../models/PointsTransaction');
 const { notify } = require('../../utils/notify');
@@ -27,7 +27,7 @@ module.exports = async (req, res) => {
     return res.json({ success: true, current_count: 1, longest_count: 1, bonus_points: 0 });
   }
 
-  // Already counted today — return current values
+  // Already counted today - return current values
   if (streak.last_activity_date === today) {
     return res.json({
       success: true,
@@ -66,7 +66,7 @@ module.exports = async (req, res) => {
       { upsert: true }
     );
     notify(userEmail,
-      `🔥 ${newCount}-day streak milestone! You're on fire — +${bonusPoints} bonus points awarded.`,
+      `🔥 ${newCount}-day streak milestone! You're on fire - +${bonusPoints} bonus points awarded.`,
       'streak_milestone'
     );
   }

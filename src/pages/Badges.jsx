@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Badges Page
  * Shows earned badges, locked badges with real progress bars, and featured selection.
  */
@@ -41,12 +41,12 @@ function EarnedCard({ badge, onFeature, featured }) {
       <p className="text-white font-bold text-sm leading-tight">{badge.name}</p>
       <p className={`text-xs font-semibold uppercase tracking-wide ${r.label}`}>{badge.rarity_level}</p>
 
-      {/* Description — truncated, hover tooltip shows full text */}
+      {/* Description - truncated, hover tooltip shows full text */}
       <div className="relative w-full">
         <p className="text-zinc-500 text-xs leading-snug line-clamp-2">{badge.description}</p>
         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 z-50
           opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150">
-          {/* Solid opaque background — never inherits card transparency */}
+          {/* Solid opaque background - never inherits card transparency */}
           <div className={`rounded-xl border ${r.border} bg-zinc-950 shadow-2xl p-3 text-left`}>
             <p className="text-white font-semibold text-xs mb-1">{badge.name}</p>
             <p className="text-zinc-300 text-xs leading-snug">{badge.description}</p>
@@ -78,19 +78,19 @@ function LockedCard({ badge }) {
   const isExclusive = badge.category === 'exclusive';
 
   return (
-    // opacity-75 removed from the wrapper — it was dimming the tooltip child too.
+    // opacity-75 removed from the wrapper - it was dimming the tooltip child too.
     // Individual elements carry their own muted colours instead.
     <div className={`group relative rounded-2xl border ${r.border} bg-zinc-900/60 p-5 flex flex-col items-center gap-2 text-center h-[194px]`}>
       <span className="text-4xl grayscale opacity-40">{badge.icon || '🔒'}</span>
       <p className="text-zinc-500 font-bold text-sm leading-tight">{badge.name}</p>
       <p className={`text-xs font-semibold uppercase tracking-wide opacity-60 ${r.label}`}>{badge.rarity_level}</p>
 
-      {/* Description — truncated, hover tooltip shows full text */}
+      {/* Description - truncated, hover tooltip shows full text */}
       <div className="relative w-full">
         <p className="text-zinc-600 text-xs leading-snug line-clamp-2">{badge.description}</p>
         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 z-50
           opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150">
-          {/* Solid opaque background — not affected by parent opacity */}
+          {/* Solid opaque background - not affected by parent opacity */}
           <div className="rounded-xl border border-zinc-700 bg-zinc-950 shadow-2xl p-3 text-left">
             <p className="text-white font-semibold text-xs mb-1">{badge.name}</p>
             <p className="text-zinc-300 text-xs leading-snug">{badge.description}</p>
@@ -102,7 +102,7 @@ function LockedCard({ badge }) {
       </div>
 
       {isExclusive ? (
-        <p className="text-[10px] text-zinc-600 mt-1 italic">Awarded exclusively — cannot be earned through activity</p>
+        <p className="text-[10px] text-zinc-600 mt-1 italic">Awarded exclusively - cannot be earned through activity</p>
       ) : (
         <div className="w-full mt-1">
           <div className="w-full h-1.5 bg-zinc-700 rounded-full overflow-hidden">
@@ -122,7 +122,7 @@ function LockedCard({ badge }) {
 function StatCard({ label, value }) {
   return (
     <div className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-center">
-      <p className="text-xl font-bold text-white">{value ?? '—'}</p>
+      <p className="text-xl font-bold text-white">{value ?? '-'}</p>
       <p className="text-xs text-zinc-500 mt-0.5">{label}</p>
     </div>
   );
@@ -331,7 +331,7 @@ export default function Badges() {
                   <div className="col-span-full text-center py-12">
                     <Award className="w-10 h-10 text-zinc-700 mx-auto mb-3" />
                     <p className="text-zinc-500 font-semibold mb-1">No featured badges yet.</p>
-                    <p className="text-zinc-600 text-sm">Go to Earned, hit "Feature" on any badge — it'll appear here and on your public profile.</p>
+                    <p className="text-zinc-600 text-sm">Go to Earned, hit "Feature" on any badge - it'll appear here and on your public profile.</p>
                   </div>
                 ) : (
                   featured.map(badge => (

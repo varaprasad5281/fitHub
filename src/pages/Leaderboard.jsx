@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { api } from '@/api/client';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -62,7 +62,7 @@ export default function Leaderboard() {
      return unsubscribe;
    }, [user?.email, queryClient]);
 
-  // Friends leaderboard data — same source as Socials page so numbers always match
+  // Friends leaderboard data - same source as Socials page so numbers always match
   const { data: friends = [], isLoading: friendsLoading } = useQuery({
     queryKey: ['friends', 'accepted'],
     queryFn: async () => {
@@ -233,7 +233,7 @@ export default function Leaderboard() {
               <p className="text-amber-400 text-xs sm:text-sm font-semibold uppercase tracking-[0.15em]">Leaderboard</p>
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Unlock Your Rank 🏆</h1>
-            <p className="text-zinc-500">See where you stand among the 7% — upgrade to Elite to claim your position</p>
+            <p className="text-zinc-500">See where you stand among the 7% - upgrade to Elite to claim your position</p>
           </div>
           <LeaderboardPreview
             topLeaders={leaderboard.slice(0, 5)}
@@ -577,7 +577,7 @@ export default function Leaderboard() {
                 onSent={() => queryClient.invalidateQueries({ queryKey: ['friendRequests'] })}
               />
 
-              {/* Friends Leaderboard — same data source as Socials page */}
+              {/* Friends Leaderboard - same data source as Socials page */}
               <div>
                 <h3 className="text-white font-semibold mb-4">This Week's Circle Rankings</h3>
                 {friendsLoading ? (

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Miscellaneous lightweight functions:
  * smartUpgradePrompt, trackBehaviorMetric, activatePrestige
  */
@@ -23,7 +23,7 @@ async function smartUpgradePrompt(req, res) {
 
 // ── trackBehaviorMetric ────────────────────────────────────────────────────────
 async function trackBehaviorMetric(req, res) {
-  // No-op — analytics hook; can be wired to a real analytics service later
+  // No-op - analytics hook; can be wired to a real analytics service later
   res.json({ success: true });
 }
 

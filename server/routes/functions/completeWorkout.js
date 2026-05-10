@@ -1,4 +1,4 @@
-const Workout = require('../../models/Workout');
+﻿const Workout = require('../../models/Workout');
 const WorkoutCompletion = require('../../models/WorkoutCompletion');
 const Points = require('../../models/Points');
 const PointsTransaction = require('../../models/PointsTransaction');
@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
   const today = new Date().toISOString().split('T')[0];
   const pointsEarned = DIFFICULTY_POINTS[workout.difficulty] || 50;
 
-  // One per day — delete any existing completed workout for today before marking this one
+  // One per day - delete any existing completed workout for today before marking this one
   await Workout.deleteMany({
     created_by: userEmail,
     is_completed: true,
@@ -55,7 +55,7 @@ module.exports = async (req, res) => {
     transaction_date: today,
   });
 
-  // Prune — keep only the 7 most recent completed workouts
+  // Prune - keep only the 7 most recent completed workouts
   const allCompleted = await Workout.find({ created_by: userEmail, is_completed: true }, { _id: 1, completed_date: 1 })
     .sort({ completed_date: -1 })
     .lean();
@@ -66,7 +66,7 @@ module.exports = async (req, res) => {
   }
 
   notify(userEmail,
-    `💪 Workout complete — "${workout.workout_name || 'Session'}"! You earned +${pointsEarned} points.`,
+    `💪 Workout complete - "${workout.workout_name || 'Session'}"! You earned +${pointsEarned} points.`,
     'workout_completed'
   );
 

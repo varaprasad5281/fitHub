@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Real-time Performance Metrics
  * Displays Core Web Vitals and performance targets
  * Dev mode only
@@ -89,19 +89,19 @@ const PerformanceChecker = () => {
       <div className="space-y-2">
         <div className={`flex justify-between ${getColor('lcp', metrics.lcp)}`}>
           <span>LCP</span>
-          <span>{metrics.lcp ? `${(metrics.lcp / 1000).toFixed(2)}s` : '—'}</span>
+          <span>{metrics.lcp ? `${(metrics.lcp / 1000).toFixed(2)}s` : '-'}</span>
         </div>
         <div className="text-[10px] text-zinc-500">Target: &lt;2.5s</div>
         
         <div className={`flex justify-between ${getColor('cls', metrics.cls)}`}>
           <span>CLS</span>
-          <span>{metrics.cls ? metrics.cls.toFixed(3) : '—'}</span>
+          <span>{metrics.cls ? metrics.cls.toFixed(3) : '-'}</span>
         </div>
         <div className="text-[10px] text-zinc-500">Target: &lt;0.1</div>
         
         <div className={`flex justify-between ${getColor('fcp', metrics.fcp)}`}>
           <span>FCP</span>
-          <span>{metrics.fcp ? `${(metrics.fcp / 1000).toFixed(2)}s` : '—'}</span>
+          <span>{metrics.fcp ? `${(metrics.fcp / 1000).toFixed(2)}s` : '-'}</span>
         </div>
         <div className="text-[10px] text-zinc-500">Target: &lt;1.8s</div>
       </div>

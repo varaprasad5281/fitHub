@@ -1,9 +1,9 @@
-const MealLog = require('../../models/MealLog');
+﻿const MealLog = require('../../models/MealLog');
 const NutritionHistory = require('../../models/NutritionHistory');
 
 const MAX_DAYS = 7;
 
-/** Upsert one day's aggregated totals — one record per (user, date) */
+/** Upsert one day's aggregated totals - one record per (user, date) */
 async function upsertDate(userEmail, date, logs) {
   const total_calories = logs.reduce((s, m) => s + (Number(m.calories) || 0), 0);
   const total_protein  = logs.reduce((s, m) => s + (Number(m.protein)  || 0), 0);

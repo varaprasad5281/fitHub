@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Email service using Nodemailer.
  * Configure SMTP_HOST / SMTP_PORT / SMTP_USER / SMTP_PASS in server/.env
  */
@@ -44,7 +44,7 @@ async function sendEmail({ to, subject, body, html, from_name = '7% Team' }) {
       port: 587,
       auth: { user: testAccount.user, pass: testAccount.pass },
     });
-    console.log('[email] No SMTP configured — using Ethereal:', testAccount.web);
+    console.log('[email] No SMTP configured - using Ethereal:', testAccount.web);
   }
 
   const fromAddr = process.env.SMTP_USER || 'team@7percent.info';
@@ -62,7 +62,7 @@ async function sendEmail({ to, subject, body, html, from_name = '7% Team' }) {
     if (previewUrl) {
       console.log('[email] Ethereal preview:', previewUrl);
     } else {
-      console.log('[email] Sent to', to, '—', subject);
+      console.log('[email] Sent to', to, '-', subject);
     }
   } catch (err) {
     console.error('[email] Send failed:', err.message);

@@ -139,8 +139,8 @@ export default function Terms() {
             <h2 className="text-2xl font-bold text-white mb-4">Contact Us</h2>
             <p className="text-zinc-400 leading-relaxed">
               Questions about these terms? Contact us at:{' '}
-              <a href="mailto:legal@7percent.info" className="text-amber-400 hover:text-amber-300 underline">
-                legal@7percent.info
+              <a href="mailto:team@7percent.info" className="text-amber-400 hover:text-amber-300 underline">
+                team@7percent.info
               </a>
             </p>
           </section>

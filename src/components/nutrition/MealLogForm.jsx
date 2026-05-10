@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -56,7 +56,7 @@ export default function MealLogForm({ onSave, onCancel, initialMeal }) {
       toast.success('Macros calculated!');
     } catch (error) {
       console.error('Macro calculation failed:', error);
-      toast.error('Could not calculate macros — please enter them manually.');
+      toast.error('Could not calculate macros - please enter them manually.');
     } finally {
       setCalculating(false);
     }

@@ -1,5 +1,5 @@
-/**
- * chatMessage — action: 'init' | 'send' | 'list' | 'conversations' | 'mark_read'
+﻿/**
+ * chatMessage - action: 'init' | 'send' | 'list' | 'conversations' | 'mark_read'
  *
  * action: 'init'          → get or create a 1:1 conversation with a friend
  * action: 'send'          → send a message to an existing conversation

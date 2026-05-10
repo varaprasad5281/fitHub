@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Replaces: base44/functions/generatePersonalizedWorkout/entry.ts
  */
 const https = require('https');
@@ -7,7 +7,7 @@ const WorkoutCompletion = require('../../models/WorkoutCompletion');
 const Workout = require('../../models/Workout');
 const { invokeLLM } = require('../../services/ai');
 
-/** Fire-and-forget GET — warms the Pollinations cache before the user opens the modal */
+/** Fire-and-forget GET - warms the Pollinations cache before the user opens the modal */
 function prewarm(url) {
   https.get(url, (res) => res.resume()).on('error', () => {});
 }
@@ -15,7 +15,7 @@ function prewarm(url) {
 module.exports = async (req, res) => {
   const user = req.user;
 
-  // Profile is optional — use defaults if not set up yet
+  // Profile is optional - use defaults if not set up yet
   const profile = await Profile.findOne({ created_by: user.email }) || {};
 
   const completions = await WorkoutCompletion.find({ created_by: user.email });

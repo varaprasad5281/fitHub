@@ -1,4 +1,4 @@
-/**
+﻿/**
  * awardWeeklyLeaderboardBadges.js
  *
  * Run every Monday (before or as part of the weekly reset) to:
@@ -10,7 +10,7 @@
  * Usage (standalone):
  *   node server/scripts/awardWeeklyLeaderboardBadges.js
  *
- * Usage (programmatic — call from a weekly reset function):
+ * Usage (programmatic - call from a weekly reset function):
  *   const awardWeeklyLeaderboardBadges = require('./awardWeeklyLeaderboardBadges');
  *   await awardWeeklyLeaderboardBadges();
  */
@@ -24,7 +24,7 @@ const Badge     = require('../models/Badge');
 const UserBadge = require('../models/UserBadge');
 const WeeklyRank = require('../models/WeeklyRank');
 
-// Lazy-require notify — may not be available in standalone mode
+// Lazy-require notify - may not be available in standalone mode
 let notify;
 try { notify = require('../utils/notify').notify; } catch (_) { notify = null; }
 
@@ -72,7 +72,7 @@ async function consecutiveWeeksInTop(userEmail, weekStart, maxCheck = 10, rankLi
 async function grantBadge(userEmail, badgeCode, notes = '') {
   const badge = await Badge.findOne({ badge_code: badgeCode }).lean();
   if (!badge) {
-    console.warn(`  [warn] Badge "${badgeCode}" not in DB — run seedBadges first.`);
+    console.warn(`  [warn] Badge "${badgeCode}" not in DB - run seedBadges first.`);
     return false;
   }
 
@@ -85,13 +85,13 @@ async function grantBadge(userEmail, badgeCode, notes = '') {
     });
 
     const rarityEmoji = { common: '🥉', rare: '🥈', epic: '🥇', legendary: '✨' };
-    const msg = `${rarityEmoji[badge.rarity_level] || '🏅'} New badge unlocked: "${badge.name}" — ${badge.description}`;
+    const msg = `${rarityEmoji[badge.rarity_level] || '🏅'} New badge unlocked: "${badge.name}" - ${badge.description}`;
     if (notify) notify(userEmail, msg, 'badge_earned');
 
     console.log(`  ✓ Awarded "${badge.name}" (${badgeCode}) → ${userEmail}`);
     return true;
   } catch (err) {
-    if (err.code === 11000) return false; // already earned — no-op
+    if (err.code === 11000) return false; // already earned - no-op
     throw err;
   }
 }
@@ -107,12 +107,12 @@ async function run() {
     .lean();
 
   if (top3.length === 0) {
-    console.log('  No points data found — skipping.');
+    console.log('  No points data found - skipping.');
     return;
   }
 
   console.log(`  Top ${top3.length} this week:`);
-  top3.forEach((p, i) => console.log(`    #${i + 1} ${p.created_by} — ${p.weekly_points} pts`));
+  top3.forEach((p, i) => console.log(`    #${i + 1} ${p.created_by} - ${p.weekly_points} pts`));
 
   // ── 2. Upsert WeeklyRank records ─────────────────────────────────────────
   for (let i = 0; i < top3.length; i++) {
@@ -128,13 +128,13 @@ async function run() {
   for (let i = 0; i < top3.length; i++) {
     const { created_by: email, weekly_points: pts } = top3[i];
     const rank = i + 1;
-    const notes = `Week ${weekStart} — Rank #${rank} with ${pts} pts`;
+    const notes = `Week ${weekStart} - Rank #${rank} with ${pts} pts`;
 
     // Single-week badges
     if (rank <= 3) await grantBadge(email, 'LEADER_TOP3', notes);
     if (rank === 1) await grantBadge(email, 'LEADER_TOP1', notes);
 
-    // Consecutive-week streaks — top 3
+    // Consecutive-week streaks - top 3
     const top3Streak = await consecutiveWeeksInTop(email, weekStart, 12, 3);
     console.log(`  ${email}: ${top3Streak} consecutive week(s) in top 3`);
 
@@ -142,7 +142,7 @@ async function run() {
     if (top3Streak >= 5)  await grantBadge(email, 'LEADER_TOP3_5W',  `${top3Streak} consecutive weeks in top 3`);
     if (top3Streak >= 10) await grantBadge(email, 'LEADER_TOP3_10W', `${top3Streak} consecutive weeks in top 3`);
 
-    // Consecutive-week streaks — #1 only
+    // Consecutive-week streaks - #1 only
     if (rank === 1) {
       const top1Streak = await consecutiveWeeksInTop(email, weekStart, 6, 1);
       console.log(`  ${email}: ${top1Streak} consecutive week(s) at #1`);

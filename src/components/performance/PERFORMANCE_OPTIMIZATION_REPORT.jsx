@@ -1,4 +1,4 @@
-# 7% Platform Performance Optimization Report
+﻿# 7% Platform Performance Optimization Report
 
 **Generated**: 2026-02-18  
 **Target**: Initial page load <2s, smooth navigation, responsive UI  
@@ -15,13 +15,13 @@ The 7% platform has **multiple performance bottlenecks** that significantly impa
 - Heavy data-fetching pages (Leaderboard, Nutrition, Coaching)
 
 **Key Issues**:
-1. ❌ **Layout fetches entire ActivityFeed on auth** (~250+ items unfiltered) — blocks initial render
-2. ❌ **Re-fetches ActivityFeed on every update** — network thrashing
-3. ❌ **No caching for leaderboard/profile data** — repeated identical API calls
-4. ❌ **Large bundle size** — no code splitting for heavy pages
-5. ❌ **Images not optimized** — no lazy loading, no modern formats
-6. ❌ **Perceived speed issues** — no skeleton loaders on many pages
-7. ❌ **Mobile rendering** — heavy JS execution blocks interaction
+1. ❌ **Layout fetches entire ActivityFeed on auth** (~250+ items unfiltered) - blocks initial render
+2. ❌ **Re-fetches ActivityFeed on every update** - network thrashing
+3. ❌ **No caching for leaderboard/profile data** - repeated identical API calls
+4. ❌ **Large bundle size** - no code splitting for heavy pages
+5. ❌ **Images not optimized** - no lazy loading, no modern formats
+6. ❌ **Perceived speed issues** - no skeleton loaders on many pages
+7. ❌ **Mobile rendering** - heavy JS execution blocks interaction
 
 **Estimated Improvements** (with all fixes):
 - Initial page load: **3.5s → 1.8s** (-49%)
@@ -257,7 +257,7 @@ TOTAL: 1.2-2.5s (before page content)
 
 ## Quick Wins Implementation Plan
 
-### Phase 1: Critical Fixes (1-2 hours) — **Do First**
+### Phase 1: Critical Fixes (1-2 hours) - **Do First**
 
 #### 1.1 Defer ActivityFeed to Idle (Layout.js)
 **Change**:

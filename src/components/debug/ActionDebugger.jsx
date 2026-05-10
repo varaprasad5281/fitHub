@@ -1,5 +1,5 @@
-/**
- * Action Debugger — dev-only instrumentation for button/async actions.
+﻿/**
+ * Action Debugger - dev-only instrumentation for button/async actions.
  * Enable via: localStorage.setItem('7pct_debug', '1') in browser console.
  *
  * Usage:
@@ -26,7 +26,7 @@ const IS_DEBUG = () => {
 function log(action, event, extra) {
   if (!IS_DEBUG()) return;
   const ts = new Date().toISOString();
-  console.log(`[7%Debug] [${ts}] ${action} — ${event}`, extra || '');
+  console.log(`[7%Debug] [${ts}] ${action} - ${event}`, extra || '');
 }
 
 function debugToast(msg) {

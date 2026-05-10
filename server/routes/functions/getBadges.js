@@ -1,5 +1,5 @@
-/**
- * getBadges   — action: 'all' | 'me' | 'progress' | 'feature' | 'featured'
+﻿/**
+ * getBadges   - action: 'all' | 'me' | 'progress' | 'feature' | 'featured'
  *
  * action: 'me'       → only earned badges (with badge details)
  * action: 'all'      → every badge with earned flag
@@ -97,7 +97,7 @@ module.exports = async (req, res) => {
   }
 
   // ── action: 'featured' ───────────────────────────────────────────────────
-  // Returns up to 3 featured badges for any user email — used by PublicProfile
+  // Returns up to 3 featured badges for any user email - used by PublicProfile
   if (action === 'featured') {
     const targetEmail = req.body.email || userEmail;
     const featuredUserBadges = await UserBadge.find({ created_by: targetEmail, is_featured: true })

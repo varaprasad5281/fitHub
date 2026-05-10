@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { api } from '@/api/client';
 import { useQuery } from "@tanstack/react-query";
-import { Trophy, Zap, Users, Plus, Loader2, Lock } from "lucide-react";
+import { Trophy, Zap, Users, Plus, Loader2, Lock, X, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ChallengeCard from "@/components/challenges/ChallengeCard";
 import CreateChallengeForm from "@/components/challenges/CreateChallengeForm";
@@ -10,7 +10,13 @@ import { toast } from "sonner";
 
 export default function Challenges() {
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showLimitModal, setShowLimitModal] = useState(false);
   const [filter, setFilter] = useState('active'); // active, upcoming, completed
+
+  const { data: user } = useQuery({
+    queryKey: ['user'],
+    queryFn: () => api.auth.me(),
+  });
 
   const { data: challenges = [], isLoading } = useQuery({
     queryKey: ['challenges', filter],
@@ -18,10 +24,31 @@ export default function Challenges() {
       const res = await api.functions.invoke('getChallenges', { status: filter });
       return Array.isArray(res?.data) ? res.data : [];
     },
-    placeholderData: [],   // shows [] while loading but won't silence fetch errors
-    staleTime: 0,          // always refetch — challenges change frequently
+    placeholderData: [],
+    staleTime: 0,
     refetchOnMount: true,
   });
+
+  const { data: createdChallenges = [] } = useQuery({
+    queryKey: ['created-challenges', user?.email],
+    queryFn: async () => {
+      const res = await api.functions.invoke('getChallenges', { created_by: user.email });
+      return Array.isArray(res?.data) ? res.data : [];
+    },
+    enabled: !!user?.email,
+    staleTime: 0,
+    refetchOnMount: true,
+  });
+
+  const canCreateMore = createdChallenges.length < 15;
+
+  const displayChallenges = useMemo(() => {
+    if (filter === 'completed')
+      return [...challenges].sort((a, b) => new Date(b.end_date) - new Date(a.end_date)).slice(0, 10);
+    if (filter === 'upcoming')
+      return [...challenges].sort((a, b) => new Date(a.start_date) - new Date(b.start_date)).slice(0, 10);
+    return challenges;
+  }, [challenges, filter]);
 
   const { data: subscription = [], isLoading: subLoading } = useQuery({
     queryKey: ['subscription'],
@@ -87,17 +114,24 @@ export default function Challenges() {
             ))}
           </div>
           {hasPro && (
-            <Button
-              onClick={() => setShowCreateForm(true)}
-              className="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-semibold px-6 rounded-full h-10 w-full sm:w-auto"
-            >
-              <Plus className="w-4 h-4 mr-2" /> Create Challenge
-            </Button>
+            <div className="flex flex-col items-end gap-1">
+              <Button
+                onClick={() => canCreateMore ? setShowCreateForm(true) : setShowLimitModal(true)}
+                className={`px-6 rounded-full h-10 w-full sm:w-auto font-semibold ${
+                  canCreateMore
+                    ? 'bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black'
+                    : 'bg-zinc-800 text-zinc-500 cursor-not-allowed opacity-60'
+                }`}
+              >
+                <Plus className="w-4 h-4 mr-2" /> Create Challenge
+              </Button>
+              <p className="text-xs text-zinc-500">{createdChallenges.length}/15 created</p>
+            </div>
           )}
         </div>
 
         {/* Challenges Grid */}
-        {challenges.length === 0 ? (
+        {displayChallenges.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -120,7 +154,7 @@ export default function Challenges() {
             animate={{ opacity: 1 }}
             className="grid grid-cols-1 md:grid-cols-2 gap-6"
           >
-            {challenges.map((challenge, idx) => (
+            {displayChallenges.map((challenge, idx) => (
               <motion.div
                 key={challenge.id}
                 initial={{ opacity: 0, y: 10 }}
@@ -138,6 +172,35 @@ export default function Challenges() {
 
         {showCreateForm && hasPro && (
           <CreateChallengeForm onClose={() => setShowCreateForm(false)} />
+        )}
+
+        {showLimitModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="w-full max-w-sm bg-zinc-900 rounded-2xl border border-zinc-800 p-6"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-amber-400" />
+                  <h3 className="text-white font-bold text-lg">Limit Reached</h3>
+                </div>
+                <button onClick={() => setShowLimitModal(false)} className="text-zinc-500 hover:text-white transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <p className="text-zinc-400 text-sm mb-6">
+                You've reached the maximum of <span className="text-white font-semibold">15 challenges</span> you can create. Delete an existing challenge to make room for a new one.
+              </p>
+              <Button
+                onClick={() => setShowLimitModal(false)}
+                className="w-full bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl h-11"
+              >
+                Got it
+              </Button>
+            </motion.div>
+          </div>
         )}
       </div>
     </div>

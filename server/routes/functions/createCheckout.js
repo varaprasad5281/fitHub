@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Replaces: base44/functions/createCheckout/entry.ts
  */
 const stripe = require('../../services/stripe');
@@ -45,12 +45,12 @@ module.exports = async (req, res) => {
           sub.plan === 'elite_monthly' || sub.plan === 'elite_yearly');
 
     if (isCurrentlyActive) {
-      // User already has a live paid subscription — don't create a new checkout
+      // User already has a live paid subscription - don't create a new checkout
       idempotencyStore.delete(idempotencyKey);
       return res.status(400).json({ error: 'You already have an active subscription. Manage it from the Subscription page.' });
     }
 
-    // Allow checkout — but only grant a trial if they haven't had one before
+    // Allow checkout - but only grant a trial if they haven't had one before
     eligibleForTrial = !sub?.had_trial;
   }
 

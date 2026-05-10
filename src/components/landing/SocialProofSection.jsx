@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { motion } from "framer-motion";
 import { Rocket, Star, Shield, Zap } from "lucide-react";
 
@@ -6,7 +6,7 @@ const betaPerks = [
   {
     icon: Star,
     title: "Exclusive Beta Badge",
-    description: "Every beta member receives a permanent 'Beta Founder' badge displayed on their profile — a mark of being here from day one."
+    description: "Every beta member receives a permanent 'Beta Founder' badge displayed on their profile - a mark of being here from day one."
   },
   {
     icon: Zap,
@@ -21,7 +21,7 @@ const betaPerks = [
   {
     icon: Rocket,
     title: "Priority Access",
-    description: "Beta members get first access to every new feature before global launch — no waitlists, no delays."
+    description: "Beta members get first access to every new feature before global launch - no waitlists, no delays."
   }
 ];
 
@@ -46,7 +46,7 @@ export default function SocialProofSection() {
             </span>
           </h2>
           <p className="text-zinc-400 text-lg max-w-2xl mx-auto leading-relaxed">
-            7% is in beta. Every member joining now is a founding member — and we're rewarding that with perks that last forever.
+            7% is in beta. Every member joining now is a founding member - and we're rewarding that with perks that last forever.
           </p>
         </motion.div>
 
@@ -85,7 +85,7 @@ export default function SocialProofSection() {
             <span className="text-amber-300 text-sm font-bold tracking-wide">Beta Founder</span>
           </div>
           <p className="text-zinc-500 text-sm mt-4 max-w-md mx-auto">
-            Join during beta and this badge is permanently on your profile — a mark of being part of the 7% from the very beginning.
+            Join during beta and this badge is permanently on your profile - a mark of being part of the 7% from the very beginning.
           </p>
         </motion.div>
       </div>

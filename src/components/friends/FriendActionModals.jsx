@@ -38,8 +38,7 @@ export function RemoveFriendModal({ isOpen, friendName, onConfirm, onCancel, isP
             <div className="flex gap-3">
               <Button
                 onClick={onCancel}
-                variant="outline"
-                className="flex-1 border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                className="flex-1 bg-red-600/20 border border-red-500/50 text-red-400 hover:bg-red-600/30 hover:border-red-500 rounded-xl h-11"
               >
                 Cancel
               </Button>
@@ -92,8 +91,7 @@ export function MuteFriendModal({ isOpen, friendName, isMuted, onConfirm, onCanc
             <div className="flex gap-3">
               <Button
                 onClick={onCancel}
-                variant="outline"
-                className="flex-1 border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                className="flex-1 bg-red-600/20 border border-red-500/50 text-red-400 hover:bg-red-600/30 hover:border-red-500 rounded-xl h-11"
               >
                 Cancel
               </Button>
@@ -142,8 +140,7 @@ export function BlockUserModal({ isOpen, userName, onConfirm, onCancel, isPendin
             <div className="flex gap-3">
               <Button
                 onClick={onCancel}
-                variant="outline"
-                className="flex-1 border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                className="flex-1 bg-red-600/20 border border-red-500/50 text-red-400 hover:bg-red-600/30 hover:border-red-500 rounded-xl h-11"
               >
                 Cancel
               </Button>

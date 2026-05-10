@@ -1,6 +1,6 @@
-/**
+﻿/**
  * Replaces: base44.integrations.Core.GenerateImage({ prompt })
- * Stub — returns a placeholder. Wire up DALL-E or another image service if needed.
+ * Stub - returns a placeholder. Wire up DALL-E or another image service if needed.
  */
 module.exports = async (req, res) => {
   const { prompt } = req.body;

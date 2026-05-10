@@ -137,9 +137,8 @@ export default function ProgressGoalForm({ onClose }) {
           <div className="flex gap-3 pt-2">
             <Button
               type="button"
-              variant="outline"
               onClick={onClose}
-              className="flex-1 border-zinc-700 text-zinc-300 hover:bg-red-500/10 hover:border-red-500/50 hover:text-red-400 rounded-xl h-11 transition-colors"
+              className="flex-1 bg-red-600/20 border border-red-500/50 text-red-400 hover:bg-red-600/30 hover:border-red-500 rounded-xl h-11"
             >
               Cancel
             </Button>
