@@ -205,7 +205,7 @@ function LayoutContent({ children, currentPageName }) {
               {!loading && !user && (
                 <>
                   <Link to="/login">
-                    <Button variant="outline" className="border-amber-500/50 text-amber-400 hover:bg-amber-500/10 hover:border-amber-400 hover:text-amber-300 text-sm rounded-full touch-target transition-colors">
+                    <Button variant="outline" className="border-amber-500/50 text-black-400 hover:bg-amber-500/10 hover:border-amber-400 hover:text-amber-300 text-sm rounded-full touch-target transition-colors">
                       Log in
                     </Button>
                   </Link>

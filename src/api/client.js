@@ -1,5 +1,5 @@
-/**
- * API client — all calls go to the Express/MongoDB backend at /api/*
+﻿/**
+ * API client - all calls go to the Express/MongoDB backend at /api/*
  */
 
 const API_BASE = '/api';

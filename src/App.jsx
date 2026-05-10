@@ -1,4 +1,4 @@
-import { Toaster } from "@/components/ui/toaster"
+﻿import { Toaster } from "@/components/ui/toaster"
 import { Toaster as SonnerToaster } from "sonner"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -47,7 +47,7 @@ const AuthenticatedApp = () => {
     }
   }
 
-  // Guard private pages — unauthenticated users go back to home
+  // Guard private pages - unauthenticated users go back to home
   const isPublic = PUBLIC_PAGES.has(location.pathname) || PUBLIC_PAGES.has('/' + location.pathname.split('/')[1]);
   if (!isAuthenticated && !isPublic) {
     return <Navigate to="/" replace />;
@@ -85,7 +85,7 @@ function App() {
           <ScrollToTop />
           <NavigationTracker />
           {/*
-            /login and /register are public — rendered before AuthenticatedApp
+            /login and /register are public - rendered before AuthenticatedApp
             so the auth guard never blocks them.
           */}
           <Routes>

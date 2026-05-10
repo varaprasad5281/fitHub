@@ -1,4 +1,4 @@
-require('dotenv').config({ path: require('path').join(__dirname, '.env') });
+﻿require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -39,7 +39,7 @@ app.use('/api/', rateLimit({
   message: { error: 'Too many requests, please try again later.' },
 }));
 
-// Stripe webhook needs raw body — must be before express.json()
+// Stripe webhook needs raw body - must be before express.json()
 app.use('/api/functions/stripeWebhook', express.raw({ type: 'application/json' }));
 
 // Body parsing

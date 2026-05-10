@@ -1,4 +1,4 @@
-const stripe = require('../../services/stripe');
+﻿const stripe = require('../../services/stripe');
 const Subscription = require('../../models/Subscription');
 const { notify } = require('../../utils/notify');
 
@@ -40,14 +40,14 @@ module.exports = async (req, res) => {
     ? session.subscription
     : session.subscription?.id;
 
-  // Idempotency — if we already processed this exact Stripe subscription and
+  // Idempotency - if we already processed this exact Stripe subscription and
   // the subscription is live, return success without re-writing.
   const existing = await Subscription.findOne({ created_by: userEmail });
   if (
     existing?.stripe_subscription_id === stripeSubId &&
     (existing.status === 'active' || existing.status === 'trial')
   ) {
-    console.log(`[verifyCheckout] Already processed for ${userEmail} — returning cached result`);
+    console.log(`[verifyCheckout] Already processed for ${userEmail} - returning cached result`);
     return res.json({ success: true, plan: existing.plan, status: existing.status });
   }
 

@@ -1,5 +1,5 @@
-/**
- * Debug Mode Toggle — renders a tiny toggle in the bottom-left corner.
+﻿/**
+ * Debug Mode Toggle - renders a tiny toggle in the bottom-left corner.
  * Visible only in development or when ?debug=1 is in the URL.
  * Users can also manually activate via: localStorage.setItem('7pct_debug', '1')
  */
@@ -40,7 +40,7 @@ export default function DebugModeToggle() {
       }
     } catch (_e) {}
     setEnabled(next);
-    toast.info(next ? 'Debug mode ON — button actions will be logged' : 'Debug mode OFF', {
+    toast.info(next ? 'Debug mode ON - button actions will be logged' : 'Debug mode OFF', {
       position: 'bottom-right',
       duration: 2000
     });

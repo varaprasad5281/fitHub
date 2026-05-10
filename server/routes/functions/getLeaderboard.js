@@ -1,5 +1,5 @@
-/**
- * Leaderboard — supports timeframe (weekly | alltime) and category (points | workouts | nutrition | streaks)
+﻿/**
+ * Leaderboard - supports timeframe (weekly | alltime) and category (points | workouts | nutrition | streaks)
  */
 const Points = require('../../models/Points');
 const Profile = require('../../models/Profile');

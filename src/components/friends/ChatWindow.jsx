@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ChatWindow
  * 1:1 direct message interface between two friends.
  *
@@ -27,7 +27,7 @@ export default function ChatWindow({ friendEmail, onClose }) {
   const inputRef = useRef(null);
   const queryClient = useQueryClient();
 
-  // Resolve current user's email once — needed for isOwn detection
+  // Resolve current user's email once - needed for isOwn detection
   useEffect(() => {
     api.auth.me().then(u => setMyEmail(u?.email)).catch(() => {});
   }, []);
@@ -205,7 +205,7 @@ export default function ChatWindow({ friendEmail, onClose }) {
               animate={{ opacity: 1, y: 0 }}
               className={`flex items-end gap-2 ${isOwn ? 'justify-end' : 'justify-start'}`}
             >
-              {/* Report controls — appear left of message on right-click */}
+              {/* Report controls - appear left of message on right-click */}
               {isReporting && !isOwn && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}

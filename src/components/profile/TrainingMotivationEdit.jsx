@@ -46,9 +46,8 @@ export default function TrainingMotivationEdit({ profile, onClose }) {
       <div className="text-xs text-zinc-600">{motivation.length}/500 characters</div>
       <div className="flex gap-2 justify-end">
         <Button
-          variant="outline"
           onClick={onClose}
-          className="border-zinc-700 text-zinc-400 hover:bg-zinc-800"
+          className="bg-red-600/20 border border-red-500/50 text-red-400 hover:bg-red-600/30 hover:border-red-500 rounded-xl h-11"
         >
           Cancel
         </Button>

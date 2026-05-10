@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Smartphone, Bell, Dumbbell, Apple, Play, CheckCircle, Zap, Trophy, Flame } from 'lucide-react';
 
@@ -51,7 +51,7 @@ export default function MobileAppSection() {
             </h2>
 
             <p className="text-zinc-400 text-lg leading-relaxed mb-8 max-w-md">
-              The 7% mobile app is on its way. Track workouts, log meals, and stay on your streak — anywhere, anytime.
+              The 7% mobile app is on its way. Track workouts, log meals, and stay on your streak - anywhere, anytime.
             </p>
 
             {/* Features */}
@@ -59,7 +59,6 @@ export default function MobileAppSection() {
               {[
                 'Real-time workout tracking with voice cues',
                 'Instant meal logging with camera scan',
-                'Offline mode — no excuses, no signal needed',
                 'Push notifications to protect your streak',
               ].map((feat) => (
                 <li key={feat} className="flex items-center gap-3 text-zinc-300 text-sm">

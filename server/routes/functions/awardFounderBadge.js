@@ -1,12 +1,12 @@
-/**
+﻿/**
  * awardFounderBadge
  *
  * Admin-only endpoint to award the Beta Founder badge.
  *
  * Modes:
- *   action: 'award_list'   — award to a specific array of emails provided in the request
- *   action: 'award_first'  — auto-detect the first N registered users by account creation date
- *   action: 'status'       — return who currently holds the badge + how many slots remain
+ *   action: 'award_list'   - award to a specific array of emails provided in the request
+ *   action: 'award_first'  - auto-detect the first N registered users by account creation date
+ *   action: 'status'       - return who currently holds the badge + how many slots remain
  *
  * Security: restricted to ADMIN_EMAIL env variable (or a hardcoded set of admin emails).
  * Never expose this endpoint publicly.
@@ -19,7 +19,7 @@ const UserBadge = require('../../models/UserBadge');
 const BADGE_CODE = 'FOUNDER';
 const DEFAULT_FOUNDER_LIMIT = 100;
 
-// Simple admin guard — set ADMIN_EMAIL in your .env (comma-separated for multiple)
+// Simple admin guard - set ADMIN_EMAIL in your .env (comma-separated for multiple)
 function isAdmin(userEmail) {
   const admins = (process.env.ADMIN_EMAIL || '')
     .split(',')

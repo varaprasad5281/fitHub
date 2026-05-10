@@ -1,4 +1,4 @@
-import React, { Suspense, useState, useEffect, memo } from 'react';
+﻿import React, { Suspense, useState, useEffect, memo } from 'react';
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { api } from '@/api/client';
@@ -110,9 +110,9 @@ function Home() {
   return (
     <div className="bg-zinc-950">
       <SEOHead 
-        title="7% — Improve 7% Every Week | Discipline-Driven Fitness Platform"
+        title="7% - Improve 7% Every Week | Discipline-Driven Fitness Platform"
         description="Improve 7% every week with personalised workouts, calorie tracking, AI coaching, and a competitive leaderboard. Most people quit. The 7% stay disciplined."
-        ogTitle="7% — Improve 7% Every Week"
+        ogTitle="7% - Improve 7% Every Week"
         ogDescription="Most people quit. The 7% stay disciplined."
         ogUrl="https://7percent.info"
       />

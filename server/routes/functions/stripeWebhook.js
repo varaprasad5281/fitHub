@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Replaces: base44/functions/stripeWebhook/entry.ts
  * NOTE: Registered with express.raw() in index.js so body is a Buffer.
  */
@@ -76,12 +76,12 @@ module.exports = async (req, res) => {
     });
 
     const emailSubject = isPro
-      ? `Your 7-day free trial has started — welcome to ${planName}!`
+      ? `Your 7-day free trial has started - welcome to ${planName}!`
       : `Welcome to ${planName}!`;
 
     const emailPlain = isPro
-      ? `Your 7-day free trial is now active. No payment has been charged yet.\nTrial ends: ${trialEnd.toLocaleDateString('en-GB')}\nCancel anytime before your trial ends.\n— The 7% Team`
-      : `Your ${planName} subscription is now active. Let's stay disciplined.\n— The 7% Team`;
+      ? `Your 7-day free trial is now active. No payment has been charged yet.\nTrial ends: ${trialEnd.toLocaleDateString('en-GB')}\nCancel anytime before your trial ends.\n- The 7% Team`
+      : `Your ${planName} subscription is now active. Let's stay disciplined.\n- The 7% Team`;
 
     const emailHtml = isPro
       ? buildEmail({
@@ -105,7 +105,7 @@ module.exports = async (req, res) => {
           body: `
             <p style="margin:0 0 16px 0;color:#ffffff;font-weight:600;font-size:16px;">You're in the top 7%.</p>
             <p style="margin:0 0 16px 0;">Your <strong style="color:#f59e0b;">${planName}</strong> subscription is now active. All premium features are unlocked.</p>
-            <p style="margin:0;font-size:13px;color:#71717a;">Stay consistent. Most people quit — you didn't.</p>
+            <p style="margin:0;font-size:13px;color:#71717a;">Stay consistent. Most people quit - you didn't.</p>
           `,
           footer: 'Manage your subscription anytime from the Subscription page in the app.',
         });
@@ -159,7 +159,7 @@ module.exports = async (req, res) => {
     const invoice = event.data.object;
     if (!invoice.subscription) return res.json({ received: true });
 
-    // A $0 invoice fired at trial start should NOT flip status to 'active' —
+    // A $0 invoice fired at trial start should NOT flip status to 'active' -
     // the subscription is still in its trial period.
     if (invoice.amount_paid === 0 && invoice.billing_reason === 'subscription_create') {
         return res.json({ received: true });

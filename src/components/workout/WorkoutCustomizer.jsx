@@ -164,8 +164,7 @@ export default function WorkoutCustomizer({ workout, onSave }) {
           <div className="flex gap-3">
             <Button
               onClick={() => setIsOpen(false)}
-              variant="outline"
-              className="flex-1 border-zinc-700 text-zinc-300 hover:bg-zinc-800 rounded-lg"
+              className="flex-1 bg-red-600/20 border border-red-500/50 text-red-400 hover:bg-red-600/30 hover:border-red-500 rounded-xl h-11"
             >
               Cancel
             </Button>

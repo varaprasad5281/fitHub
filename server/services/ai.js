@@ -1,5 +1,5 @@
-/**
- * AI service — replaces base44.integrations.Core.InvokeLLM()
+﻿/**
+ * AI service - replaces base44.integrations.Core.InvokeLLM()
  * Uses Anthropic Claude API.
  */
 
@@ -9,7 +9,7 @@ const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 /**
  * @param {string} prompt
- * @param {object|null} response_json_schema  — when provided, response is parsed as JSON
+ * @param {object|null} response_json_schema  - when provided, response is parsed as JSON
  * @returns {object|string}
  */
 async function invokeLLM({ prompt, response_json_schema = null }) {

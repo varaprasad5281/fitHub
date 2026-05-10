@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Comprehensive async action wrapper for all backend/API operations
  * Ensures:
  * - 10s timeout on all requests
@@ -20,7 +20,7 @@ const DEBUG = () => {
 const log = (action, event, extra) => {
   if (!DEBUG()) return;
   const ts = new Date().toISOString();
-  console.log(`[7%Action] [${ts}] ${action} — ${event}`, extra || '');
+  console.log(`[7%Action] [${ts}] ${action} - ${event}`, extra || '');
   if (window.__7pctCompat) {
     window.__7pctCompat.actions.push({ ts, action, event, extra });
   }

@@ -30,37 +30,32 @@ export default function CreateChallengeForm({ onClose }) {
     metric: 'active_days',
     duration: 'weekly',
     start_date: todayStr,
-    end_date: calcEndDate(todayStr, 'weekly'), // pre-filled on mount
+    end_date: calcEndDate(todayStr, 'weekly'),
     prize_description: ''
   });
+
+  const [errors, setErrors] = useState({});
 
   const createChallengeMutation = useMutation({
     mutationFn: (challengeData) => api.functions.invoke('createChallenge', challengeData),
     onSuccess: () => {
-      // Invalidate all filter variants so every tab refreshes
       queryClient.invalidateQueries({ queryKey: ['challenges'] });
       toast.success('Challenge created!');
       onClose();
     },
     onError: (error) => {
-      toast.error(error.message || 'Failed to create challenge');
+      setErrors(prev => ({ ...prev, server: error.message || 'Failed to create challenge' }));
     }
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!data.name.trim()) {
-      toast.error('Challenge name is required');
-      return;
-    }
-    if (!data.start_date || !data.end_date) {
-      toast.error('Start and end dates are required');
-      return;
-    }
-    if (data.end_date <= data.start_date) {
-      toast.error('End date must be after start date');
-      return;
-    }
+    const newErrors = {};
+    if (!data.name.trim()) newErrors.name = 'Challenge name is required';
+    if (!data.start_date || !data.end_date) newErrors.dates = 'Start and end dates are required';
+    else if (data.end_date <= data.start_date) newErrors.dates = 'End date must be after start date';
+    if (Object.keys(newErrors).length) { setErrors(newErrors); return; }
+    setErrors({});
     createChallengeMutation.mutate(data);
   };
 
@@ -97,9 +92,10 @@ export default function CreateChallengeForm({ onClose }) {
             <Input
               placeholder="e.g., February Warrior"
               value={data.name}
-              onChange={(e) => setData({ ...data, name: e.target.value })}
-              className="bg-zinc-800 border-zinc-700 text-white rounded-xl h-11"
+              onChange={(e) => { setData({ ...data, name: e.target.value }); setErrors(p => ({ ...p, name: '' })); }}
+              className={`bg-zinc-800 text-white rounded-xl h-11 ${errors.name ? 'border-red-500' : 'border-zinc-700'}`}
             />
+            {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
           </div>
 
           <div>
@@ -153,25 +149,28 @@ export default function CreateChallengeForm({ onClose }) {
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label className="text-zinc-400 text-sm mb-2 block">Start Date</Label>
-              <Input
-                type="date"
-                value={data.start_date}
-                onChange={(e) => updateStartDate(e.target.value)}
-                className="bg-zinc-800 border-zinc-700 text-white rounded-xl h-11"
-              />
+          <div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-zinc-400 text-sm mb-2 block">Start Date</Label>
+                <Input
+                  type="date"
+                  value={data.start_date}
+                  onChange={(e) => { updateStartDate(e.target.value); setErrors(p => ({ ...p, dates: '' })); }}
+                  className={`bg-zinc-800 text-white rounded-xl h-11 ${errors.dates ? 'border-red-500' : 'border-zinc-700'}`}
+                />
+              </div>
+              <div>
+                <Label className="text-zinc-400 text-sm mb-2 block">End Date</Label>
+                <Input
+                  type="date"
+                  value={data.end_date}
+                  onChange={(e) => { setData({ ...data, end_date: e.target.value }); setErrors(p => ({ ...p, dates: '' })); }}
+                  className={`bg-zinc-800 text-white rounded-xl h-11 ${errors.dates ? 'border-red-500' : 'border-zinc-700'}`}
+                />
+              </div>
             </div>
-            <div>
-              <Label className="text-zinc-400 text-sm mb-2 block">End Date</Label>
-              <Input
-                type="date"
-                value={data.end_date}
-                onChange={(e) => setData({ ...data, end_date: e.target.value })}
-                className="bg-zinc-800 border-zinc-700 text-white rounded-xl h-11"
-              />
-            </div>
+            {errors.dates && <p className="text-red-400 text-xs mt-1">{errors.dates}</p>}
           </div>
 
           <div>
@@ -184,12 +183,15 @@ export default function CreateChallengeForm({ onClose }) {
             />
           </div>
 
+          {errors.server && (
+            <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2">{errors.server}</p>
+          )}
+
           <div className="flex gap-3 pt-2">
             <Button
               type="button"
-              variant="outline"
               onClick={onClose}
-              className="flex-1 border-zinc-700 text-zinc-300 rounded-xl h-11"
+              className="flex-1 bg-red-600/20 border border-red-500/50 text-red-400 hover:bg-red-600/30 hover:border-red-500 rounded-xl h-11"
             >
               Cancel
             </Button>

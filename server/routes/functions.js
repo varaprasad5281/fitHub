@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Functions router.
  * Replaces base44.functions.invoke('functionName', body)
  *
@@ -115,10 +115,10 @@ const handlers = {
   sendPasswordReset:            require('./functions/sendPasswordReset'),
 };
 
-// Stripe webhook — raw body, no auth
+// Stripe webhook - raw body, no auth
 router.post('/stripeWebhook', require('./functions/stripeWebhook'));
 
-// Public functions — no auth required (user is not logged in for these)
+// Public functions - no auth required (user is not logged in for these)
 router.post('/sendPasswordReset', require('./functions/sendPasswordReset'));
 router.post('/sendEmail', require('./functions/sendEmail'));
 

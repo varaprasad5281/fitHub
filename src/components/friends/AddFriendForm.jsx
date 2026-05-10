@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { api } from '@/api/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,7 +13,7 @@ export default function AddFriendForm({ onSent }) {
   const [sentRequests, setSentRequests] = useState({});
   const debounceRef = useRef(null);
 
-  // Debounced search — calls searchUsers on the server (searches Profile + User collections)
+  // Debounced search - calls searchUsers on the server (searches Profile + User collections)
   useEffect(() => {
     if (query.trim().length < 2) {
       setResults([]);
@@ -31,7 +31,7 @@ export default function AddFriendForm({ onSent }) {
         setResults(response?.data || []);
       } catch (err) {
         console.error('Search error:', err);
-        toast.error('Search failed — please try again');
+        toast.error('Search failed - please try again');
       } finally {
         setSearching(false);
       }

@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Profile = require('../models/Profile');
@@ -16,13 +16,13 @@ const FOUNDER_LIMIT = parseInt(process.env.FOUNDER_LIMIT || '100', 10);
 
 /**
  * Award the Beta Founder badge to a new user if they are within the first
- * FOUNDER_LIMIT users. Runs asynchronously — never blocks the register response.
+ * FOUNDER_LIMIT users. Runs asynchronously - never blocks the register response.
  */
 async function maybeAwardFounderBadge(userEmail, userNumber) {
   if (userNumber > FOUNDER_LIMIT) return;
   try {
     const badge = await Badge.findOne({ badge_code: 'FOUNDER' }).lean();
-    if (!badge) return; // seed not run yet — silently skip
+    if (!badge) return; // seed not run yet - silently skip
     await UserBadge.create({
       created_by: userEmail,
       badge_id: badge._id,
@@ -31,7 +31,7 @@ async function maybeAwardFounderBadge(userEmail, userNumber) {
     });
     notify(
       userEmail,
-      '✨ You earned the Beta Founder badge — a permanent mark of being here from day one.',
+      '✨ You earned the Beta Founder badge - a permanent mark of being here from day one.',
       'badge_earned'
     );
   } catch (err) {
@@ -73,7 +73,7 @@ router.post('/register', async (req, res) => {
       'welcome'
     );
 
-    // Founder badge — check eligibility async, never block the response
+    // Founder badge - check eligibility async, never block the response
     const totalUsers = await User.countDocuments({});
     setImmediate(() => maybeAwardFounderBadge(user.email, totalUsers));
 
@@ -109,7 +109,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// GET /api/auth/me  — replaces base44.auth.me()
+// GET /api/auth/me  - replaces base44.auth.me()
 router.get('/me', protect, async (req, res) => {
   try {
     const user = req.user;
@@ -119,7 +119,7 @@ router.get('/me', protect, async (req, res) => {
   }
 });
 
-// POST /api/auth/reset-password  — token from password reset email
+// POST /api/auth/reset-password  - token from password reset email
 router.post('/reset-password', async (req, res) => {
   try {
     const { token, password } = req.body;

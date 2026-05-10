@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { motion } from 'framer-motion';
 import { Lock, Crown, Sparkles, Lightbulb, Star, History, ArrowRight, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -125,7 +125,7 @@ export default function CoachingPreview() {
           <Lightbulb className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-semibold text-white">Actionable daily plans</p>
-            <p className="text-xs text-zinc-500">Exact steps to follow — not generic advice</p>
+            <p className="text-xs text-zinc-500">Exact steps to follow - not generic advice</p>
           </div>
         </div>
         <div className="flex gap-3">

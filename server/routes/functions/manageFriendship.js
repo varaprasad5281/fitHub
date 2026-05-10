@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Handles: friendRequest, manageFriendRequest, searchUsers, suggestedFriends, getFriendComparison
  */
 
@@ -125,11 +125,11 @@ async function searchUsers(req, res) {
   const results = [
     ...profiles.map(p => {
       const obj = p.toObject();
-      // Strip the raw email field — UI uses username; created_by is used only for friend requests
+      // Strip the raw email field - UI uses username; created_by is used only for friend requests
       delete obj.email;
       return { ...obj, friendship_status: friendMap[p.created_by] || null };
     }),
-    // Users without a profile — only expose display name and the opaque created_by key
+    // Users without a profile - only expose display name and the opaque created_by key
     ...users.map(u => ({
       created_by: u.email,
       username: null,

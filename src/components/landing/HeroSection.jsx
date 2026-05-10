@@ -1,6 +1,5 @@
-import React from 'react';
+﻿import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
@@ -12,7 +11,7 @@ export default function HeroSection() {
       style={{ minHeight: 'calc(var(--vh, 1vh) * 85)' }}
       role="banner"
     >
-      {/* Ambient glow — pointer-events-none so they never block taps */}
+      {/* Ambient glow - pointer-events-none so they never block taps */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[120px] pointer-events-none" aria-hidden="true" />
       <div className="absolute top-1/4 right-1/4 w-[300px] h-[300px] bg-amber-400/5 rounded-full blur-[80px] pointer-events-none" aria-hidden="true" />
       
@@ -28,9 +27,6 @@ export default function HeroSection() {
               <span className="text-6xl sm:text-8xl md:text-9xl font-black tracking-tighter bg-gradient-to-b from-amber-200 via-amber-400 to-amber-600 bg-clip-text text-transparent">
                 7%
               </span>
-              <div className="absolute -top-2 -right-2">
-                <Sparkles className="w-6 h-6 text-amber-400/60" />
-              </div>
             </div>
           </div>
 

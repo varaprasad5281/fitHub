@@ -1,4 +1,4 @@
-/**
+﻿/**
  * seedBadges.js
  * Run once to populate the Badge collection with all badge definitions.
  * Usage: node server/scripts/seedBadges.js
@@ -300,12 +300,12 @@ const BADGES = [
   },
 
   // ─── EXCLUSIVE ────────────────────────────────────────────────────────────
-  // These badges are awarded manually or by scheduled jobs — not via checkAndAwardBadges.
+  // These badges are awarded manually or by scheduled jobs - not via checkAndAwardBadges.
   // requirement_type is null so they never show a progress bar.
   {
     badge_code: 'FOUNDER',
     name: 'Beta Founder',
-    description: 'Exclusive Beta Badge — you were here from day one. A permanent mark of founding membership.',
+    description: 'Exclusive Beta Badge - you were here from day one. A permanent mark of founding membership.',
     icon: '🌐',
     rarity_level: 'legendary',
     category: 'exclusive',
@@ -313,7 +313,7 @@ const BADGES = [
     requirement_value: null,
   },
 
-  // Weekly leaderboard — single occurrence
+  // Weekly leaderboard - single occurrence
   {
     badge_code: 'LEADER_TOP3',
     name: 'Podium',
@@ -335,7 +335,7 @@ const BADGES = [
     requirement_value: null,
   },
 
-  // Weekly leaderboard — consecutive weeks in top 3
+  // Weekly leaderboard - consecutive weeks in top 3
   {
     badge_code: 'LEADER_TOP3_3W',
     name: 'Hat Trick',
@@ -367,7 +367,7 @@ const BADGES = [
     requirement_value: null,
   },
 
-  // Weekly leaderboard — consecutive weeks at #1
+  // Weekly leaderboard - consecutive weeks at #1
   {
     badge_code: 'LEADER_TOP1_3W',
     name: 'Triple Crown',
@@ -407,7 +407,7 @@ async function seed() {
         continue;
       }
       await Badge.create(badge);
-      console.log(`  ✓ Created: ${badge.badge_code} — ${badge.name}`);
+      console.log(`  ✓ Created: ${badge.badge_code} - ${badge.name}`);
       created++;
     }
 
