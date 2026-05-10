@@ -7,6 +7,39 @@ const Subscription = require('../models/Subscription');
 const IPLoginHistory = require('../models/IPLoginHistory');
 const { protect } = require('../middleware/auth');
 const { notify } = require('../utils/notify');
+const Badge = require('../models/Badge');
+const UserBadge = require('../models/UserBadge');
+
+// Number of early-access users who receive the Founder badge automatically.
+// Override by setting FOUNDER_LIMIT in your .env (default: 100).
+const FOUNDER_LIMIT = parseInt(process.env.FOUNDER_LIMIT || '100', 10);
+
+/**
+ * Award the Beta Founder badge to a new user if they are within the first
+ * FOUNDER_LIMIT users. Runs asynchronously — never blocks the register response.
+ */
+async function maybeAwardFounderBadge(userEmail, userNumber) {
+  if (userNumber > FOUNDER_LIMIT) return;
+  try {
+    const badge = await Badge.findOne({ badge_code: 'FOUNDER' }).lean();
+    if (!badge) return; // seed not run yet — silently skip
+    await UserBadge.create({
+      created_by: userEmail,
+      badge_id: badge._id,
+      badge_code: 'FOUNDER',
+      achievement_notes: `Auto-awarded: user #${userNumber} of the first ${FOUNDER_LIMIT}`,
+    });
+    notify(
+      userEmail,
+      '✨ You earned the Beta Founder badge — a permanent mark of being here from day one.',
+      'badge_earned'
+    );
+  } catch (err) {
+    if (err.code !== 11000) {
+      console.error('[register] Founder badge error:', err.message);
+    }
+  }
+}
 
 const router = express.Router();
 
@@ -39,6 +72,10 @@ router.post('/register', async (req, res) => {
       `Welcome to 7%, ${full_name}! 🎉 Start by logging your first workout or meal to earn points.`,
       'welcome'
     );
+
+    // Founder badge — check eligibility async, never block the response
+    const totalUsers = await User.countDocuments({});
+    setImmediate(() => maybeAwardFounderBadge(user.email, totalUsers));
 
     const token = signToken(user._id);
     res.status(201).json({ token, user: { id: user._id, email: user.email, full_name: user.full_name } });

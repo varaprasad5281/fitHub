@@ -12,6 +12,7 @@ import ChatWindow from '@/components/friends/ChatWindow';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
+import { BadgeMiniRow } from '@/components/badges/BadgeTooltip';
 
 export default function SocialsPage() {
   const queryClient = useQueryClient();
@@ -108,6 +109,18 @@ export default function SocialsPage() {
     },
     staleTime: 1000 * 60 * 5,
     enabled: !!user,
+  });
+
+  // Featured badges for everyone on the leaderboard (self + friends)
+  const leaderboardEmails = [user?.email, ...friends.map(f => f.email)].filter(Boolean);
+  const { data: socialBadgeMap = {} } = useQuery({
+    queryKey: ['socials-featured-badges', leaderboardEmails.join(',')],
+    queryFn: async () => {
+      const res = await api.functions.invoke('getBadges', { action: 'bulk_featured', emails: leaderboardEmails });
+      return res?.data || {};
+    },
+    enabled: leaderboardEmails.length > 0,
+    staleTime: 1000 * 60 * 5,
   });
 
   // Conversations list with unread counts — polls every 10 s so user sees new messages automatically
@@ -389,13 +402,16 @@ export default function SocialsPage() {
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <p className="text-sm font-semibold text-white truncate">{entry.username || entry.email}</p>
                           {entry.isMe && (
                             <span className="text-[10px] font-bold bg-zinc-600 text-zinc-300 px-1.5 py-0.5 rounded-full flex-shrink-0">YOU</span>
                           )}
                         </div>
-                        <p className="text-xs text-zinc-500">Level {entry.level || 1}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <p className="text-xs text-zinc-500">Level {entry.level || 1}</p>
+                          <BadgeMiniRow badges={socialBadgeMap[entry.email] || []} size="xs" align="left" above={true} />
+                        </div>
                       </div>
                       <div className="text-right flex-shrink-0">
                         <p className="text-sm font-bold text-amber-400">{(entry.weekly_points || 0).toLocaleString()}</p>

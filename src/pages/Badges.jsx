@@ -31,7 +31,7 @@ const CATEGORY_LABEL = {
 function EarnedCard({ badge, onFeature, featured }) {
   const r = RARITY[badge.rarity_level] || RARITY.common;
   return (
-    <div className={`relative rounded-2xl border ${r.border} ${r.bg} shadow-lg ${r.glow} p-5 flex flex-col items-center gap-2 text-center`}>
+    <div className={`group relative rounded-2xl border ${r.border} ${r.bg} shadow-lg ${r.glow} p-5 flex flex-col items-center gap-2 text-center h-[194px]`}>
       {featured && (
         <span className="absolute top-2 right-2 bg-amber-500 text-black text-[10px] font-bold px-1.5 py-0.5 rounded-full">
           FEATURED
@@ -40,7 +40,23 @@ function EarnedCard({ badge, onFeature, featured }) {
       <span className="text-4xl">{badge.icon || '🏅'}</span>
       <p className="text-white font-bold text-sm leading-tight">{badge.name}</p>
       <p className={`text-xs font-semibold uppercase tracking-wide ${r.label}`}>{badge.rarity_level}</p>
-      <p className="text-zinc-500 text-xs leading-snug">{badge.description}</p>
+
+      {/* Description — truncated, hover tooltip shows full text */}
+      <div className="relative w-full">
+        <p className="text-zinc-500 text-xs leading-snug line-clamp-2">{badge.description}</p>
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 z-50
+          opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150">
+          {/* Solid opaque background — never inherits card transparency */}
+          <div className={`rounded-xl border ${r.border} bg-zinc-950 shadow-2xl p-3 text-left`}>
+            <p className="text-white font-semibold text-xs mb-1">{badge.name}</p>
+            <p className="text-zinc-300 text-xs leading-snug">{badge.description}</p>
+          </div>
+          <div className="flex justify-center">
+            <div className={`w-2 h-2 rotate-45 border-b border-r ${r.border} bg-zinc-950 -mt-px`} />
+          </div>
+        </div>
+      </div>
+
       <button
         onClick={() => onFeature.mutate({ badge_code: badge.badge_code, featured: !featured })}
         className={`mt-1 text-xs px-3 py-1 rounded-full border transition-colors ${
@@ -62,11 +78,29 @@ function LockedCard({ badge }) {
   const isExclusive = badge.category === 'exclusive';
 
   return (
-    <div className={`rounded-2xl border ${r.border} bg-zinc-900/60 p-5 flex flex-col items-center gap-2 text-center opacity-75`}>
-      <span className="text-4xl grayscale opacity-50">{badge.icon || '🔒'}</span>
-      <p className="text-zinc-300 font-bold text-sm leading-tight">{badge.name}</p>
-      <p className={`text-xs font-semibold uppercase tracking-wide ${r.label}`}>{badge.rarity_level}</p>
-      <p className="text-zinc-600 text-xs leading-snug">{badge.description}</p>
+    // opacity-75 removed from the wrapper — it was dimming the tooltip child too.
+    // Individual elements carry their own muted colours instead.
+    <div className={`group relative rounded-2xl border ${r.border} bg-zinc-900/60 p-5 flex flex-col items-center gap-2 text-center h-[194px]`}>
+      <span className="text-4xl grayscale opacity-40">{badge.icon || '🔒'}</span>
+      <p className="text-zinc-500 font-bold text-sm leading-tight">{badge.name}</p>
+      <p className={`text-xs font-semibold uppercase tracking-wide opacity-60 ${r.label}`}>{badge.rarity_level}</p>
+
+      {/* Description — truncated, hover tooltip shows full text */}
+      <div className="relative w-full">
+        <p className="text-zinc-600 text-xs leading-snug line-clamp-2">{badge.description}</p>
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 z-50
+          opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150">
+          {/* Solid opaque background — not affected by parent opacity */}
+          <div className="rounded-xl border border-zinc-700 bg-zinc-950 shadow-2xl p-3 text-left">
+            <p className="text-white font-semibold text-xs mb-1">{badge.name}</p>
+            <p className="text-zinc-300 text-xs leading-snug">{badge.description}</p>
+          </div>
+          <div className="flex justify-center">
+            <div className="w-2 h-2 rotate-45 border-b border-r border-zinc-700 bg-zinc-950 -mt-px" />
+          </div>
+        </div>
+      </div>
+
       {isExclusive ? (
         <p className="text-[10px] text-zinc-600 mt-1 italic">Awarded exclusively — cannot be earned through activity</p>
       ) : (

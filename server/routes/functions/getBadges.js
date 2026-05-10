@@ -70,6 +70,32 @@ module.exports = async (req, res) => {
     return res.json({ success: true });
   }
 
+  // ── action: 'bulk_featured' ──────────────────────────────────────────────
+  // Returns featured badges for multiple users in one query.
+  // Body: { emails: ['a@b.com', 'c@d.com', ...] }
+  // Response: { data: { 'a@b.com': [badge, ...], 'c@d.com': [...] } }
+  if (action === 'bulk_featured') {
+    const { emails = [] } = req.body;
+    if (!emails.length) return res.json({ data: {} });
+
+    const userBadges = await UserBadge.find({
+      created_by: { $in: emails },
+      is_featured: true,
+    }).populate('badge_id').lean();
+
+    const result = {};
+    userBadges.forEach(ub => {
+      if (!ub.badge_id) return; // guard orphaned refs
+      if (!result[ub.created_by]) result[ub.created_by] = [];
+      result[ub.created_by].push({
+        ...ub.badge_id,
+        earned_date: ub.earned_date,
+      });
+    });
+
+    return res.json({ data: result });
+  }
+
   // ── action: 'featured' ───────────────────────────────────────────────────
   // Returns up to 3 featured badges for any user email — used by PublicProfile
   if (action === 'featured') {

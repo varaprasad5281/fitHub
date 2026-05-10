@@ -3,7 +3,7 @@
  * Shows accepted friends with options
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { api } from '@/api/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { RemoveFriendModal, BlockUserModal } from './FriendActionModals';
+import { BadgeMiniRow } from '@/components/badges/BadgeTooltip';
 
 export default function FriendsList({ onChatClick }) {
   const [removeModalOpen, setRemoveModalOpen] = useState(null);
@@ -27,13 +28,24 @@ export default function FriendsList({ onChatClick }) {
   const { data: friends = [], isLoading } = useQuery({
     queryKey: ['friends', 'accepted'],
     queryFn: async () => {
-      const response = await api.functions.invoke('getFriendsList', {
-        type: 'accepted'
-      });
-      return response?.friends || [];  // server returns { success, friends: [...] }
+      const response = await api.functions.invoke('getFriendsList', { type: 'accepted' });
+      return response?.friends || [];
     },
-    staleTime: 0,           // always fetch fresh — friend list must be up to date
+    staleTime: 0,
     refetchOnMount: true,
+  });
+
+  // Fetch featured badges for all friends in one request
+  const { data: badgeMap = {} } = useQuery({
+    queryKey: ['friends-featured-badges', friends.map(f => f.email).join(',')],
+    queryFn: async () => {
+      const emails = friends.map(f => f.email).filter(Boolean);
+      if (!emails.length) return {};
+      const res = await api.functions.invoke('getBadges', { action: 'bulk_featured', emails });
+      return res?.data || {};
+    },
+    enabled: friends.length > 0,
+    staleTime: 1000 * 60 * 5, // badges rarely change — 5 min cache
   });
 
   const removeMutation = useMutation({
@@ -96,24 +108,26 @@ export default function FriendsList({ onChatClick }) {
             className="flex items-center justify-between p-3 rounded-lg bg-zinc-800/50 border border-zinc-700/50 hover:bg-zinc-800 transition-colors"
           >
             <div
-              className="flex items-center gap-3 flex-1 cursor-pointer"
+              className="flex items-center gap-3 flex-1 cursor-pointer min-w-0"
               onClick={() => onChatClick?.(friend.email)}
             >
-              {friend.avatar_url && (
+              {friend.avatar_url ? (
                 <img
                   src={friend.avatar_url}
                   alt={friend.username}
-                  className="w-10 h-10 rounded-full object-cover"
+                  className="w-10 h-10 rounded-full object-cover flex-shrink-0"
                 />
-              )}
-              {!friend.avatar_url && (
-                <div className="w-10 h-10 rounded-full bg-zinc-700 flex items-center justify-center text-sm font-bold text-white">
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-zinc-700 flex items-center justify-center text-sm font-bold text-white flex-shrink-0">
                   {(friend.username || friend.email || '?')[0].toUpperCase()}
                 </div>
               )}
-              <div>
-                <p className="text-sm font-semibold text-white">{friend.username || friend.email}</p>
-                <p className="text-xs text-zinc-500">{friend.email}</p>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-white truncate">{friend.username || friend.email}</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <p className="text-xs text-zinc-500 truncate">{friend.email}</p>
+                  <BadgeMiniRow badges={badgeMap[friend.email] || []} size="xs" align="left" above={true} />
+                </div>
               </div>
             </div>
 

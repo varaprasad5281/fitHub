@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '@/api/client';
 import { useQuery } from "@tanstack/react-query";
@@ -180,6 +180,9 @@ export default function PublicProfile() {
                     <p className={`text-[10px] font-semibold uppercase tracking-wide ${r.label}`}>
                       {badge.rarity_level}
                     </p>
+                    {badge.description && (
+                      <p className="text-zinc-500 text-[10px] leading-snug">{badge.description}</p>
+                    )}
                   </div>
                 );
               })}

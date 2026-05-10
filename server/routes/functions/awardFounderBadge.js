@@ -45,6 +45,7 @@ async function grantFounderBadge(email, badge, notes = 'Manual Founder award') {
 
 module.exports = async (req, res) => {
   const callerEmail = req.user?.email;
+  console.log('[awardFounderBadge] caller:', callerEmail, '| ADMIN_EMAIL env:', process.env.ADMIN_EMAIL);
 
   if (!isAdmin(callerEmail)) {
     return res.status(403).json({ error: 'Admin access required' });
