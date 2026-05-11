@@ -48,6 +48,40 @@ const planColors = {
   elite_yearly: "text-amber-400 border-amber-500/30 bg-amber-500/10",
 };
 
+function GoalsSummary({ goals = [] }) {
+  if (goals.length === 0) {
+    return (
+      <div className="text-center py-4">
+        <p className="text-xs text-zinc-500">No active goals. Set one on the Progress page!</p>
+      </div>
+    );
+  }
+  return (
+    <div className="space-y-2">
+      {goals.slice(0, 3).map(goal => {
+        const progress = Math.min(100, ((goal.current_value || 0) / (goal.target_value || 1)) * 100);
+        return (
+          <div key={goal._id || goal.id} className="space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-white text-xs font-medium truncate max-w-[70%]">{goal.goal_name || goal.name || 'Goal'}</span>
+              <span className="text-zinc-500 text-xs">{Math.round(progress)}%</span>
+            </div>
+            <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-purple-500 to-purple-400 rounded-full transition-all"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+        );
+      })}
+      {goals.length > 3 && (
+        <p className="text-zinc-600 text-xs text-center pt-1">+{goals.length - 3} more goals</p>
+      )}
+    </div>
+  );
+}
+
 export default function Profile() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -136,6 +170,14 @@ export default function Profile() {
     },
     enabled: !!user,
     staleTime: 1000 * 60 * 5,
+  });
+
+  const { data: activeGoals = [] } = useQuery({
+    queryKey: ['progress-goals'],
+    queryFn: () => api.entities.ProgressGoal.list('-createdAt', 10),
+    enabled: !!user,
+    staleTime: 1000 * 60 * 2,
+    select: (data) => data.filter(g => !g.status || g.status === 'active'),
   });
 
   const profile = profiles[0];
@@ -286,7 +328,6 @@ export default function Profile() {
           {[
             { label: t("profile.logWorkout"), icon: Dumbbell, to: "WorkoutBuilder", color: "text-blue-400" },
             { label: t("profile.logNutrition"), icon: Apple, to: "Nutrition", color: "text-green-400" },
-            { label: "Coaching", icon: Sparkles, to: "Coaching", color: "text-amber-400" },
             { label: t("nav.coaching"), icon: Sparkles, to: "Coaching", color: "text-amber-400" },
           ].map(({ label, icon: Icon, to, color }) => (
             <Link key={to} to={createPageUrl(to)}>
@@ -420,6 +461,22 @@ export default function Profile() {
                     )}
                   </div>
                 )}
+              </motion.div>
+            )}
+
+            {/* My Goals */}
+            {profile && (
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Target className="w-3.5 h-3.5 text-purple-400" />
+                    <span className="text-zinc-500 text-xs uppercase tracking-wider font-semibold">My Goals</span>
+                  </div>
+                  <Link to={createPageUrl("Progress")}>
+                    <span className="text-xs text-purple-400 hover:text-purple-300 font-semibold">View All</span>
+                  </Link>
+                </div>
+                <GoalsSummary goals={activeGoals} />
               </motion.div>
             )}
           </div>

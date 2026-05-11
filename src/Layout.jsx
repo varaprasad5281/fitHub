@@ -18,8 +18,14 @@ import { useAuth } from "@/lib/AuthContext";
 
 const publicPages = ["Home", "Features", "Pricing", "Contact", "Terms", "Privacy"];
 
+// Active-page helper — returns true when location matches the given href
+function useIsActive(href) {
+  const location = useLocation();
+  return location.pathname === href || location.pathname.startsWith(href + '/');
+}
+
 // Reusable dropdown for desktop nav
-function NavDropdown({ label, children, hasbadge }) {
+function NavDropdown({ label, children, hasbadge, active }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -33,7 +39,9 @@ function NavDropdown({ label, children, hasbadge }) {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(o => !o)}
-        className="flex items-center gap-1 text-sm text-zinc-400 hover:text-white transition-colors"
+        className={`flex items-center gap-1 text-sm transition-colors ${
+          active ? 'text-white font-bold' : 'text-zinc-400 hover:text-white'
+        }`}
       >
         {label}
         {hasbadge && <span className="w-2 h-2 rounded-full bg-red-500 mb-2" />}
@@ -49,11 +57,14 @@ function NavDropdown({ label, children, hasbadge }) {
 }
 
 function NavDropdownItem({ to, onClick, children, badge }) {
+  const active = useIsActive(to);
   return (
     <Link
       to={to}
       onClick={onClick}
-      className="flex items-center justify-between px-4 py-2.5 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors"
+      className={`flex items-center justify-between px-4 py-2.5 text-sm hover:bg-zinc-800/60 transition-colors ${
+        active ? 'text-white font-bold bg-zinc-800/40' : 'text-zinc-400 hover:text-white'
+      }`}
     >
       {children}
       {badge > 0 && (
@@ -66,11 +77,14 @@ function NavDropdownItem({ to, onClick, children, badge }) {
 }
 
 function MobileLink({ to, onClose, children, badge }) {
+  const active = useIsActive(to);
   return (
     <Link
       to={to}
       onClick={onClose}
-      className="flex items-center justify-between text-base text-zinc-400 py-3 px-2 rounded-lg active:bg-zinc-800 transition-colors touch-target"
+      className={`flex items-center justify-between text-base py-3 px-2 rounded-lg active:bg-zinc-800 transition-colors touch-target ${
+        active ? 'text-white font-bold' : 'text-zinc-400'
+      }`}
       style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
     >
       {children}
@@ -174,12 +188,33 @@ function LayoutContent({ children, currentPageName }) {
           <div className="hidden md:flex items-center gap-5 lg:gap-6">
             {user ? (
               <>
-                <Link to={createPageUrl("Workouts")} className="text-sm text-zinc-400 hover:text-white transition-colors">Workouts</Link>
-                <Link to={createPageUrl("Nutrition")} className="text-sm text-zinc-400 hover:text-white transition-colors">{t("nav.nutrition")}</Link>
-                <Link to={createPageUrl("Coaching")} className="text-sm text-zinc-400 hover:text-white transition-colors">{t("nav.coaching")}</Link>
+                {[
+                  { label: 'Workouts', page: 'Workouts' },
+                  { label: t('nav.nutrition'), page: 'Nutrition' },
+                  { label: t('nav.coaching'), page: 'Coaching' },
+                ].map(({ label, page }) => {
+                  const href = createPageUrl(page);
+                  const isActive = location.pathname === href || location.pathname.startsWith(href + '/');
+                  return (
+                    <Link
+                      key={page}
+                      to={href}
+                      className={`text-sm transition-colors ${
+                        isActive ? 'text-white font-bold' : 'text-zinc-400 hover:text-white'
+                      }`}
+                    >
+                      {label}
+                    </Link>
+                  );
+                })}
 
                 {/* Community dropdown */}
-                <NavDropdown label="Community" hasbadge={unreadActivityCount > 0}>
+                <NavDropdown
+                  label="Community"
+                  hasbadge={unreadActivityCount > 0}
+                  active={[createPageUrl("Challenges"), createPageUrl("Leaderboard"), createPageUrl("Badges"), createPageUrl("Socials")]
+                    .some(href => location.pathname === href || location.pathname.startsWith(href + '/'))}
+                >
                   <NavDropdownItem to={createPageUrl("Challenges")} onClick={() => {}}>Challenges</NavDropdownItem>
                   <NavDropdownItem to={createPageUrl("Leaderboard")} onClick={() => {}}>Leaderboard</NavDropdownItem>
                   <NavDropdownItem to={createPageUrl("Badges")} onClick={() => {}}>Badges</NavDropdownItem>
@@ -187,7 +222,11 @@ function LayoutContent({ children, currentPageName }) {
                 </NavDropdown>
 
                 {/* Account dropdown */}
-                <NavDropdown label="Account">
+                <NavDropdown
+                  label="Account"
+                  active={[createPageUrl("Profile"), createPageUrl("Subscription"), createPageUrl("Contact")]
+                    .some(href => location.pathname === href || location.pathname.startsWith(href + '/'))}
+                >
                   <NavDropdownItem to={createPageUrl("Profile")} onClick={() => {}}>{t("nav.profile")}</NavDropdownItem>
                   <NavDropdownItem to={createPageUrl("Subscription")} onClick={() => {}}>Subscription</NavDropdownItem>
                   <NavDropdownItem to={createPageUrl("Contact")} onClick={() => {}}>{t("nav.contact")}</NavDropdownItem>
@@ -195,9 +234,25 @@ function LayoutContent({ children, currentPageName }) {
               </>
             ) : (
               <>
-                <Link to={createPageUrl("Home")} className="text-sm text-zinc-400 hover:text-white transition-colors">{t("nav.home")}</Link>
-                <Link to={createPageUrl("Pricing")} className="text-sm text-zinc-400 hover:text-white transition-colors">Pricing</Link>
-                <Link to={createPageUrl("Contact")} className="text-sm text-zinc-400 hover:text-white transition-colors">{t("nav.contact")}</Link>
+                {[
+                  { label: t('nav.home'), page: 'Home' },
+                  { label: 'Pricing', page: 'Pricing' },
+                  { label: t('nav.contact'), page: 'Contact' },
+                ].map(({ label, page }) => {
+                  const href = createPageUrl(page);
+                  const isActive = location.pathname === href || location.pathname.startsWith(href + '/');
+                  return (
+                    <Link
+                      key={page}
+                      to={href}
+                      className={`text-sm transition-colors ${
+                        isActive ? 'text-white font-bold' : 'text-zinc-400 hover:text-white'
+                      }`}
+                    >
+                      {label}
+                    </Link>
+                  );
+                })}
               </>
             )}
             <div className="flex items-center gap-4 ml-2">
