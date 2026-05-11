@@ -97,6 +97,9 @@ export default function Leaderboard() {
     enabled: !!user,
   });
 
+  const [imgErrors, setImgErrors] = useState(new Set());
+  const markImgError = (id) => setImgErrors(prev => new Set([...prev, id]));
+
   const { data: myProfile } = useQuery({
     queryKey: ['my-profile'],
     queryFn: async () => {
@@ -421,17 +424,18 @@ export default function Leaderboard() {
                             #{rank}
                           </div>
 
-                          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-zinc-800 overflow-hidden flex items-center justify-center shrink-0">
-                            {entry.profile_picture_url ? (
+                          <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden flex items-center justify-center shrink-0 ${entry.profile_picture_url && !imgErrors.has(entry.id) ? 'bg-zinc-800' : 'bg-amber-500/20'}`}>
+                            {entry.profile_picture_url && !imgErrors.has(entry.id) ? (
                               <img
                                 src={entry.profile_picture_url}
                                 alt={entry.username}
                                 className="w-full h-full object-cover"
                                 loading="lazy"
                                 decoding="async"
+                                onError={() => markImgError(entry.id)}
                               />
                             ) : (
-                              <span className="text-zinc-400 font-semibold">
+                              <span className="text-amber-400 font-bold text-xs sm:text-sm">
                                 {entry.username?.[0]?.toUpperCase() || '?'}
                               </span>
                             )}
@@ -479,15 +483,16 @@ export default function Leaderboard() {
                         #{userRank}
                       </div>
 
-                      <div className="w-10 h-10 rounded-full bg-zinc-800 overflow-hidden flex items-center justify-center shrink-0">
-                        {pinnedUser.profile_picture_url ? (
+                      <div className={`w-10 h-10 rounded-full overflow-hidden flex items-center justify-center shrink-0 ${pinnedUser.profile_picture_url && !imgErrors.has(pinnedUser.id) ? 'bg-zinc-800' : 'bg-amber-500/20'}`}>
+                        {pinnedUser.profile_picture_url && !imgErrors.has(pinnedUser.id) ? (
                           <img
                             src={pinnedUser.profile_picture_url}
                             alt={pinnedUser.username}
                             className="w-full h-full object-cover"
+                            onError={() => markImgError(pinnedUser.id)}
                           />
                         ) : (
-                          <span className="text-zinc-400 font-semibold">
+                          <span className="text-amber-400 font-bold">
                             {pinnedUser.username?.[0]?.toUpperCase() || '?'}
                           </span>
                         )}
