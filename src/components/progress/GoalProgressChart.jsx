@@ -5,9 +5,10 @@ import { TrendingUp, AlertCircle, CheckCircle2 } from 'lucide-react';
 export default function GoalProgressChart({ goal, historicalData = [] }) {
   if (!goal) return null;
 
-  const progressPercentage = Math.min((goal.current_value / goal.target_value) * 100, 100);
+  const progressPercentage = Math.min(((goal.current_value || 0) / (goal.target_value || 1)) * 100, 100);
   const daysLeft = Math.max(0, Math.ceil((new Date(goal.target_date) - new Date()) / (1000 * 60 * 60 * 24)));
-  const daysTotal = Math.ceil((new Date(goal.target_date) - new Date(goal.start_date)) / (1000 * 60 * 60 * 24));
+  const startDateStr = goal.start_date || goal.createdAt?.split?.('T')[0] || new Date().toISOString().split('T')[0];
+  const daysTotal = Math.ceil((new Date(goal.target_date) - new Date(startDateStr)) / (1000 * 60 * 60 * 24));
   const expectedProgress = daysTotal > 0 ? ((daysTotal - daysLeft) / daysTotal) * 100 : 0;
   const isOnTrack = progressPercentage >= expectedProgress * 0.85;
 
@@ -22,7 +23,7 @@ export default function GoalProgressChart({ goal, historicalData = [] }) {
       points: 'Points Goal',
       workout_streak: 'Workout Streak',
       workouts_completed: 'Workouts',
-      custom: goal.goal_name
+      custom: goal.goal_name || goal.name
     };
     return goalMap[goal.goal_type] || goal.goal_name;
   };
@@ -33,7 +34,7 @@ export default function GoalProgressChart({ goal, historicalData = [] }) {
       <div className="flex items-start justify-between mb-6">
         <div>
           <h3 className="text-white font-semibold text-lg mb-1">{getGoalLabel()}</h3>
-          <p className="text-zinc-500 text-sm">{goal.goal_name || getGoalLabel()}</p>
+          <p className="text-zinc-500 text-sm">{goal.goal_name || goal.name || getGoalLabel()}</p>
         </div>
         {goal.status === 'completed' ? (
           <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/30">

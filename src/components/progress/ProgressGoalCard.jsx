@@ -7,15 +7,16 @@ import { toast } from "sonner";
 
 export default function ProgressGoalCard({ goal, onDelete }) {
   const queryClient = useQueryClient();
-  const progress = Math.min(100, (goal.current_value / goal.target_value) * 100);
+  const progress = Math.min(100, ((goal.current_value || 0) / (goal.target_value || 1)) * 100);
   const daysLeft = Math.max(0, Math.ceil((new Date(goal.target_date) - new Date()) / (1000 * 60 * 60 * 24)));
   const [uploading, setUploading] = useState(false);
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [recommendations, setRecommendations] = useState(null);
   const [loadingRecs, setLoadingRecs] = useState(false);
-  
-  // Calculate if goal is on track
-  const daysTotal = Math.ceil((new Date(goal.target_date) - new Date(goal.start_date)) / (1000 * 60 * 60 * 24));
+
+  // Calculate if goal is on track (fall back to createdAt if start_date missing)
+  const startDateStr = goal.start_date || goal.createdAt?.split?.('T')[0] || new Date().toISOString().split('T')[0];
+  const daysTotal = Math.ceil((new Date(goal.target_date) - new Date(startDateStr)) / (1000 * 60 * 60 * 24));
   const daysPassed = daysTotal - daysLeft;
   const expectedProgress = (daysPassed / daysTotal) * 100;
   const progressDifference = progress - expectedProgress;
@@ -24,7 +25,7 @@ export default function ProgressGoalCard({ goal, onDelete }) {
   const deleteGoal = useMutation({
     mutationFn: (id) => api.entities.ProgressGoal.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries(['progress-goals']);
+      queryClient.invalidateQueries({ queryKey: ['progress-goals'] });
       toast.success('Goal deleted');
       if (onDelete) onDelete();
     },
@@ -56,7 +57,7 @@ export default function ProgressGoalCard({ goal, onDelete }) {
           status: 'completed',
           current_value: goal.target_value
         });
-        queryClient.invalidateQueries(['progress-goals']);
+        queryClient.invalidateQueries({ queryKey: ['progress-goals'] });
         toast.success('Goal verified as completed! 🎉');
       } else {
         toast.error('Could not verify goal completion. ' + (verification.message || ''));
@@ -96,7 +97,7 @@ export default function ProgressGoalCard({ goal, onDelete }) {
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <h4 className="text-white font-semibold text-lg">{goal.goal_name}</h4>
+            <h4 className="text-white font-semibold text-lg">{goal.goal_name || goal.name || 'Goal'}</h4>
             {goal.status === 'completed' && (
               <CheckCircle className="w-5 h-5 text-green-400 shrink-0" />
             )}
@@ -183,7 +184,7 @@ export default function ProgressGoalCard({ goal, onDelete }) {
       <div className="flex items-center justify-between text-xs text-zinc-500 mb-4 pb-4 border-b border-zinc-800">
         <div className="flex items-center gap-1.5">
           <Calendar className="w-3 h-3" />
-          <span>Started {new Date(goal.start_date).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })}</span>
+          <span>Started {new Date(startDateStr).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })}</span>
         </div>
         <span>Due {new Date(goal.target_date).toLocaleDateString('en-GB', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
       </div>

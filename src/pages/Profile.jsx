@@ -270,7 +270,7 @@ export default function Profile() {
           {[
             { label: t("profile.logWorkout"), icon: Dumbbell, to: "WorkoutBuilder", color: "text-blue-400" },
             { label: t("profile.logNutrition"), icon: Apple, to: "Nutrition", color: "text-green-400" },
-            { label: t("profile.viewProgress"), icon: TrendingUp, to: "Progress", color: "text-purple-400" },
+            { label: "Coaching", icon: Sparkles, to: "Coaching", color: "text-amber-400" },
           ].map(({ label, icon: Icon, to, color }) => (
             <Link key={to} to={createPageUrl(to)}>
               <motion.div
@@ -356,7 +356,7 @@ export default function Profile() {
               </p>
             </motion.div>
 
-            {/* Badge manager + Language */}
+            {/* Badge manager + View Progress */}
             {profile && (
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4 space-y-4">
                 <div>
@@ -371,6 +371,20 @@ export default function Profile() {
                   </div>
                   <BadgeManager />
                 </div>
+
+                {/* View Progress link */}
+                <Link to={createPageUrl("Progress")}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-center gap-3 p-3 rounded-xl border border-zinc-800 bg-zinc-900/80 hover:border-zinc-700 hover:bg-zinc-800/50 transition-all cursor-pointer group mt-2"
+                    style={{ WebkitTapHighlightColor: 'transparent' }}
+                  >
+                    <TrendingUp className="w-4 h-4 text-purple-400 shrink-0" />
+                    <span className="text-zinc-300 text-sm font-medium group-hover:text-white transition-colors">{t("profile.viewProgress")}</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-zinc-600 ml-auto group-hover:text-zinc-400 transition-colors" />
+                  </motion.div>
+                </Link>
               </motion.div>
             )}
           </div>

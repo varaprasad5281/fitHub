@@ -14,9 +14,9 @@ export default function Progress() {
 
   const { data: goals, isLoading: goalsLoading } = useQuery({
     queryKey: ['progress-goals'],
-    queryFn: () => api.entities.ProgressGoal.list('-created_date', 50),
+    queryFn: () => api.entities.ProgressGoal.list('-createdAt', 50),
     initialData: [],
-    staleTime: 1000 * 60 * 10,
+    staleTime: 1000 * 60 * 2,
     gcTime: 1000 * 60 * 30,
   });
 
@@ -72,13 +72,20 @@ export default function Progress() {
     refetchOnMount: false,
   });
 
+  const { data: pointsTransactions = [] } = useQuery({
+    queryKey: ['points-transactions'],
+    queryFn: () => api.entities.PointsTransaction.list('-transaction_date', 500),
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 30,
+  });
+
   // Prepare chart data
-  const pointsData = generatePointsChartData(points[0]);
+  const pointsData = generatePointsChartData(pointsTransactions);
   const workoutData = generateWorkoutChartData(workouts);
   const calorieData = generateCalorieChartData(mealLogs);
   const weightData = generateWeightChartData(weightLogs);
   const leaderboardData = generateLeaderboardChartData(points[0]);
-  const activeGoals = goals.filter(g => g.status === 'active');
+  const activeGoals = goals.filter(g => !g.status || g.status === 'active');
   const completedGoals = goals.filter(g => g.status === 'completed').length;
   
   // Calculate changes
@@ -444,19 +451,44 @@ export default function Progress() {
   );
 }
 
-function generatePointsChartData(points) {
-  if (!points) return [];
-  
+function generatePointsChartData(transactions) {
+  if (!transactions || transactions.length === 0) return [];
+
+  // Only meaningful transactions (exclude the 0-pt idempotency markers)
+  const meaningful = transactions.filter(t => t.points_awarded > 0 && t.source !== 'daily_calc');
+
+  // Build last 12 weeks of weekly totals
   const weeks = [];
   for (let i = 11; i >= 0; i--) {
-    const date = new Date();
-    date.setDate(date.getDate() - (i * 7));
+    const refDay = new Date();
+    // Week ending on refDay - i*7
+    const weekEnd = new Date(refDay);
+    weekEnd.setDate(refDay.getDate() - i * 7);
+    const weekStart = new Date(weekEnd);
+    weekStart.setDate(weekEnd.getDate() - 6);
+    weekStart.setHours(0, 0, 0, 0);
+    weekEnd.setHours(23, 59, 59, 999);
+
+    const weekPts = meaningful
+      .filter(t => {
+        if (!t.transaction_date) return false;
+        const d = new Date(t.transaction_date);
+        return d >= weekStart && d <= weekEnd;
+      })
+      .reduce((sum, t) => sum + (t.points_awarded || 0), 0);
+
     weeks.push({
-      week: date.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' }),
-      points: Math.max(0, (points.total_points || 0) - Math.random() * 100)
+      week: weekStart.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' }),
+      points: weekPts,
     });
   }
-  return weeks;
+
+  // Convert to cumulative running total
+  let running = 0;
+  return weeks.map(w => {
+    running += w.points;
+    return { week: w.week, points: running };
+  });
 }
 
 function generateWorkoutChartData(workouts) {

@@ -21,7 +21,7 @@ export default function ProgressGoalForm({ onClose }) {
   const createGoalMutation = useMutation({
     mutationFn: (goalData) => api.entities.ProgressGoal.create(goalData),
     onSuccess: () => {
-      queryClient.invalidateQueries(['progress-goals']);
+      queryClient.invalidateQueries({ queryKey: ['progress-goals'] });
       toast.success('Goal created!');
       onClose();
     },
