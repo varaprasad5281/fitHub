@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { api } from '@/api/client';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -116,7 +116,7 @@ export default function Coaching() {
               <p className="text-amber-400 text-xs sm:text-sm font-semibold uppercase tracking-[0.15em]">Coaching</p>
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Unlock Your Coach</h1>
-            <p className="text-zinc-500">Get personalised daily coaching — upgrade Pro to access</p>
+            <p className="text-zinc-500">Get personalised daily coaching - upgrade Pro to access</p>
           </div>
           <CoachingPreview />
         </div>
@@ -193,12 +193,12 @@ export default function Coaching() {
                 <li>Rate your current plan with 👍 or 👎 after reading it.</li>
                 <li>If you liked it and want to refresh anyway, we'll show you a new suggestion to compare.</li>
                 <li>
-                  <span className="text-green-400 font-semibold">👍 Keep This Plan</span> — replaces your current plan with the new one.
+                  <span className="text-green-400 font-semibold">👍 Keep This Plan</span> - replaces your current plan with the new one.
                 </li>
                 <li>
-                  <span className="text-red-400 font-semibold">👎 Keep Current Plan</span> — discards the new suggestion, your current plan stays.
+                  <span className="text-red-400 font-semibold">👎 Keep Current Plan</span> - discards the new suggestion, your current plan stays.
                 </li>
-                <li>You earn <span className="text-amber-400 font-semibold">+10 pts</span> for rating coaching — once per day.</li>
+                <li>You earn <span className="text-amber-400 font-semibold">+10 pts</span> for rating coaching - once per day.</li>
               </ul>
             </div>
           )}
@@ -241,7 +241,7 @@ export default function Coaching() {
                 </div>
               </div>
 
-              {/* Current plan — read-only while candidate is pending */}
+              {/* Current plan - read-only while candidate is pending */}
               {latestCoaching && (
                 <div className="opacity-60">
                   <p className="text-zinc-500 text-xs font-semibold uppercase tracking-widest mb-2 px-1">Your Current Plan</p>

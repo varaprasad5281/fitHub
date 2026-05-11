@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+﻿import React, { createContext, useState, useContext, useEffect } from 'react';
 import { auth } from '@/api/client';
 import { queryClientInstance } from '@/lib/query-client';
 
@@ -8,7 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
-  const [isLoadingPublicSettings] = useState(false); // no longer needed — kept for API compat
+  const [isLoadingPublicSettings] = useState(false); // no longer needed - kept for API compat
   const [authError, setAuthError] = useState(null);
   const [appPublicSettings] = useState(null); // kept for API compat
 

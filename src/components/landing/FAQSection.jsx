@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { motion } from "framer-motion";
 import {
   Accordion,
@@ -10,7 +10,7 @@ import {
 const faqs = [
   {
     question: "What is the 7% mindset?",
-    answer: "93% of people quit their fitness goals within the first 3 months. The 7% stay disciplined, consistent, and committed no matter what. This app is built for them — gamified accountability, real competition, and personalised guidance to keep you on track."
+    answer: "93% of people quit their fitness goals within the first 3 months. The 7% stay disciplined, consistent, and committed no matter what. This app is built for them - gamified accountability, real competition, and personalised guidance to keep you on track."
   },
   {
     question: "How does pricing work?",
@@ -18,7 +18,7 @@ const faqs = [
   },
   {
     question: "Is there a free trial?",
-    answer: "Yes — 7% Pro includes a 7-day free trial. You won't be charged until after your trial ends, and you can cancel at any time before then with no cost."
+    answer: "Yes - 7% Pro includes a 7-day free trial. You won't be charged until after your trial ends, and you can cancel at any time before then with no cost."
   },
   {
     question: "What happens after I unsubscribe?",

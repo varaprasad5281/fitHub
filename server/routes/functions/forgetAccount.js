@@ -1,5 +1,5 @@
-/**
- * forgetAccount — delete or anonymize a user account.
+﻿/**
+ * forgetAccount - delete or anonymize a user account.
  * deleteMode: 'remove_from_quick_login' | 'delete_account'
  */
 
@@ -28,7 +28,7 @@ module.exports = async (req, res) => {
     return res.json({ success: true, message: 'Account permanently deleted.' });
   }
 
-  // 'remove_from_quick_login' — no action needed with JWT auth
+  // 'remove_from_quick_login' - no action needed with JWT auth
   // (quick login list was a Base44-specific feature)
   res.json({ success: true, message: 'Removed from quick login list.' });
 };

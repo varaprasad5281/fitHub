@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { api } from '@/api/client';
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Flame, Trophy, Star, TrendingUp, Target, Sparkles, Award, Loader2, Calendar, Edit2, Dumbbell, Apple, ChevronRight, Crown, User, LogOut } from "lucide-react";
@@ -11,7 +11,12 @@ import PointsProgressCard from "@/components/points/PointsProgressCard";
 import PointsBreakdown from "@/components/points/PointsBreakdown";
 import BetaBadge from "@/components/profile/BetaBadge";
 import GenderAvatar from "@/components/profile/GenderAvatar";
-import BadgeManager from "@/components/profile/BadgeManager";
+const BADGE_RARITY = {
+  common:    { border: 'border-zinc-600',    bg: 'bg-zinc-800/60',    label: 'text-zinc-400'   },
+  rare:      { border: 'border-blue-500',    bg: 'bg-blue-900/30',    label: 'text-blue-400'   },
+  epic:      { border: 'border-purple-500',  bg: 'bg-purple-900/30',  label: 'text-purple-400' },
+  legendary: { border: 'border-amber-400',   bg: 'bg-amber-900/30',   label: 'text-amber-400'  },
+};
 import ProfileEdit from "@/components/profile/ProfileEdit";
 import { toast } from "sonner";
 import { withActionDebug } from "@/components/debug/ActionDebugger";
@@ -69,7 +74,7 @@ export default function Profile() {
       }
       api.analytics.track({ eventName: 'profile_viewed', properties: { authenticated: true } });
 
-      // Auto-calculate today's points on every profile visit (idempotent — server ignores duplicate calls for same day)
+      // Auto-calculate today's points on every profile visit (idempotent - server ignores duplicate calls for same day)
       api.functions.invoke('calculateDailyPoints')
         .then(() => {
           queryClient.invalidateQueries({ queryKey: ['points'] });
@@ -118,6 +123,17 @@ export default function Profile() {
   const { data: subscriptions = [] } = useQuery({
     queryKey: ['subscription'],
     queryFn: () => api.entities.Subscription.filter({ created_by: user?.email }),
+    enabled: !!user,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const { data: earnedBadges = [] } = useQuery({
+    queryKey: ['badges-progress', user?.email],
+    queryFn: async () => {
+      const res = await api.functions.invoke('getBadges', { action: 'progress' });
+      const all = res?.data || [];
+      return all.filter(b => b.earned);
+    },
     enabled: !!user,
     staleTime: 1000 * 60 * 5,
   });
@@ -239,12 +255,12 @@ export default function Profile() {
                 variant="outline"
                 size="sm"
                 onClick={() => setShowEdit(true)}
-                className="border-amber-500/40 text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 hover:border-amber-400 rounded-full gap-1.5"
+                className="border-amber-500/40 text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 hover:border-amber-400 hover:text-amber-400 rounded-full gap-1.5"
               >
                 <Edit2 className="w-3.5 h-3.5" /> {t("profile.edit")}
               </Button>
               <Link to={createPageUrl("Subscription")}>
-                <Button variant="outline" size="sm" className="border-amber-500/40 text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 hover:border-amber-400 rounded-full">
+                <Button variant="outline" size="sm" className="border-amber-500/40 text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 hover:border-amber-400 hover:text-amber-400 rounded-full">
                   {t("profile.manage")}
                 </Button>
               </Link>
@@ -271,6 +287,7 @@ export default function Profile() {
             { label: t("profile.logWorkout"), icon: Dumbbell, to: "WorkoutBuilder", color: "text-blue-400" },
             { label: t("profile.logNutrition"), icon: Apple, to: "Nutrition", color: "text-green-400" },
             { label: "Coaching", icon: Sparkles, to: "Coaching", color: "text-amber-400" },
+            { label: t("nav.coaching"), icon: Sparkles, to: "Coaching", color: "text-amber-400" },
           ].map(({ label, icon: Icon, to, color }) => (
             <Link key={to} to={createPageUrl(to)}>
               <motion.div
@@ -356,35 +373,53 @@ export default function Profile() {
               </p>
             </motion.div>
 
-            {/* Badge manager + View Progress */}
+            {/* My Badges */}
             {profile && (
-              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4 space-y-4">
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <Award className="w-3.5 h-3.5 text-amber-400" />
-                      <span className="text-zinc-500 text-xs uppercase tracking-wider font-semibold">{t("profile.myBadges")}</span>
-                    </div>
-                    <Link to={createPageUrl("Badges")}>
-                      <span className="text-xs text-amber-400 hover:text-amber-300 font-semibold">{t("profile.viewAll")}</span>
-                    </Link>
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Award className="w-3.5 h-3.5 text-amber-400" />
+                    <span className="text-zinc-500 text-xs uppercase tracking-wider font-semibold">{t("profile.myBadges")}</span>
+                    {earnedBadges.length > 0 && (
+                      <span className="text-xs bg-amber-500/20 text-amber-400 font-semibold px-1.5 py-0.5 rounded-full">{earnedBadges.length}</span>
+                    )}
                   </div>
-                  <BadgeManager />
+                  <Link to={createPageUrl("Badges")}>
+                    <span className="text-xs text-amber-400 hover:text-amber-300 font-semibold">{t("profile.viewAll")}</span>
+                  </Link>
                 </div>
 
-                {/* View Progress link */}
-                <Link to={createPageUrl("Progress")}>
-                  <motion.div
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex items-center gap-3 p-3 rounded-xl border border-zinc-800 bg-zinc-900/80 hover:border-zinc-700 hover:bg-zinc-800/50 transition-all cursor-pointer group mt-2"
-                    style={{ WebkitTapHighlightColor: 'transparent' }}
-                  >
-                    <TrendingUp className="w-4 h-4 text-purple-400 shrink-0" />
-                    <span className="text-zinc-300 text-sm font-medium group-hover:text-white transition-colors">{t("profile.viewProgress")}</span>
-                    <ChevronRight className="w-3.5 h-3.5 text-zinc-600 ml-auto group-hover:text-zinc-400 transition-colors" />
-                  </motion.div>
-                </Link>
+                {earnedBadges.length === 0 ? (
+                  <div className="text-center py-6">
+                    <div className="w-12 h-12 rounded-xl bg-zinc-800 flex items-center justify-center mx-auto mb-3">
+                      <Award className="w-6 h-6 text-zinc-600" />
+                    </div>
+                    <p className="text-zinc-500 text-sm">No badges yet</p>
+                    <p className="text-zinc-600 text-xs mt-1">Complete workouts to earn your first badge!</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-4 gap-2">
+                    {earnedBadges.slice(0, 8).map(badge => {
+                      const r = BADGE_RARITY[badge.rarity_level] || BADGE_RARITY.common;
+                      return (
+                        <div key={badge.badge_code} className="group relative flex flex-col items-center gap-1.5">
+                          <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-2xl border ${r.bg} ${r.border} ${badge.rarity_level === 'legendary' ? 'animate-pulse-glow' : ''} transition-transform group-hover:scale-110`}>
+                            {badge.icon || '🏅'}
+                          </div>
+                          <span className={`text-[10px] font-medium text-center leading-tight ${r.label} line-clamp-1 w-full px-0.5`}>{badge.name}</span>
+                        </div>
+                      );
+                    })}
+                    {earnedBadges.length > 8 && (
+                      <Link to={createPageUrl("Badges")} className="flex flex-col items-center gap-1.5">
+                        <div className="w-14 h-14 rounded-xl border border-dashed border-zinc-700 flex items-center justify-center text-sm font-bold text-zinc-500 hover:border-amber-500/50 hover:text-amber-400 transition-colors">
+                          +{earnedBadges.length - 8}
+                        </div>
+                        <span className="text-[10px] text-zinc-600">more</span>
+                      </Link>
+                    )}
+                  </div>
+                )}
               </motion.div>
             )}
           </div>

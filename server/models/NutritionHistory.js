@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+﻿const mongoose = require('mongoose');
 
 const schema = new mongoose.Schema({
   created_by: { type: String, required: true },
@@ -11,7 +11,7 @@ const schema = new mongoose.Schema({
   meal_types: [{ type: String, enum: ['breakfast', 'lunch', 'dinner', 'snack'] }],
 }, { timestamps: true });
 
-// Unique per user per day — enforces exactly one record per date
+// Unique per user per day - enforces exactly one record per date
 schema.index({ created_by: 1, date: 1 }, { unique: true });
 
 module.exports = mongoose.model('NutritionHistory', schema);

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Frontend configuration and constants
  * Shared across all React components
  */
@@ -45,8 +45,8 @@ export const SUBSCRIPTION_TIERS = {
 
 // Reusable gold shine class names (defined in globals.css)
 export const GOLD = {
-  shine: 'gold-shine',        // light-sweep — buttons, cards, badges
-  textShine: 'gold-text-shine', // glow-pulse  — amber text, headings
+  shine: 'gold-shine',        // light-sweep - buttons, cards, badges
+  textShine: 'gold-text-shine', // glow-pulse  - amber text, headings
 };
 
 export const ANIMATION_DELAYS = {

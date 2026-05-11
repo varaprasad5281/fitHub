@@ -1,10 +1,20 @@
 import React from 'react';
-import { FileText } from 'lucide-react';
+import { FileText, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Terms() {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-zinc-950 p-6">
       <div className="max-w-4xl mx-auto py-12">
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-white transition-colors mb-6"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </button>
         <div className="flex items-center gap-3 mb-8">
           <FileText className="w-8 h-8 text-amber-400" />
           <h1 className="text-4xl font-bold text-white">Terms & Conditions</h1>
@@ -50,11 +60,12 @@ export default function Terms() {
 
           <section>
             <h2 className="text-2xl font-bold text-white mb-4">4. Subscription & Billing</h2>
+            
             <p className="text-zinc-400 leading-relaxed mb-4">
-              <strong>Free Tier:</strong> Basic features are free forever.
+              <strong>7% Pro:</strong> £12.99/month or £99/year. Includes all Free Tier features plus AI-generated workout plans, full nutrition tracking, coaching insights, and priority leaderboard access. Billed via Stripe. Subscriptions auto-renew unless cancelled. Cancellation takes effect at the end of the current billing period.
             </p>
             <p className="text-zinc-400 leading-relaxed mb-4">
-              <strong>7% Pro:</strong> £12.99/month or £99/year. Billed via Stripe. Subscriptions auto-renew unless cancelled. Cancellation takes effect at the end of the current billing period.
+              <strong>7% Elite:</strong> £24.99/month or £199/year. Includes all Pro features plus elite leaderboard ranking, private friend challenges, advanced AI coaching, profile highlights, and exclusive Elite badges. Billed via Stripe. Subscriptions auto-renew unless cancelled. Cancellation takes effect at the end of the current billing period.
             </p>
             <p className="text-zinc-400 leading-relaxed">
               <strong>Refunds:</strong> We offer refunds within 7 days of purchase if you're not satisfied. Contact us at team@7percent.info.
@@ -139,8 +150,8 @@ export default function Terms() {
             <h2 className="text-2xl font-bold text-white mb-4">Contact Us</h2>
             <p className="text-zinc-400 leading-relaxed">
               Questions about these terms? Contact us at:{' '}
-              <a href="mailto:legal@7percent.info" className="text-amber-400 hover:text-amber-300 underline">
-                legal@7percent.info
+              <a href="mailto:team@7percent.info" className="text-amber-400 hover:text-amber-300 underline">
+                team@7percent.info
               </a>
             </p>
           </section>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Crown, Award, Medal } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -47,6 +47,7 @@ export default function PodiumDisplay({ top3, timeframe = 'weekly', category = '
   };
 
   const PodiumCard = ({ entry, rank, delay }) => {
+    const [imgError, setImgError] = useState(false);
     const heights = { 1: 'h-36 sm:h-48', 2: 'h-32 sm:h-40', 3: 'h-28 sm:h-36' };
     const widths = { 1: 'w-20 sm:w-28', 2: 'w-18 sm:w-28', 3: 'w-18 sm:w-28' };
     const icons = { 1: Crown, 2: Award, 3: Medal };
@@ -68,16 +69,17 @@ export default function PodiumDisplay({ top3, timeframe = 'weekly', category = '
         {/* Profile Picture */}
         <div className={`relative mb-2 sm:mb-3 ${rank === 1 ? 'w-16 h-16 sm:w-24 sm:h-24' : 'w-14 h-14 sm:w-20 sm:h-20'}`}>
           <div className={`w-full h-full rounded-full bg-gradient-to-br ${colors[rank].bg} border-2 ${colors[rank].border} ${colors[rank].glow} flex items-center justify-center overflow-hidden`}>
-            {entry.profile_picture_url ? (
-              <img 
-                src={entry.profile_picture_url} 
-                alt={entry.username} 
-                className="w-full h-full object-cover" 
+            {entry.profile_picture_url && !imgError ? (
+              <img
+                src={entry.profile_picture_url}
+                alt={entry.username}
+                className="w-full h-full object-cover"
                 loading="lazy"
                 decoding="async"
+                onError={() => setImgError(true)}
               />
             ) : (
-              <div className="text-3xl font-black text-zinc-400">
+              <div className={`text-3xl font-black ${rank === 1 ? 'text-amber-400' : rank === 2 ? 'text-zinc-300' : 'text-amber-700'}`}>
                 {entry.username?.[0]?.toUpperCase() || '?'}
               </div>
             )}

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+﻿import { useEffect } from 'react';
 
 /**
  * Performance monitoring component
@@ -9,7 +9,7 @@ export default function PerformanceMonitor() {
     // Track Web Vitals
     if (typeof window !== 'undefined' && 'PerformanceObserver' in window) {
       try {
-        // Guard each observer individually — older browsers/Safari
+        // Guard each observer individually - older browsers/Safari
         // may support PerformanceObserver but not every entry type
         const observers = [];
 
@@ -19,7 +19,7 @@ export default function PerformanceMonitor() {
             obs.observe({ entryTypes: [type] });
             observers.push(obs);
           } catch (_) {
-            // Entry type not supported in this browser — skip silently
+            // Entry type not supported in this browser - skip silently
           }
         };
 

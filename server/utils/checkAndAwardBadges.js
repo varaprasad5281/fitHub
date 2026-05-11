@@ -1,9 +1,9 @@
-/**
+﻿/**
  * checkAndAwardBadges(userEmail)
  *
  * Queries the user's current stats, checks every badge definition,
  * and awards any newly-unlocked badges via UserBadge.create().
- * Safe to call multiple times — duplicate awards are ignored via
+ * Safe to call multiple times - duplicate awards are ignored via
  * the unique index on (created_by, badge_code).
  *
  * Returns: array of newly-awarded badge codes (may be empty).
@@ -70,7 +70,7 @@ async function checkAndAwardBadges(userEmail) {
     // Fetch each required stat once, then evaluate badges
     for (const [reqType, badges] of Object.entries(typeGroups)) {
       const fetcher = STAT_FETCHERS[reqType];
-      if (!fetcher) continue; // unknown requirement type — skip
+      if (!fetcher) continue; // unknown requirement type - skip
 
       const currentValue = await fetcher(userEmail);
 
@@ -89,7 +89,7 @@ async function checkAndAwardBadges(userEmail) {
             const rarityEmoji = { common: '🥉', rare: '🥈', epic: '🥇', legendary: '✨' };
             notify(
               userEmail,
-              `${rarityEmoji[badge.rarity_level] || '🏅'} New badge unlocked: "${badge.name}" — ${badge.description}`,
+              `${rarityEmoji[badge.rarity_level] || '🏅'} New badge unlocked: "${badge.name}" - ${badge.description}`,
               'badge_earned'
             );
           } catch (err) {
@@ -102,7 +102,7 @@ async function checkAndAwardBadges(userEmail) {
       }
     }
   } catch (err) {
-    // Never crash the caller — badge awarding is a background concern
+    // Never crash the caller - badge awarding is a background concern
     console.error('[checkAndAwardBadges] Error:', err.message);
   }
 

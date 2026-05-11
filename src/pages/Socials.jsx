@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { api } from '@/api/client';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { Users, MessageCircle, Loader2, UserPlus, Trophy, Check, X } from 'lucide-react';
@@ -31,7 +31,7 @@ export default function SocialsPage() {
     staleTime: 1000 * 60 * 5,
   });
 
-  // Friends list — uses the correct function route
+  // Friends list - uses the correct function route
   const { data: friends = [], isLoading: friendsLoading } = useQuery({
     queryKey: ['friends', 'accepted'],
     queryFn: async () => {
@@ -123,7 +123,7 @@ export default function SocialsPage() {
     staleTime: 1000 * 60 * 5,
   });
 
-  // Conversations list with unread counts — polls every 10 s so user sees new messages automatically
+  // Conversations list with unread counts - polls every 10 s so user sees new messages automatically
   const { data: conversations = [] } = useQuery({
     queryKey: ['conversations'],
     queryFn: async () => {
@@ -158,7 +158,7 @@ export default function SocialsPage() {
               <p className="text-amber-400 text-xs sm:text-sm font-semibold uppercase tracking-[0.15em]">Social</p>
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Unlock Your Circle 👥</h1>
-            <p className="text-zinc-500">Connect with serious athletes — upgrade Elite to build your network</p>
+            <p className="text-zinc-500">Connect with serious athletes - upgrade Elite to build your network</p>
           </div>
           <SocialsPreview />
         </div>
@@ -231,7 +231,7 @@ export default function SocialsPage() {
             </TabsTrigger>
             <TabsTrigger value="leaderboard" className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 rounded-none h-full py-2.5 data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-400 data-[state=active]:shadow-none">
               <Trophy className="w-4 h-4 flex-shrink-0" />
-              <span className="text-[10px] sm:text-sm leading-tight">Board</span>
+              <span className="text-[10px] sm:text-sm leading-tight">Leaderboard</span>
             </TabsTrigger>
             <TabsTrigger value="chat" className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 rounded-none h-full py-2.5 data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-400 data-[state=active]:shadow-none">
               <div className="relative flex-shrink-0">

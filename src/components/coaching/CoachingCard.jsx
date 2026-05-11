@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { ThumbsUp, ThumbsDown, Clock, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -39,7 +39,7 @@ export default function CoachingCard({ coaching, onFeedback, onFavourite }) {
         </div>
       </div>
 
-      {/* Main content — structured advice or plain-text fallback */}
+      {/* Main content - structured advice or plain-text fallback */}
       {(coaching.advice || coaching.content) && (
         <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 mb-4">
           <p className="text-zinc-100 text-sm leading-relaxed font-medium">

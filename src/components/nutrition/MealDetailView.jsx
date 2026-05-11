@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2, Check } from "lucide-react";
 import { api } from "@/api/client";
@@ -10,47 +10,37 @@ export default function MealDetailView({ meal, mealType, onBack, onAddMeal }) {
   const [ingredients, setIngredients] = useState(null);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
+  const onBackRef = useRef(onBack);
+  useEffect(() => { onBackRef.current = onBack; }, [onBack]);
 
-  React.useEffect(() => {
-    const fetchMealDetails = async () => {
-      try {
-        const response = await api.integrations.Core.InvokeLLM({
-          prompt: `For the meal "${meal.name}": 
-          1. List the key ingredients needed (just main ingredients, be concise)
-          2. Provide step-by-step cooking instructions (keep it brief, 4-6 steps max)
-          
-          Format your response as JSON with two keys:
-          - "ingredients": array of ingredient strings
-          - "instructions": array of instruction step strings`,
-          response_json_schema: {
-            type: "object",
-            properties: {
-              ingredients: {
-                type: "array",
-                items: { type: "string" }
-              },
-              instructions: {
-                type: "array",
-                items: { type: "string" }
-              }
-            },
-            required: ["ingredients", "instructions"]
-          }
-        });
-        
-        setIngredients(response.ingredients || []);
-        setInstructions(response.instructions || []);
-      } catch (error) {
-        console.error('Failed to fetch meal details:', error);
-        toast.error('Could not load meal details');
-        onBack();
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMealDetails();
-  }, [meal.name, onBack]);
+  useEffect(() => {
+    let alive = true;
+    api.integrations.Core.InvokeLLM({
+      prompt: `List the main ingredients and step-by-step cooking instructions for this meal: "${meal.name}" (${meal.calories || ''} calories). Keep it concise - 4-6 ingredients, 4-5 steps.`,
+      response_json_schema: {
+        type: 'object',
+        properties: {
+          ingredients: { type: 'array', items: { type: 'string' } },
+          instructions: { type: 'array', items: { type: 'string' } },
+        },
+        required: ['ingredients', 'instructions'],
+      },
+    })
+      .then(data => {
+        if (!alive) return;
+        const ing = Array.isArray(data?.ingredients) && data.ingredients.length ? data.ingredients : [`${meal.name} (main ingredients)`];
+        const ins = Array.isArray(data?.instructions) && data.instructions.length ? data.instructions : [`Prepare ${meal.name} according to your preference.`];
+        setIngredients(ing);
+        setInstructions(ins);
+      })
+      .catch(() => {
+        if (!alive) return;
+        setIngredients([`${meal.name} ingredients`]);
+        setInstructions([`Prepare ${meal.name} as desired.`]);
+      })
+      .finally(() => { if (alive) setLoading(false); });
+    return () => { alive = false; };
+  }, [meal.name]);
 
   const handleAddMeal = async () => {
     setAdding(true);
@@ -74,7 +64,7 @@ export default function MealDetailView({ meal, mealType, onBack, onAddMeal }) {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4"
       >
         <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-8 max-w-md w-full text-center">
           <Loader2 className="w-8 h-8 text-amber-400 animate-spin mx-auto mb-4" />
@@ -89,7 +79,7 @@ export default function MealDetailView({ meal, mealType, onBack, onAddMeal }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4 overflow-y-auto"
     >
       <motion.div
         initial={{ scale: 0.95, y: 20 }}
@@ -97,22 +87,20 @@ export default function MealDetailView({ meal, mealType, onBack, onAddMeal }) {
         className="bg-zinc-900 rounded-2xl border border-zinc-800 p-6 sm:p-8 max-w-2xl w-full my-8"
       >
         {/* Header */}
-        <div className="flex items-start gap-4 mb-6">
-          <Button
-            variant="ghost"
-            size="icon"
+        <div className="mb-6">
+          <button
+            type="button"
             onClick={onBack}
-            className="text-zinc-500 hover:text-white rounded-lg"
+            className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-white transition-colors mb-4"
           >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div className="flex-1">
-            <h2 className="text-2xl font-bold text-white">{meal.name}</h2>
-            <p className="text-amber-400 font-semibold mt-1">{meal.calories} calories</p>
-            {meal.description && (
-              <p className="text-zinc-400 text-sm mt-2">{meal.description}</p>
-            )}
-          </div>
+            <ArrowLeft className="w-4 h-4" />
+            Back to Plan
+          </button>
+          <h2 className="text-2xl font-bold text-white">{meal.name}</h2>
+          <p className="text-amber-400 font-semibold mt-1">{meal.calories} calories</p>
+          {meal.description && (
+            <p className="text-zinc-400 text-sm mt-2">{meal.description}</p>
+          )}
         </div>
 
         {/* Ingredients */}
@@ -156,18 +144,11 @@ export default function MealDetailView({ meal, mealType, onBack, onAddMeal }) {
         </div>
 
         {/* Actions */}
-        <div className="flex gap-3">
-          <Button
-            variant="outline"
-            onClick={onBack}
-            className="flex-1 border-zinc-700 text-zinc-400 hover:text-white rounded-lg h-11"
-          >
-            Back to Plan
-          </Button>
+        <div>
           <Button
             onClick={handleAddMeal}
             disabled={adding}
-            className="flex-1 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-semibold rounded-lg h-11"
+            className="w-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-semibold rounded-lg h-11"
           >
             {adding ? (
               <>

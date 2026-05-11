@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Friends Page
  * Complete friends + chat + activity system
  */
@@ -64,7 +64,7 @@ export default function FriendsPage() {
             }
           }
 
-          // Load suggestions — server returns { data: [...] }
+          // Load suggestions - server returns { data: [...] }
           const suggestRes = await api.functions.invoke('suggestedFriends');
           setSuggested(suggestRes?.data || []);
         }
@@ -117,7 +117,7 @@ export default function FriendsPage() {
               <p className="text-amber-400 text-xs sm:text-sm font-semibold uppercase tracking-[0.15em]">Friends</p>
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Unlock Your Circle 👥</h1>
-            <p className="text-zinc-500">Connect with serious athletes — upgrade Elite to build your network</p>
+            <p className="text-zinc-500">Connect with serious athletes - upgrade Elite to build your network</p>
           </div>
           <SocialsPreview />
         </div>

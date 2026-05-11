@@ -41,10 +41,6 @@ export default function TrustSignals() {
           transition={{ delay: 0.4 }}
           className="mt-16 max-w-3xl mx-auto text-center rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-500/10 to-zinc-900 p-10"
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 mb-5">
-            <Rocket className="w-3.5 h-3.5 text-amber-400" />
-            <span className="text-amber-400 text-xs font-bold uppercase tracking-widest">Join the 7% Club</span>
-          </div>
           <h3 className="text-white text-2xl sm:text-3xl font-black mb-3">
             Ready to become elite?
           </h3>
@@ -64,7 +60,7 @@ export default function TrustSignals() {
             <Link to={createPageUrl("Pricing")} className="w-full sm:w-auto">
               <button
                 type="button"
-                className="w-full sm:w-auto px-8 py-3 rounded-full border border-zinc-700 text-zinc-300 font-semibold text-sm cursor-pointer active:scale-95 transition-transform"
+                className="w-full sm:w-auto px-8 py-3 rounded-full border border-amber-500 text-amber-400 hover:bg-amber-500/10 font-semibold text-sm cursor-pointer active:scale-95 transition-all"
                 style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
               >
                 View Plans

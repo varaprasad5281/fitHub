@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { api } from '@/api/client';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -62,7 +62,7 @@ export default function Leaderboard() {
      return unsubscribe;
    }, [user?.email, queryClient]);
 
-  // Friends leaderboard data — same source as Socials page so numbers always match
+  // Friends leaderboard data - same source as Socials page so numbers always match
   const { data: friends = [], isLoading: friendsLoading } = useQuery({
     queryKey: ['friends', 'accepted'],
     queryFn: async () => {
@@ -96,6 +96,9 @@ export default function Leaderboard() {
     staleTime: 1000 * 60,
     enabled: !!user,
   });
+
+  const [imgErrors, setImgErrors] = useState(new Set());
+  const markImgError = (id) => setImgErrors(prev => new Set([...prev, id]));
 
   const { data: myProfile } = useQuery({
     queryKey: ['my-profile'],
@@ -233,7 +236,7 @@ export default function Leaderboard() {
               <p className="text-amber-400 text-xs sm:text-sm font-semibold uppercase tracking-[0.15em]">Leaderboard</p>
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Unlock Your Rank 🏆</h1>
-            <p className="text-zinc-500">See where you stand among the 7% — upgrade to Elite to claim your position</p>
+            <p className="text-zinc-500">See where you stand among the 7% - upgrade to Elite to claim your position</p>
           </div>
           <LeaderboardPreview
             topLeaders={leaderboard.slice(0, 5)}
@@ -421,17 +424,18 @@ export default function Leaderboard() {
                             #{rank}
                           </div>
 
-                          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-zinc-800 overflow-hidden flex items-center justify-center shrink-0">
-                            {entry.profile_picture_url ? (
+                          <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden flex items-center justify-center shrink-0 ${entry.profile_picture_url && !imgErrors.has(entry.id) ? 'bg-zinc-800' : 'bg-amber-500/20'}`}>
+                            {entry.profile_picture_url && !imgErrors.has(entry.id) ? (
                               <img
                                 src={entry.profile_picture_url}
                                 alt={entry.username}
                                 className="w-full h-full object-cover"
                                 loading="lazy"
                                 decoding="async"
+                                onError={() => markImgError(entry.id)}
                               />
                             ) : (
-                              <span className="text-zinc-400 font-semibold">
+                              <span className="text-amber-400 font-bold text-xs sm:text-sm">
                                 {entry.username?.[0]?.toUpperCase() || '?'}
                               </span>
                             )}
@@ -479,15 +483,16 @@ export default function Leaderboard() {
                         #{userRank}
                       </div>
 
-                      <div className="w-10 h-10 rounded-full bg-zinc-800 overflow-hidden flex items-center justify-center shrink-0">
-                        {pinnedUser.profile_picture_url ? (
+                      <div className={`w-10 h-10 rounded-full overflow-hidden flex items-center justify-center shrink-0 ${pinnedUser.profile_picture_url && !imgErrors.has(pinnedUser.id) ? 'bg-zinc-800' : 'bg-amber-500/20'}`}>
+                        {pinnedUser.profile_picture_url && !imgErrors.has(pinnedUser.id) ? (
                           <img
                             src={pinnedUser.profile_picture_url}
                             alt={pinnedUser.username}
                             className="w-full h-full object-cover"
+                            onError={() => markImgError(pinnedUser.id)}
                           />
                         ) : (
-                          <span className="text-zinc-400 font-semibold">
+                          <span className="text-amber-400 font-bold">
                             {pinnedUser.username?.[0]?.toUpperCase() || '?'}
                           </span>
                         )}
@@ -577,7 +582,7 @@ export default function Leaderboard() {
                 onSent={() => queryClient.invalidateQueries({ queryKey: ['friendRequests'] })}
               />
 
-              {/* Friends Leaderboard — same data source as Socials page */}
+              {/* Friends Leaderboard - same data source as Socials page */}
               <div>
                 <h3 className="text-white font-semibold mb-4">This Week's Circle Rankings</h3>
                 {friendsLoading ? (

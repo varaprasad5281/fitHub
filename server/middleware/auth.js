@@ -1,4 +1,4 @@
-const jwt = require('jsonwebtoken');
+﻿const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 /**
@@ -26,7 +26,7 @@ const protect = async (req, res, next) => {
 };
 
 /**
- * Optional auth — attaches user if token present, continues regardless.
+ * Optional auth - attaches user if token present, continues regardless.
  */
 const optionalAuth = async (req, res, next) => {
   try {

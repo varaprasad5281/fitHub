@@ -1,9 +1,9 @@
-import React, { createContext, useContext } from 'react';
+﻿import React, { createContext, useContext } from 'react';
 import { translations } from './translations';
 
 const LanguageContext = createContext();
 
-// Language selection is intentionally disabled — the app is English-only for now.
+// Language selection is intentionally disabled - the app is English-only for now.
 // Re-enable by restoring the previous LanguageProvider implementation and the
 // Profile dropdown.
 const LOCKED_LANGUAGE = 'en';

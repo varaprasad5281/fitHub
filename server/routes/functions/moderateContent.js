@@ -1,9 +1,9 @@
-/**
+﻿/**
  * Handles: sanitizeChat, moderateProfilePicture
  * Basic content moderation helpers.
  */
 
-// Simple word-list for chat — extend as needed
+// Simple word-list for chat - extend as needed
 const BLOCKED_WORDS = ['spam', 'hate', 'abuse'];
 
 // ── sanitizeChat ───────────────────────────────────────────────────────────────

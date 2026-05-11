@@ -215,7 +215,7 @@ export default function WorkoutBuilder() {
               onClick={() => setPlanType('single')}
               className={planType === 'single'
                 ? 'bg-amber-500/20 border border-amber-500 text-amber-400 hover:bg-amber-500/30 rounded-full'
-                : 'bg-zinc-900 border border-zinc-700 text-zinc-500 hover:border-zinc-600 hover:text-zinc-400 rounded-full'}
+                : 'bg-zinc-900 border border-zinc-700 text-zinc-400 hover:border-amber-500/50 hover:text-white hover:bg-zinc-800 rounded-full'}
             >
               Single Workout
             </Button>
@@ -223,7 +223,7 @@ export default function WorkoutBuilder() {
               onClick={() => setPlanType('weekly')}
               className={planType === 'weekly'
                 ? 'bg-amber-500/20 border border-amber-500 text-amber-400 hover:bg-amber-500/30 rounded-full'
-                : 'bg-zinc-900 border border-zinc-700 text-zinc-500 hover:border-zinc-600 hover:text-zinc-400 rounded-full'}
+                : 'bg-zinc-900 border border-zinc-700 text-zinc-400 hover:border-amber-500/50 hover:text-white hover:bg-zinc-800 rounded-full'}
             >
               Weekly Plan
             </Button>
@@ -403,22 +403,24 @@ export default function WorkoutBuilder() {
         {/* Generated Workouts */}
         <div>
           <h2 className="text-xl font-bold text-white mb-4">
-            {(workouts.length > 0 ? workouts : cachedWorkouts).some(w => w.day_of_week) ? 'Your Weekly Plan' : 'Your Workout'}
+            {planType === 'weekly' ? 'Your Weekly Plan' : 'Your Workout'}
           </h2>
           {workoutsLoading && workouts.length === 0 && cachedWorkouts.length === 0 ? (
             <div className="text-center py-8">
               <Loader2 className="w-8 h-8 text-amber-400 animate-spin mx-auto" />
             </div>
-          ) : workouts.length === 0 && cachedWorkouts.length === 0 ? (
-            <div className="text-center py-12 rounded-xl border border-zinc-800 bg-zinc-900/30">
-              <Dumbbell className="w-12 h-12 text-zinc-600 mx-auto mb-3" />
-              <p className="text-zinc-500">No workout yet. Generate your personalized workout above!</p>
-            </div>
-          ) : (workouts.length > 0 ? workouts : cachedWorkouts).some(w => w.day_of_week) ? (
+          ) : planType === 'weekly' ? (() => {
+            const weeklyWorkouts = (workouts.length > 0 ? workouts : cachedWorkouts).filter(w => w.day_of_week);
+            if (!weeklyWorkouts.length) return (
+              <div className="text-center py-12 rounded-xl border border-zinc-800 bg-zinc-900/30">
+                <Dumbbell className="w-12 h-12 text-zinc-600 mx-auto mb-3" />
+                <p className="text-zinc-500">No weekly plan yet. Generate your weekly plan above!</p>
+              </div>
+            );
+            return (
             <div className="space-y-4">
                {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map(day => {
-                 const displayWorkouts = workouts.length > 0 ? workouts : cachedWorkouts;
-                 const workout = displayWorkouts.find(w => w.day_of_week === day);
+                 const workout = weeklyWorkouts.find(w => w.day_of_week === day);
                 if (!workout) return null;
                 return (
                   <div key={day}>
@@ -511,9 +513,18 @@ export default function WorkoutBuilder() {
                 );
               })}
             </div>
-          ) : (
+            );
+          })() : (() => {
+            const singleWorkouts = (workouts.length > 0 ? workouts : cachedWorkouts).filter(w => !w.day_of_week);
+            if (!singleWorkouts.length) return (
+              <div className="text-center py-12 rounded-xl border border-zinc-800 bg-zinc-900/30">
+                <Dumbbell className="w-12 h-12 text-zinc-600 mx-auto mb-3" />
+                <p className="text-zinc-500">No workout yet. Generate your personalized workout above!</p>
+              </div>
+            );
+            return (
             <div>
-               {(workouts.length > 0 ? workouts : cachedWorkouts).slice(0, 1).map((workout) => (
+               {singleWorkouts.slice(0, 1).map((workout) => (
                 <div
                   key={workout.id}
                   className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 hover:border-zinc-700 transition-colors"
@@ -602,7 +613,8 @@ export default function WorkoutBuilder() {
                 </div>
               ))}
             </div>
-          )}
+            );
+          })()}
         </div>
 
       </div>

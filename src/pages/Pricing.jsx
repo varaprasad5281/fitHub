@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import SEOHead from '@/components/SEOHead';
 import PricingSection from "@/components/landing/PricingSection";
 import FooterSection from "@/components/landing/FooterSection";
@@ -7,7 +7,7 @@ export default function Pricing() {
   return (
     <div className="min-h-screen bg-zinc-950">
       <SEOHead 
-        title="7% Pricing — Starter, Pro & Elite Discipline Plans"
+        title="7% Pricing - Starter, Pro & Elite Discipline Plans"
         description="Choose your discipline level with 7%. Start free or unlock Pro and Elite for leaderboard competition, advanced analytics, and exclusive challenges."
         ogTitle="7% Pricing Plans"
         ogDescription="Starter, Pro, and Elite plans for fitness discipline."

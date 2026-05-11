@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Replaces: cancelSubscription
  */
 const stripe = require('../../services/stripe');
@@ -15,7 +15,7 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'Subscription is not active' });
   }
 
-  // Cancel at period end — user keeps access until the billing period ends
+  // Cancel at period end - user keeps access until the billing period ends
   await stripe.subscriptions.update(sub.stripe_subscription_id, { cancel_at_period_end: true });
 
   await sub.updateOne({ status: 'cancelled' });

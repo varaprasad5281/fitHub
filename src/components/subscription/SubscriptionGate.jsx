@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+﻿import { useQuery } from '@tanstack/react-query';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { api } from '@/api/client';
@@ -38,7 +38,7 @@ export default function SubscriptionGate({ children }) {
   // Don't gate open pages or while loading
   if (isOpenPath || isLoadingAuth || !user) return <>{children}</>;
 
-  // Still fetching subscription — let through to avoid flash
+  // Still fetching subscription - let through to avoid flash
   if (subLoading) return <>{children}</>;
 
   const sub = subscriptions[0];
@@ -65,7 +65,7 @@ export default function SubscriptionGate({ children }) {
           Unlock 7% Features
         </h1>
         <p className="text-zinc-400 text-sm mb-8 leading-relaxed">
-          Start your <span className="text-amber-400 font-semibold">7-day free trial</span> to access all features. No charge until the trial ends — cancel anytime.
+          Start your <span className="text-amber-400 font-semibold">7-day free trial</span> to access all features. No charge until the trial ends - cancel anytime.
         </p>
 
         {/* Feature list */}

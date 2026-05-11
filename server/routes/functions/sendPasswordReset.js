@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Sends a password reset email with a one-time link.
  * Called by PasswordResetForm on the frontend.
  *
@@ -36,7 +36,7 @@ module.exports = async (req, res) => {
       to: email,
       subject: 'Reset your 7% password',
       from_name: '7% Team',
-      body: `Hi ${user.full_name},\n\nYou requested a password reset. Click the link below:\n\n${resetUrl}\n\nThis link expires in 1 hour. If you didn't request this, ignore this email.\n\n— The 7% Team`,
+      body: `Hi ${user.full_name},\n\nYou requested a password reset. Click the link below:\n\n${resetUrl}\n\nThis link expires in 1 hour. If you didn't request this, ignore this email.\n\n- The 7% Team`,
       html: buildEmail({
         title: 'Reset Your Password',
         preheader: 'Click the button below to set a new password for your 7% account.',
@@ -44,7 +44,7 @@ module.exports = async (req, res) => {
           <p style="margin:0 0 16px 0;color:#ffffff;font-weight:600;font-size:16px;">Hi ${user.full_name},</p>
           <p style="margin:0 0 16px 0;">We received a request to reset the password for your <strong style="color:#f59e0b;">7%</strong> account.</p>
           <p style="margin:0 0 24px 0;">Click the button below to choose a new password. This link is valid for <strong style="color:#ffffff;">1 hour</strong>.</p>
-          <p style="margin:24px 0 0 0;font-size:13px;color:#52525b;">If you didn't request a password reset, you can safely ignore this email — your password won't change.</p>
+          <p style="margin:24px 0 0 0;font-size:13px;color:#52525b;">If you didn't request a password reset, you can safely ignore this email - your password won't change.</p>
         `,
         buttonText: 'Reset My Password',
         buttonUrl: resetUrl,

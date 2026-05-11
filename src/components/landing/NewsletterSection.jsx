@@ -48,9 +48,6 @@ export default function NewsletterSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center">
-            <Sparkles className="w-8 h-8 text-amber-400" />
-          </div>
 
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             Join the 7% Community

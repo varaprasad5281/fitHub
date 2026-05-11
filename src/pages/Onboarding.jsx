@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { api } from '@/api/client';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -120,7 +120,7 @@ export default function Onboarding() {
         password: reg.password,
       });
 
-      // Server auto-creates Profile — update it with the onboarding data
+      // Server auto-creates Profile - update it with the onboarding data
       const profiles = await _api.entities.Profile.list().catch(() => []);
       if (profiles?.[0]) {
         await _api.entities.Profile.update(profiles[0].id, {
@@ -322,7 +322,7 @@ export default function Onboarding() {
     },
     {
       title: "Create your account",
-      subtitle: "Almost there — set up your login details.",
+      subtitle: "Almost there - set up your login details.",
       content: (
         <div className="space-y-4">
           <div>
@@ -455,7 +455,7 @@ export default function Onboarding() {
 
             <p className="text-amber-400 text-xs font-semibold uppercase tracking-[0.2em] mb-2">Step 8 of 8</p>
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2 tracking-tight">One last step 🎉</h2>
-            <p className="text-zinc-500 mb-8 text-sm leading-relaxed">Start your free trial to unlock all features — or skip and upgrade later.</p>
+            <p className="text-zinc-500 mb-8 text-sm leading-relaxed">Start your free trial to unlock all features - or skip and upgrade later.</p>
 
             {/* Pro plan card */}
             <div className="rounded-2xl border-2 border-amber-500/40 bg-amber-500/5 p-6 mb-4">
@@ -468,7 +468,7 @@ export default function Onboarding() {
                 <span className="text-4xl font-black text-green-400">Free</span>
                 <span className="text-green-500/70 text-sm font-semibold ml-2">for 7 days</span>
               </div>
-              <p className="text-zinc-500 text-xs mb-5">then £12.99/month — cancel anytime before trial ends</p>
+              <p className="text-zinc-500 text-xs mb-5">then £12.99/month - cancel anytime before trial ends</p>
 
               <ul className="space-y-2 mb-6">
                 {['🥗 Nutrition tracking & AI meal plans', '💪 Personalised workout plans', '🎯 Daily coaching & guidance', '📊 Progress tracking & streaks'].map(f => (

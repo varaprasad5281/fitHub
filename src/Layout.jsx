@@ -160,7 +160,7 @@ function LayoutContent({ children, currentPageName }) {
     <InteractionAuditPanel />
     <div className="min-h-screen bg-zinc-950">
       {/* Top nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-xl safe-top">
+      <nav className="fixed top-0 left-0 right-0 z-[200] border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-xl safe-top">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link to={createPageUrl("Home")} className="flex items-center gap-2 group">
             <div className="relative">
@@ -205,7 +205,7 @@ function LayoutContent({ children, currentPageName }) {
               {!loading && !user && (
                 <>
                   <Link to="/login">
-                    <Button variant="outline" className="border-amber-500/50 text-amber-400 hover:bg-amber-500/10 hover:border-amber-400 hover:text-amber-300 text-sm rounded-full touch-target transition-colors">
+                    <Button variant="outline" className="border-amber-500/50 text-black-400 hover:bg-amber-500/10 hover:border-amber-400 hover:text-amber-300 text-sm rounded-full touch-target transition-colors">
                       Log in
                     </Button>
                   </Link>

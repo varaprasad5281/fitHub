@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { api } from '@/api/client';
 import { useQuery } from "@tanstack/react-query";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from 'recharts';
@@ -337,7 +337,7 @@ export default function Progress() {
                   </div>
                   <div className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-4">
                     <p className="text-zinc-500 text-xs uppercase tracking-wider mb-1">Goal</p>
-                    <p className="text-2xl font-bold text-amber-400">{weightChange.goal || '—'}</p>
+                    <p className="text-2xl font-bold text-amber-400">{weightChange.goal || '-'}</p>
                   </div>
                 </div>
               </div>

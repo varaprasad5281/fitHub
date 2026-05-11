@@ -1,4 +1,4 @@
-/**
+﻿/**
  * BadgeTooltip
  *
  * A small badge icon that reveals a rich hover card with the badge's
@@ -6,10 +6,10 @@
  * (leaderboard rows, friends list, social tab).
  *
  * Props:
- *   badge  — badge object: { icon, name, rarity_level, description, badge_code }
- *   size   — 'xs' (20px) | 'sm' (26px, default) | 'md' (32px)
- *   align  — 'left' | 'center' | 'right' (tooltip horizontal anchor, default 'center')
- *   above  — bool: open tooltip above (default true) or below the icon
+ *   badge  - badge object: { icon, name, rarity_level, description, badge_code }
+ *   size   - 'xs' (20px) | 'sm' (26px, default) | 'md' (32px)
+ *   align  - 'left' | 'center' | 'right' (tooltip horizontal anchor, default 'center')
+ *   above  - bool: open tooltip above (default true) or below the icon
  */
 
 import React, { useState, useRef } from 'react';
@@ -115,10 +115,10 @@ export default function BadgeTooltip({ badge, size = 'sm', align = 'center', abo
  * Each icon has a hover tooltip via BadgeTooltip.
  *
  * Props:
- *   badges  — array of badge objects (max 3)
- *   size    — passed to BadgeTooltip ('xs' | 'sm' | 'md')
- *   align   — tooltip alignment for the row ('left' | 'center' | 'right')
- *   above   — bool: tooltip opens above (default) or below icons
+ *   badges  - array of badge objects (max 3)
+ *   size    - passed to BadgeTooltip ('xs' | 'sm' | 'md')
+ *   align   - tooltip alignment for the row ('left' | 'center' | 'right')
+ *   above   - bool: tooltip opens above (default) or below icons
  */
 export function BadgeMiniRow({ badges = [], size = 'xs', align = 'center', above = true }) {
   if (!badges || badges.length === 0) return null;

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Friends List Component
  * Shows accepted friends with options
  */
@@ -45,7 +45,7 @@ export default function FriendsList({ onChatClick }) {
       return res?.data || {};
     },
     enabled: friends.length > 0,
-    staleTime: 1000 * 60 * 5, // badges rarely change — 5 min cache
+    staleTime: 1000 * 60 * 5, // badges rarely change - 5 min cache
   });
 
   const removeMutation = useMutation({

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { api } from '@/api/client';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -54,6 +54,7 @@ export default function Nutrition() {
   const [tempMeals, setTempMeals] = useState([]);
   const [selectedMeal, setSelectedMeal] = useState(null);
   const [savingDiet, setSavingDiet] = useState(false);
+  const [dietaryPref, setDietaryPref] = useState('no_preference');
   // Track per-meal-type loading so only the clicked button shows a spinner
   const [addingMealType, setAddingMealType] = useState(null);
   const queryClient = useQueryClient();
@@ -188,7 +189,7 @@ export default function Nutrition() {
         }
       }
 
-      // Save to DB (must succeed — no silent localStorage fallback)
+      // Save to DB (must succeed - no silent localStorage fallback)
       const meal = await api.entities.MealLog.create(mealData);
 
       // Fire-and-forget: goal progress + nutrition history update
@@ -205,14 +206,14 @@ export default function Nutrition() {
       refetchMeals();
       setShowForm(false);
       toast.success('Meal logged!');
-      // Recalculate daily points — awards bonuses for 3 meals logged / calorie target met
+      // Recalculate daily points - awards bonuses for 3 meals logged / calorie target met
       api.functions.invoke('calculateDailyPoints').catch(() => {});
       api.analytics.track({
         eventName: 'meal_logged',
         properties: { meal_type: variables.meal_type }
       });
     },
-    onError: () => toast.error('Failed to save meal — please try again.'),
+    onError: () => toast.error('Failed to save meal - please try again.'),
   });
 
   const deleteMeal = useMutation({
@@ -236,7 +237,7 @@ export default function Nutrition() {
     onError: () => toast.error('Failed to delete meal'),
   });
 
-  // Per-card add handler — only the clicked card shows a spinner
+  // Per-card add handler - only the clicked card shows a spinner
   const addMealFromPlan = async (meal, mealType) => {
     setAddingMealType(mealType);
     try {
@@ -250,14 +251,19 @@ export default function Nutrition() {
   };
 
   const todayPlan = mealPlans[0];
-  const profile = profiles[0]; // used for dietary preference editing
+  const profile = profiles[0];
+
+  // Sync local dropdown from profile once it loads
+  React.useEffect(() => {
+    if (profile?.dietary_preference) setDietaryPref(profile.dietary_preference);
+  }, [profile?.dietary_preference]);
 
   const handleDietaryChange = async (value) => {
+    setDietaryPref(value);
     if (!profile) return;
     setSavingDiet(true);
     await api.entities.Profile.update(profile.id, { dietary_preference: value });
     queryClient.invalidateQueries({ queryKey: ['profile'] });
-    toast.success('Dietary preference updated');
     setSavingDiet(false);
   };
 
@@ -268,17 +274,12 @@ export default function Nutrition() {
       return;
     }
 
-    if (todayPlan) {
-      const confirmRegenerate = window.confirm('Regenerate meal plan for today? This will replace the current plan.');
-      if (!confirmRegenerate) return;
-    }
-
     setGenerating(true);
 
     try {
       const response = await api.functions.invoke('mealPlan', {
         calories: calorieTarget,
-        dietary: profile?.dietary_preference || '',
+        dietary: dietaryPref !== 'no_preference' ? dietaryPref : '',
         allergies: profile?.allergies || '',
         fitnessGoal: profile?.fitness_goal || ''
       });
@@ -481,30 +482,26 @@ export default function Nutrition() {
                 Get a personalised meal plan tailored to your calorie target and dietary preferences.
               </p>
 
-              {profile && (
-                <div className="flex flex-wrap items-center gap-2 mb-4">
-                  <Settings2 className="w-4 h-4 text-zinc-500 flex-shrink-0" />
-                  <Select
-                    value={profile.dietary_preference || 'no_preference'}
-                    onValueChange={handleDietaryChange}
-                    disabled={savingDiet}
-                  >
-                    <SelectTrigger className="flex-1 min-w-[140px] max-w-xs bg-zinc-800/60 border-zinc-700 text-zinc-200 h-9 text-sm">
-                      <SelectValue placeholder="Dietary preference" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-zinc-900 border-zinc-700 text-zinc-200 [&_[role=option]]:text-zinc-200 [&_[role=option]:focus]:bg-amber-500/10 [&_[role=option]:focus]:text-amber-400">
-                      <SelectItem value="no_preference">No Preference</SelectItem>
-                      <SelectItem value="vegetarian">Vegetarian</SelectItem>
-                      <SelectItem value="vegan">Vegan</SelectItem>
-                      <SelectItem value="keto">Keto</SelectItem>
-                      <SelectItem value="paleo">Paleo</SelectItem>
-                      <SelectItem value="mediterranean">Mediterranean</SelectItem>
-                      <SelectItem value="gluten_free">Gluten Free</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {savingDiet && <Loader2 className="w-4 h-4 text-amber-400 animate-spin flex-shrink-0" />}
-                </div>
-              )}
+              <div className="flex flex-wrap items-center gap-2 mb-4">
+                <Settings2 className="w-4 h-4 text-zinc-500 flex-shrink-0" />
+                <Select value={dietaryPref} onValueChange={handleDietaryChange} disabled={savingDiet}>
+                  <SelectTrigger className="flex-1 min-w-[160px] max-w-xs bg-zinc-800/60 border-zinc-700 text-zinc-200 h-9 text-sm">
+                    <SelectValue placeholder="Dietary preference" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-900 border-zinc-700 text-zinc-200 [&_[role=option]]:text-zinc-200 [&_[role=option]:focus]:bg-amber-500/10 [&_[role=option]:focus]:text-amber-400">
+                    <SelectItem value="no_preference">No Preference</SelectItem>
+                    <SelectItem value="vegetarian">Vegetarian</SelectItem>
+                    <SelectItem value="vegan">Vegan</SelectItem>
+                    <SelectItem value="keto">Keto</SelectItem>
+                    <SelectItem value="paleo">Paleo</SelectItem>
+                    <SelectItem value="mediterranean">Mediterranean</SelectItem>
+                    <SelectItem value="gluten_free">Gluten Free</SelectItem>
+                    <SelectItem value="dairy_free">Dairy Free</SelectItem>
+                    <SelectItem value="high_protein">High Protein</SelectItem>
+                  </SelectContent>
+                </Select>
+                {savingDiet && <Loader2 className="w-4 h-4 text-amber-400 animate-spin flex-shrink-0" />}
+              </div>
 
               <Button
                 onClick={handleGenerateMealPlan}

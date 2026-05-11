@@ -1,5 +1,5 @@
-/**
- * generateRecipeSuggestions — AI-powered recipe suggestions based on ingredients or goal.
+﻿/**
+ * generateRecipeSuggestions - AI-powered recipe suggestions based on ingredients or goal.
  */
 
 const { invokeLLM } = require('../../services/ai');

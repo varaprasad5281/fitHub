@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,7 @@ export default function PricingSection({ fullPage = false }) {
     staleTime: 1000 * 60 * 5,
   });
   const hasUsedTrial = activeSub(subscriptions)?.had_trial === true;
-  // Track which specific plan is loading — null means nothing is loading
+  // Track which specific plan is loading - null means nothing is loading
   const [upgradingPlan, setUpgradingPlan] = useState(/** @type {string|null} */(null));
 
   /** @param {string} billingPeriod */
@@ -150,7 +150,7 @@ export default function PricingSection({ fullPage = false }) {
             <span className="text-green-400 text-sm font-semibold">7-day free trial on Pro. No card surprises.</span>
           </div>
           <p className="text-zinc-600 text-sm">
-            Over 10,000 people building the 7% habit 🔥
+            Join the athletes who refuse to quit 💪
           </p>
         </motion.div>
 
@@ -298,7 +298,7 @@ export default function PricingSection({ fullPage = false }) {
 
               <p className="text-center text-zinc-600 text-xs mt-3">
                 {plan.trialUsed
-                  ? 'Free trial already used — billed immediately'
+                  ? 'Free trial already used - billed immediately'
                   : plan.trial
                     ? '7-day free trial • Cancel anytime'
                     : 'Cancel anytime • No commitment'}

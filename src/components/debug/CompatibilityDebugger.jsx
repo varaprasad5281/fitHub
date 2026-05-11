@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Copy, Download, AlertCircle, CheckCircle2, Clock, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -31,7 +31,7 @@ export function useCompatibilityDebugger() {
     logsRef.current.push(log);
     setLogs([...logsRef.current]);
     
-    console.log(`[7% Compat] ${action} — ${status}`, details || '');
+    console.log(`[7% Compat] ${action} - ${status}`, details || '');
   }, []);
 
   const clearLogs = useCallback(() => {
@@ -47,7 +47,7 @@ Platform: ${navigator.platform}
 Language: ${navigator.language}
 
 LOGS:
-${logs.map(l => `[${l.timestamp}] ${l.action} — ${l.status}${l.details ? `\n  Details: ${JSON.stringify(l.details)}` : ''}`).join('\n')}
+${logs.map(l => `[${l.timestamp}] ${l.action} - ${l.status}${l.details ? `\n  Details: ${JSON.stringify(l.details)}` : ''}`).join('\n')}
 
 BROWSER INFO:
 - User Agent: ${navigator.userAgent}

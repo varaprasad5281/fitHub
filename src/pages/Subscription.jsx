@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { api } from '@/api/client';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,7 @@ export default function Subscription() {
     });
 
     // When landing here after a successful Stripe checkout, verify payment directly
-    // with Stripe and update the subscription immediately — no webhook dependency.
+    // with Stripe and update the subscription immediately - no webhook dependency.
     const params = new URLSearchParams(window.location.search);
     const sessionId = params.get('session_id');
     if (params.get('checkout') === 'success' && sessionId) {
@@ -33,7 +33,7 @@ export default function Subscription() {
           toast.success('Payment successful! Your plan is now active 🎉');
         })
         .catch(() => {
-          // Fallback: just refetch — webhook may have already updated it
+          // Fallback: just refetch - webhook may have already updated it
           queryClient.invalidateQueries({ queryKey: ['subscription'] });
           toast.success('Subscription activated!');
         });
@@ -257,7 +257,7 @@ export default function Subscription() {
                {isPastDue
                  ? 'Payment Failed'
                  : isTrial
-                 ? `Trial — ${trialDaysRemaining}d left`
+                 ? `Trial - ${trialDaysRemaining}d left`
                  : isGracePeriod
                  ? `Cancels ${new Date(subscription.end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`
                  : isActive
@@ -272,7 +272,7 @@ export default function Subscription() {
             <div className="flex items-start gap-3 p-4 rounded-xl bg-blue-500/5 border border-blue-500/20 mb-4">
               <AlertCircle className="w-5 h-5 text-blue-400 mt-0.5 shrink-0" />
               <div>
-                <p className="text-white font-medium text-sm mb-1">Free Trial Active — {trialDaysRemaining} day{trialDaysRemaining !== 1 ? 's' : ''} remaining</p>
+                <p className="text-white font-medium text-sm mb-1">Free Trial Active - {trialDaysRemaining} day{trialDaysRemaining !== 1 ? 's' : ''} remaining</p>
                 <p className="text-zinc-400 text-xs">No charge yet. Your card will be billed automatically when the trial ends. Cancel anytime before then.</p>
               </div>
             </div>
@@ -290,7 +290,7 @@ export default function Subscription() {
                   <li>• Global leaderboard access</li>
                   <li>• Weekly competitive challenges</li>
                   <li>• Badge & achievement system</li>
-                  {!isElite && <li>• ⚠️ Social &amp; competitive features not included — upgrade to Elite</li>}
+                  {!isElite && <li>• ⚠️ Social &amp; competitive features not included - upgrade to Elite</li>}
                   <li>• Streak multipliers active</li>
                   {isElite && (
                     <>
@@ -307,7 +307,7 @@ export default function Subscription() {
 
           {isTrial && subscription?.trial_end && (
             <p className="text-blue-400/70 text-sm">
-              Trial ends {new Date(subscription.trial_end).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} — card will be charged automatically
+              Trial ends {new Date(subscription.trial_end).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} - card will be charged automatically
             </p>
           )}
           {!isTrial && subscription?.start_date && (

@@ -68,8 +68,7 @@ export default function WeightTracker({ weight = {}, onLogWeight, isLoading = fa
             </Button>
             <Button
               onClick={() => setShowForm(false)}
-              variant="outline"
-              className="flex-1"
+              className="flex-1 bg-red-600/20 border border-red-500/50 text-red-400 hover:bg-red-600/30 hover:border-red-500 rounded-xl h-11"
             >
               Cancel
             </Button>

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * syncSubscription
  *
  * Retrieves the user's Stripe subscription, maps the price ID back to
@@ -52,7 +52,7 @@ module.exports = async (req, res) => {
   const billingPeriod = PRICE_TO_PLAN[priceId];
 
   if (!billingPeriod) {
-    console.warn('[syncSubscription] Unknown price ID:', priceId, '— cannot map to plan');
+    console.warn('[syncSubscription] Unknown price ID:', priceId, '- cannot map to plan');
     return res.json({ success: false, message: `Unknown price ID: ${priceId}` });
   }
 
