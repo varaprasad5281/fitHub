@@ -4,15 +4,15 @@ import { useNavigate } from 'react-router-dom';
 
 export default function Privacy() {
   const navigate = useNavigate();
-
   return (
     <div className="min-h-screen bg-zinc-950 p-6">
       <div className="max-w-4xl mx-auto py-12">
         <button
+          type="button"
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-zinc-400 hover:text-white mb-8 transition-colors"
+          className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-white transition-colors mb-6"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-4 h-4" />
           Back
         </button>
         <div className="flex items-center gap-3 mb-8">
