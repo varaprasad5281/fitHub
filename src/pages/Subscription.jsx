@@ -347,19 +347,12 @@ export default function Subscription() {
                     Downgrade to Pro (Yearly)
                   </button>
                 )}
-                {isTrial ? (
+                {isTrial && (
                   <button
                     onClick={handleCancelClick}
                     className="w-full flex items-center justify-center h-11 rounded-xl border border-red-500/30 bg-transparent text-red-400 hover:bg-red-500/10 transition-colors font-medium text-sm"
                   >
                     Cancel Free Trial
-                  </button>
-                ) : (isPro || isElite) && (
-                  <button
-                    onClick={handleDowngradeContact}
-                    className="w-full flex items-center justify-center h-11 rounded-xl border border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800 transition-colors font-medium text-sm"
-                  >
-                    Downgrade to Free
                   </button>
                 )}
               </div>

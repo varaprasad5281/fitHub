@@ -43,7 +43,7 @@ const appPages = [
   { name: "Profile", path: "Profile", icon: LayoutDashboard, description: "Overview & stats" },
   { name: "Nutrition", path: "Nutrition", icon: Utensils, description: "Meal tracking" },
   { name: "Workouts", path: "WorkoutBuilder", icon: Dumbbell, description: "Training plans" },
-  { name: "Coaching", path: "Coaching", icon: Sparkles, description: "AI guidance" },
+  { name: "Coaching", path: "Coaching", icon: Sparkles, description: "Guidance" },
   { name: "Challenges", path: "Challenges", icon: Trophy, description: "Compete & win" },
   { name: "Leaderboard", path: "Leaderboard", icon: Trophy, description: "Rankings" },
   { name: "Badges", path: "Badges", icon: Award, description: "Achievements" },

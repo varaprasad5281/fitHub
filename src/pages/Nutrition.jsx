@@ -607,7 +607,7 @@ export default function Nutrition() {
                         <th className="text-right text-blue-400 font-semibold px-4 py-3 uppercase tracking-wider text-xs">Protein</th>
                         <th className="text-right text-green-400 font-semibold px-4 py-3 uppercase tracking-wider text-xs">Carbs</th>
                         <th className="text-right text-orange-400 font-semibold px-4 py-3 uppercase tracking-wider text-xs">Fats</th>
-                        <th className="text-center text-zinc-400 font-semibold px-4 py-3 uppercase tracking-wider text-xs">vs Target</th>
+                        <th className="text-center text-zinc-400 font-semibold px-4 py-3 uppercase tracking-wider text-xs">Target</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-800/60">
