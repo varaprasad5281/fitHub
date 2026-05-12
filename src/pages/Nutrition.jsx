@@ -602,7 +602,7 @@ export default function Nutrition() {
                     <thead>
                       <tr className="border-b border-zinc-800 bg-zinc-900/80">
                         <th className="text-left text-zinc-400 font-semibold px-4 py-3 uppercase tracking-wider text-xs">Date</th>
-                        <th className="text-center text-zinc-400 font-semibold px-4 py-3 uppercase tracking-wider text-xs"># Meals</th>
+                        <th className="text-center text-zinc-400 font-semibold px-4 py-3 uppercase tracking-wider text-xs">Meals</th>
                         <th className="text-right text-amber-400 font-semibold px-4 py-3 uppercase tracking-wider text-xs">Calories</th>
                         <th className="text-right text-blue-400 font-semibold px-4 py-3 uppercase tracking-wider text-xs">Protein</th>
                         <th className="text-right text-green-400 font-semibold px-4 py-3 uppercase tracking-wider text-xs">Carbs</th>
