@@ -2,7 +2,7 @@
 import { api } from '@/api/client';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LogIn, Calendar, Eye, EyeOff, CheckCircle2, XCircle, Sparkles, Loader2, CreditCard, SkipForward } from "lucide-react";
+import { LogIn, Calendar, Eye, EyeOff, CheckCircle2, XCircle, Sparkles, Loader2, CreditCard, SkipForward, ArrowLeft } from "lucide-react";
 import OnboardingStep from "@/components/onboarding/OnboardingStep";
 import OptionGrid from "@/components/onboarding/OptionGrid";
 import { Button } from "@/components/ui/button";
@@ -414,6 +414,14 @@ export default function Onboarding() {
 
   return (
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4 sm:p-6">
+      <button
+        type="button"
+        onClick={() => step > 0 ? setStep(s => s - 1) : navigate(-1)}
+        className="absolute top-4 left-4 flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors text-sm"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Back
+      </button>
       <div className="w-full max-w-lg">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">

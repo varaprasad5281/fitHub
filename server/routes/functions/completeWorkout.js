@@ -6,7 +6,7 @@ const { notify } = require('../../utils/notify');
 const checkAndAwardBadges = require('../../utils/checkAndAwardBadges');
 
 const MAX_HISTORY = 7;
-const DIFFICULTY_POINTS = { beginner: 25, intermediate: 50, advanced: 100 };
+const DIFFICULTY_POINTS = { beginner: 10, intermediate: 20, advanced: 30 };
 
 module.exports = async (req, res) => {
   const userEmail = req.user.email;
@@ -18,7 +18,7 @@ module.exports = async (req, res) => {
   if (!workout) return res.status(404).json({ error: 'Workout not found' });
 
   const today = new Date().toISOString().split('T')[0];
-  const pointsEarned = DIFFICULTY_POINTS[workout.difficulty] || 50;
+  const pointsEarned = DIFFICULTY_POINTS[workout.difficulty] || 10;
 
   // One per day - delete any existing completed workout for today before marking this one
   await Workout.deleteMany({

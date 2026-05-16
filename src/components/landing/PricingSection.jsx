@@ -7,6 +7,7 @@ import { useCurrency } from "@/components/hooks/useCurrency";
 import { Loader2 } from "lucide-react";
 import { api } from '@/api/client';
 import { activeSub } from '@/lib/subscriptionUtils';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * @param {{ fullPage?: boolean, onUpgrade?: (period: string) => void }} props
@@ -14,6 +15,7 @@ import { activeSub } from '@/lib/subscriptionUtils';
 export default function PricingSection({ fullPage = false }) {
   const [billing, setBilling] = useState('monthly');
   const { formatPrice } = useCurrency();
+  const navigate = useNavigate();
 
   // Detect if the logged-in user has already used their free trial
   const { data: authUser } = useQuery({
@@ -48,11 +50,18 @@ export default function PricingSection({ fullPage = false }) {
         const user = await api.auth.me();
         userEmail = user?.email;
       } else {
-        userEmail = prompt('Enter your email to proceed with checkout:');
-        if (!userEmail || !userEmail.includes('@')) {
-          toast.error('Valid email required to proceed');
-          return;
-        }
+        setUpgradingPlan(null);
+        sessionStorage.setItem('pending_plan', billingPeriod);
+        toast('Please sign in or create an account to proceed', {
+          description: 'You need an account to subscribe to a plan.',
+          action: {
+            label: 'Sign In',
+            onClick: () => navigate('/login'),
+          },
+          duration: 5000,
+        });
+        navigate('/login');
+        return;
       }
 
       if (!userEmail) {
@@ -84,10 +93,12 @@ export default function PricingSection({ fullPage = false }) {
   const plans = [
     {
       name: "7% Pro",
+      monthlyGBP: 12.99,
       priceGBP: billing === 'monthly' ? 12.99 : 8.25,
       period: "/month",
       yearlyBillingGBP: 99,
-      savingsGBP: 56,
+      savingsGBP: 57,
+      savingsPct: 36,
       quote: "Most popular. Track, train, and stay consistent.",
       features: [
         "🥗 Nutrition tracking & meal plans",
@@ -97,8 +108,8 @@ export default function PricingSection({ fullPage = false }) {
       noFeatures: [],
       limits: null,
       cta: hasUsedTrial
-        ? (billing === 'monthly' ? "Subscribe Now" : "Subscribe & Save 36%")
-        : (billing === 'monthly' ? "Start Free Trial" : "Start Free Trial. Save 36%"),
+        ? "Subscribe Now"
+        : "Start Free Trial",
       highlight: false,
       badge: hasUsedTrial ? null : "7 DAY FREE TRIAL",
       trial: !hasUsedTrial,
@@ -106,11 +117,13 @@ export default function PricingSection({ fullPage = false }) {
     },
     {
       name: "7% Elite",
+      monthlyGBP: 24.99,
       priceGBP: billing === 'monthly' ? 24.99 : 16.58,
-      wasGBP: billing === 'monthly' ? 36.99 : 24.99,
+      wasGBP: billing === 'monthly' ? 36.99 : null,
       period: "/month",
       yearlyBillingGBP: 199,
-      savingsGBP: 100,
+      savingsGBP: 101,
+      savingsPct: 33,
       quote: "The 1% of the 7%. Serious athletes only.",
       features: [
         "✅ Everything in Pro, plus:",
@@ -120,7 +133,7 @@ export default function PricingSection({ fullPage = false }) {
         "🎯 Challenges & competitions",
       ],
       limits: null,
-      cta: billing === 'monthly' ? "Go Elite" : "Go Elite. Save 33%",
+      cta: "Go Elite",
       highlight: true,
       badge: "BEST VALUE"
     }
@@ -180,7 +193,7 @@ export default function PricingSection({ fullPage = false }) {
             >
               Yearly
               <span className="absolute -top-2 -right-2 px-2 py-0.5 rounded-full bg-green-500 text-black text-[10px] font-bold uppercase pointer-events-none">
-                Best
+                Save 36%
               </span>
             </button>
           </div>
@@ -221,30 +234,48 @@ export default function PricingSection({ fullPage = false }) {
                 <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">{plan.name}</h3>
                 {plan.trial ? (
                   <div className="mb-1">
-                    <div className="flex items-baseline gap-1">
+                    <div className="flex items-baseline gap-2 flex-wrap">
                       <span className="text-4xl sm:text-5xl font-black text-green-400">Free</span>
                       <span className="text-green-500/70 text-sm font-semibold">7-day trial</span>
                     </div>
                     <p className="text-zinc-500 text-xs mt-1">
-                      then {formatPrice(plan.priceGBP)}/month
-                      {billing === 'yearly' && plan.yearlyBillingGBP && (
-                        <span className="text-green-400 font-semibold ml-1">· Save {formatPrice(plan.savingsGBP)}/yr on annual</span>
+                      then {formatPrice(plan.monthlyGBP)}/month
+                      {billing === 'yearly' && (
+                        <span className="text-zinc-500 ml-1">· billed {formatPrice(plan.yearlyBillingGBP)}/yr</span>
                       )}
                     </p>
+                    {billing === 'yearly' && (
+                      <div className="flex items-center gap-2 mt-2 flex-wrap">
+                        <span className="px-2 py-0.5 rounded-full bg-green-500/15 border border-green-500/30 text-green-400 text-[11px] font-bold">
+                          Save {plan.savingsPct}%
+                        </span>
+                        <span className="text-green-400 text-xs font-semibold">
+                          You save {formatPrice(plan.savingsGBP)}/year
+                        </span>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="mb-1">
                     {plan.wasGBP && (
-                      <span className="text-zinc-400 text-2xl sm:text-3xl font-bold decoration-red-500 decoration-2 line-through mr-1">
+                      <span className="text-zinc-500 text-xl sm:text-2xl font-semibold line-through mr-1">
                         {formatPrice(plan.wasGBP)}
                       </span>
                     )}
-                    <div className="flex items-baseline gap-1">
+                    <div className="flex items-baseline gap-2 flex-wrap">
                       <span className="text-4xl sm:text-5xl font-black text-white">{formatPrice(plan.priceGBP)}</span>
                       <span className="text-zinc-500 text-base sm:text-lg">{plan.period}</span>
+                      {billing === 'yearly' && (
+                        <span className="px-2 py-0.5 rounded-full bg-green-500/15 border border-green-500/30 text-green-400 text-[11px] font-bold">
+                          Save {plan.savingsPct}%
+                        </span>
+                      )}
                     </div>
-                    {plan.yearlyBillingGBP && billing === 'yearly' && (
-                      <p className="text-green-400 text-xs font-semibold mt-1">Billed {formatPrice(plan.yearlyBillingGBP)}/year · Save {formatPrice(plan.savingsGBP)}</p>
+                    {billing === 'yearly' && (
+                      <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                        <span className="text-zinc-500 text-xs">Billed {formatPrice(plan.yearlyBillingGBP)}/year</span>
+                        <span className="text-green-400 text-xs font-bold">· You save {formatPrice(plan.savingsGBP)}</span>
+                      </div>
                     )}
                   </div>
                 )}

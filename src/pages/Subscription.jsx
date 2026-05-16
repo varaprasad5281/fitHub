@@ -154,17 +154,6 @@ export default function Subscription() {
     setShowCancelModal(true);
   };
 
-  const handleDowngradeContact = () => {
-    toast.info('To downgrade your plan, please contact our support team.', {
-      description: 'Email us at team@7percent.info and we\'ll process your request within 24 hours.',
-      duration: 8000,
-      action: {
-        label: 'Email Support',
-        onClick: () => window.open('mailto:team@7percent.info?subject=Plan%20Downgrade%20Request', '_blank'),
-      },
-    });
-  };
-
   const handleConfirmCancel = async () => {
     await withActionDebug('Cancel Subscription', async () => {
       await api.functions.invoke('cancelSubscription');
@@ -327,36 +316,14 @@ export default function Subscription() {
               <ExternalLink className="w-4 h-4" /> Manage Billing
             </button>
 
-            {/* Downgrade Options */}
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6">
-              <h3 className="text-white font-semibold mb-4">Change Plan</h3>
-              <div className="space-y-3">
-                {isElite && (
-                  <button
-                    onClick={handleDowngradeContact}
-                    className="w-full flex items-center justify-center gap-2 h-11 rounded-xl border border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800 transition-colors font-medium text-sm"
-                  >
-                    Downgrade to Pro (Monthly)
-                  </button>
-                )}
-                {isElite && (
-                  <button
-                    onClick={handleDowngradeContact}
-                    className="w-full flex items-center justify-center gap-2 h-11 rounded-xl border border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800 transition-colors font-medium text-sm"
-                  >
-                    Downgrade to Pro (Yearly)
-                  </button>
-                )}
-                {isTrial && (
-                  <button
-                    onClick={handleCancelClick}
-                    className="w-full flex items-center justify-center h-11 rounded-xl border border-red-500/30 bg-transparent text-red-400 hover:bg-red-500/10 transition-colors font-medium text-sm"
-                  >
-                    Cancel Free Trial
-                  </button>
-                )}
-              </div>
-            </div>
+            {isTrial && (
+              <button
+                onClick={handleCancelClick}
+                className="w-full flex items-center justify-center h-11 rounded-xl border border-red-500/30 bg-transparent text-red-400 hover:bg-red-500/10 transition-colors font-medium text-sm"
+              >
+                Cancel Free Trial
+              </button>
+            )}
 
             {!isTrial && (
               <button

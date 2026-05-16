@@ -27,7 +27,7 @@ const handlers = {
   generateWorkoutFromProfile:   require('./functions/generatePersonalizedWorkout'),
   generateWorkoutRateLimited:   require('./functions/generatePersonalizedWorkout'),
   generateInitialWorkout:       require('./functions/generatePersonalizedWorkout'),
-  generateWeeklyWorkout:        require('./functions/generatePersonalizedWorkout'),
+  generateWeeklyWorkout:        require('./functions/generateWeeklyWorkout'),
 
   // Coaching
   generateDailyCoaching:        require('./functions/generateDailyCoaching'),

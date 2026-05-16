@@ -33,24 +33,29 @@ module.exports = async (req, res) => {
   const isPro = billingPeriod.startsWith('pro_');
   const origin = req.headers.origin || req.headers.referer?.split('/').slice(0, 3).join('/') || '';
 
-  // Determine trial eligibility for Pro plans
+  // Look up existing subscription for this user (needed for both guard + trial logic)
+  const sub = await Subscription.findOne({ created_by: userEmail });
+
+  const isSubActive = sub && (sub.status === 'active' || sub.status === 'trial');
+  const isEliteMember = isSubActive &&
+    (sub.plan === 'elite_monthly' || sub.plan === 'elite_yearly');
+
+  // Block Elite members from subscribing to a Pro plan (no downgrade via checkout)
+  if (isEliteMember && isPro) {
+    idempotencyStore.delete(idempotencyKey);
+    return res.status(400).json({ error: 'You are already on the Elite plan. To change your plan, use Manage Billing.' });
+  }
+
+  // Block if they already have this exact plan active or on trial
+  const isSamePlanActive = isSubActive && sub.plan === billingPeriod;
+  if (isSamePlanActive) {
+    idempotencyStore.delete(idempotencyKey);
+    return res.status(400).json({ error: 'You are already subscribed to this plan. Manage it from the Subscription page.' });
+  }
+
+  // Trial eligibility: only for Pro plans, only if they have never had a trial
   let eligibleForTrial = false;
   if (isPro) {
-    const sub = await Subscription.findOne({ created_by: userEmail });
-
-    const isCurrentlyActive = sub && (
-      sub.status === 'active' || sub.status === 'trial' ||
-      (sub.status === 'cancelled' && sub.end_date && new Date(sub.end_date) > new Date())
-    ) && (sub.plan === 'pro_monthly' || sub.plan === 'pro_yearly' ||
-          sub.plan === 'elite_monthly' || sub.plan === 'elite_yearly');
-
-    if (isCurrentlyActive) {
-      // User already has a live paid subscription - don't create a new checkout
-      idempotencyStore.delete(idempotencyKey);
-      return res.status(400).json({ error: 'You already have an active subscription. Manage it from the Subscription page.' });
-    }
-
-    // Allow checkout - but only grant a trial if they haven't had one before
     eligibleForTrial = !sub?.had_trial;
   }
 

@@ -21,6 +21,7 @@ const workoutSchema = new mongoose.Schema({
   equipment: String,
   personalization_notes: String,
   image_url: String,
+  day_of_week: { type: String, enum: ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'] },
   is_completed: { type: Boolean, default: false },
   completed_date: { type: String }, // YYYY-MM-DD
 }, { timestamps: true });

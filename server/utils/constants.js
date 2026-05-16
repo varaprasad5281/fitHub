@@ -50,10 +50,10 @@ const PLANS = {
 };
 
 const PRICE_MAP = {
-  pro_monthly: process.env.STRIPE_PRICE_PRO_MONTHLY || 'price_1TPxvUDnPcosh0zXWaxTeACG',
-  pro_yearly: process.env.STRIPE_PRICE_PRO_YEARLY || 'price_1TPxyPDnPcosh0zXVsW0oeJT',
-  elite_monthly: process.env.STRIPE_PRICE_ELITE_MONTHLY || 'price_1TPxzADnPcosh0zXSEK45dWU',
-  elite_yearly: process.env.STRIPE_PRICE_ELITE_YEARLY || 'price_1TPxzYDnPcosh0zXe3xIhFES',
+  pro_monthly: process.env.STRIPE_PRICE_PRO_MONTHLY || 'price_1T0ArsDELQ2VxPfdUDBXE7AG',
+  pro_yearly: process.env.STRIPE_PRICE_PRO_YEARLY || 'price_1T0BKHDELQ2VxPfdoiLuP8Zx',
+  elite_monthly: process.env.STRIPE_PRICE_ELITE_MONTHLY || 'price_1T0C7zDELQ2VxPfdd2wDQ7v9',
+  elite_yearly: process.env.STRIPE_PRICE_ELITE_YEARLY || 'price_1T0C7zDELQ2VxPfdttBUeBuJ',
 };
 
 const LEVEL_THRESHOLDS = {

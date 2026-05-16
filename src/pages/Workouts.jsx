@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import {
   Dumbbell, Loader2, Sparkles, History, X, CheckCircle,
-  Clock, Flame, CalendarDays, Settings2, Play, Timer
+  Clock, Flame, CalendarDays, Settings2, Play, Timer, Lock
 } from "lucide-react";
 import WorkoutDetailModal from "@/components/workout/WorkoutDetailModal";
 import WorkoutPreview from "@/components/conversion/WorkoutPreview";
@@ -40,10 +40,13 @@ function CustomizePanel({ params, setParams, type }) {
           <Select value={params.days_per_week} onValueChange={v => setParams({ ...params, days_per_week: v })}>
             <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white"><SelectValue placeholder="Select days" /></SelectTrigger>
             <SelectContent>
+              <SelectItem value="1">1 day / week</SelectItem>
+              <SelectItem value="2">2 days / week</SelectItem>
               <SelectItem value="3">3 days / week</SelectItem>
               <SelectItem value="4">4 days / week</SelectItem>
               <SelectItem value="5">5 days / week</SelectItem>
               <SelectItem value="6">6 days / week</SelectItem>
+              <SelectItem value="7">7 days / week</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -125,16 +128,37 @@ function CustomizePanel({ params, setParams, type }) {
 const CustomizePanelMemo = memo(CustomizePanel);
 
 // WorkoutTimerCard owns its own timer — parent never ticks, so dropdowns stay open
-function WorkoutTimerCard({ workout, onComplete, isCompleting }) {
-  const [startTime, setStartTime] = useState(null);
+function WorkoutTimerCard({ workout, onComplete, isCompleting, locked = false }) {
+  const STORAGE_KEY = `wk_timer_${workout.id || workout._id}`;
   const totalSecs = (workout.estimated_duration || 30) * 60;
   const [, setTick] = useState(0);
   const tickRef = useRef(null);
 
+  // Restore startTime from localStorage so a page refresh continues the timer
+  const [startTime, setStartTime] = useState(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored ? Number(stored) : null;
+    } catch { return null; }
+  });
+
   const startTimer = () => {
-    setStartTime(Date.now());
+    const now = Date.now();
+    try { localStorage.setItem(STORAGE_KEY, String(now)); } catch {}
+    setStartTime(now);
     tickRef.current = setInterval(() => setTick(t => t + 1), 1000);
   };
+
+  // On mount: if a timer was already running (restored from localStorage), resume ticking
+  useEffect(() => {
+    if (startTime && !tickRef.current) {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      if (elapsed < totalSecs) {
+        tickRef.current = setInterval(() => setTick(t => t + 1), 1000);
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => () => { if (tickRef.current) clearInterval(tickRef.current); }, []);
 
@@ -147,16 +171,22 @@ function WorkoutTimerCard({ workout, onComplete, isCompleting }) {
     progress: startTime ? Math.min(100, (elapsed / totalSecs) * 100) : 0,
   };
 
-  // Stop interval once done
+  // Stop interval once done and clear persisted timer
   useEffect(() => {
     if (timer.done && tickRef.current) {
       clearInterval(tickRef.current);
       tickRef.current = null;
+      try { localStorage.removeItem(STORAGE_KEY); } catch {}
     }
   }, [timer.done]);
 
+  const handleComplete = () => {
+    try { localStorage.removeItem(STORAGE_KEY); } catch {}
+    onComplete();
+  };
+
   return (
-    <div className={`rounded-xl border p-4 sm:p-5 ${workout.is_completed ? 'border-green-500/30 bg-green-500/5' : 'border-zinc-800 bg-zinc-900/50'}`}>
+    <div className={`rounded-xl border p-4 sm:p-5 ${workout.is_completed ? 'border-green-500/30 bg-green-500/5' : locked ? 'border-zinc-800/50 bg-zinc-900/20 opacity-60' : 'border-zinc-800 bg-zinc-900/50'}`}>
       <div className="flex items-start gap-3 mb-4 flex-wrap">
         <div className="flex-1 min-w-0">
           <p className="text-white font-semibold text-base truncate mb-2">{workout.workout_name}</p>
@@ -201,7 +231,14 @@ function WorkoutTimerCard({ workout, onComplete, isCompleting }) {
         </div>
       )}
 
-      {!workout.is_completed && (
+      {!workout.is_completed && locked && (
+        <div className="pt-3 border-t border-zinc-800/50 flex items-center gap-2 text-zinc-600">
+          <Lock className="w-4 h-4 shrink-0" />
+          <span className="text-xs">Complete the previous workout to unlock this one</span>
+        </div>
+      )}
+
+      {!workout.is_completed && !locked && (
         <div className="pt-3 border-t border-zinc-800">
           {!timer.started ? (
             <div className="flex items-center gap-3">
@@ -215,7 +252,7 @@ function WorkoutTimerCard({ workout, onComplete, isCompleting }) {
             </div>
           ) : timer.done ? (
             <Button
-              onClick={onComplete}
+              onClick={handleComplete}
               disabled={isCompleting}
               className="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-semibold rounded-full px-6 h-9 text-sm"
             >
@@ -261,7 +298,7 @@ export default function Workouts() {
   const [showCustomizeSingle, setShowCustomizeSingle] = useState(false);
   const [showCustomizeWeekly, setShowCustomizeWeekly] = useState(false);
   const [singleParams, setSingleParams] = useState({ focus: '', duration: '', difficulty: '', equipment: '', target_muscles: '' });
-  const [weeklyParams, setWeeklyParams] = useState({ days_per_week: '4', duration: '', difficulty: '', equipment: '', target_muscles: '' });
+  const [weeklyParams, setWeeklyParams] = useState({ days_per_week: '1', duration: '', difficulty: '', equipment: '', target_muscles: '' });
   const [typeIds, setTypeIds] = useState({ single: loadIds(SINGLE_KEY), weekly: loadIds(WEEKLY_KEY) });
 
   const queryClient = useQueryClient();
@@ -360,7 +397,7 @@ export default function Workouts() {
         const next = new Set(newIds);
         saveIds(WEEKLY_KEY, next);
         setTypeIds(prev => ({ ...prev, weekly: next }));
-        toast.success('Weekly workout plan generated!');
+        toast.success(`Weekly plan generated! ${newIds.length} workout${newIds.length !== 1 ? 's' : ''} ready.`);
         setShowCustomizeWeekly(false);
       } else {
         const completedIds = new Set(
@@ -541,16 +578,18 @@ export default function Workouts() {
                       return ai - bi;
                     });
                     return sorted.map((workout, index) => {
+                      const locked = index > 0 && !sorted[index - 1].is_completed;
                       const label = workout.day_of_week
                         ? workout.day_of_week.charAt(0).toUpperCase() + workout.day_of_week.slice(1).toLowerCase()
                         : `Day ${index + 1}`;
                       return (
                         <div key={workout.id}>
-                          <h3 className="text-xs font-semibold text-amber-400 uppercase tracking-wider mb-2">{label}</h3>
+                          <h3 className={`text-xs font-semibold uppercase tracking-wider mb-2 ${locked ? 'text-zinc-600' : 'text-amber-400'}`}>{label}</h3>
                           <WorkoutTimerCard
                             workout={workout}
                             onComplete={() => completeWorkout.mutate(workout.id)}
                             isCompleting={completeWorkout.isPending}
+                            locked={locked}
                           />
                         </div>
                       );
