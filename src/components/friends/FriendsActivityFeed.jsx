@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Trophy, Award, TrendingUp, Zap, CheckCircle2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import UserAvatar from '@/components/ui/UserAvatar';
 
 const getEventIcon = (eventType) => {
   switch (eventType) {
@@ -141,13 +142,11 @@ export default function FriendsActivityFeed() {
                        {getEventTemplate(event.event_type, event.friend_name, event.metadata).subtitle}
                      </p>
                    </div>
-                  {event.profile_picture && (
-                    <img
-                      src={event.profile_picture}
-                      alt={event.friend_name}
-                      className="w-8 h-8 rounded-full object-cover ml-2"
-                    />
-                  )}
+                  <UserAvatar
+                    src={event.profile_picture}
+                    name={event.friend_name}
+                    className="w-8 h-8 ml-2"
+                  />
                 </div>
                 <p className="text-xs text-zinc-600 mt-1">
                   {new Date(event.created_at).toLocaleDateString('en-GB', {

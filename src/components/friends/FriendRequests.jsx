@@ -9,6 +9,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import UserAvatar from '@/components/ui/UserAvatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
@@ -100,13 +101,11 @@ export default function FriendRequests() {
                 className="flex items-center justify-between p-3 rounded-lg bg-zinc-800/50 border border-green-500/20"
               >
                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                  {request.profile_picture && (
-                    <img
-                      src={request.profile_picture}
-                      alt={request.friend_name}
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
-                  )}
+                  <UserAvatar
+                    src={request.profile_picture}
+                    name={request.friend_name || request.username || request.email}
+                    className="w-8 h-8"
+                  />
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-white truncate">
                       {request.friend_name || request.username || request.email}
@@ -161,13 +160,11 @@ export default function FriendRequests() {
                 className="flex items-center justify-between p-3 rounded-lg bg-zinc-800/50 border border-zinc-700/50"
               >
                 <div className="flex items-center gap-2 flex-1">
-                  {request.profile_picture && (
-                    <img
-                      src={request.profile_picture}
-                      alt={request.friend_name}
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
-                  )}
+                  <UserAvatar
+                    src={request.profile_picture}
+                    name={request.friend_name || request.email}
+                    className="w-8 h-8"
+                  />
                   <div>
                     <p className="text-sm font-semibold text-white">
                       {request.friend_name}

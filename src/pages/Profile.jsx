@@ -10,7 +10,7 @@ import DailyChallenge from "@/components/challenges/DailyChallenge";
 import PointsProgressCard from "@/components/points/PointsProgressCard";
 import PointsBreakdown from "@/components/points/PointsBreakdown";
 import BetaBadge from "@/components/profile/BetaBadge";
-import GenderAvatar from "@/components/profile/GenderAvatar";
+import UserAvatar from "@/components/ui/UserAvatar";
 const BADGE_RARITY = {
   common:    { border: 'border-zinc-600',    bg: 'bg-zinc-800/60',    label: 'text-zinc-400'   },
   rare:      { border: 'border-blue-500',    bg: 'bg-blue-900/30',    label: 'text-blue-400'   },
@@ -253,13 +253,12 @@ export default function Profile() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               {/* Avatar */}
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-black font-black text-2xl shrink-0 overflow-hidden">
-                {profile?.profile_picture_url ? (
-                  <img src={profile.profile_picture_url} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                  <GenderAvatar gender={profile?.gender} className="w-9 h-9" />
-                )}
-              </div>
+              <UserAvatar
+                src={profile?.profile_picture_url}
+                name={user?.full_name || user?.email}
+                className="w-16 h-16"
+                rounded="rounded-2xl"
+              />
               <div>
                 <div className="flex flex-wrap items-center gap-2 mb-0.5">
                   <h1 className="text-xl sm:text-2xl font-bold text-white">{user?.full_name || 'Athlete'}</h1>

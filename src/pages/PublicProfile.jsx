@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { api } from '@/api/client';
 import { useQuery } from "@tanstack/react-query";
 import { Flame, Trophy, Award } from "lucide-react";
-import GenderAvatar from "@/components/profile/GenderAvatar";
+import UserAvatar from "@/components/ui/UserAvatar";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -104,19 +104,11 @@ export default function PublicProfile() {
         {/* Profile Header */}
         <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-8 mb-6">
           <div className="flex items-start gap-6 mb-6">
-            <div className="w-24 h-24 rounded-full bg-zinc-800 overflow-hidden flex items-center justify-center flex-shrink-0">
-              {profile.profile_picture_url ? (
-                <img
-                  src={profile.profile_picture_url}
-                  alt={profile.username || 'Profile'}
-                  className="w-full h-full object-cover"
-                  loading="eager"
-                  decoding="async"
-                />
-              ) : (
-                <GenderAvatar gender={profile.gender} className="w-12 h-12 text-zinc-500" />
-              )}
-            </div>
+            <UserAvatar
+              src={profile.profile_picture_url}
+              name={user?.full_name || profile.username || user?.email}
+              className="w-24 h-24"
+            />
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-white mb-1">
                 {user?.full_name || profile.username || user?.email?.split('@')[0]}

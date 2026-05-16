@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { User, Users } from 'lucide-react';
+import { Users } from 'lucide-react';
+import UserAvatar from '@/components/ui/UserAvatar';
 import { useLanguage } from '@/components/i18n/LanguageContext';
 
 export default function SuggestedFriendsCard({ suggestion, onAddFriend, isLoading }) {
@@ -15,13 +16,11 @@ export default function SuggestedFriendsCard({ suggestion, onAddFriend, isLoadin
     >
       <div className="flex items-center gap-3 flex-1">
         {/* Avatar */}
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-black font-bold shrink-0 overflow-hidden">
-          {suggestion.profile_picture ? (
-            <img src={suggestion.profile_picture} alt={suggestion.username} className="w-full h-full object-cover" />
-          ) : (
-            <User className="w-5 h-5" />
-          )}
-        </div>
+        <UserAvatar
+          src={suggestion.profile_picture}
+          name={suggestion.username}
+          className="w-10 h-10"
+        />
 
         {/* Info */}
         <div className="flex-1 min-w-0">

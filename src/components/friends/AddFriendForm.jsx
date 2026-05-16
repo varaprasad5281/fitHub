@@ -3,6 +3,7 @@ import { api } from '@/api/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, Loader2, UserPlus, X } from 'lucide-react';
+import UserAvatar from '@/components/ui/UserAvatar';
 import { toast } from 'sonner';
 
 export default function AddFriendForm({ onSent }) {
@@ -112,17 +113,11 @@ export default function AddFriendForm({ onSent }) {
                 className="flex items-center justify-between p-3 rounded-lg bg-zinc-800/50 border border-zinc-700/50"
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  {user.profile_picture_url ? (
-                    <img
-                      src={user.profile_picture_url}
-                      alt={displayName}
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center text-xs font-bold text-white">
-                      {(displayName || '?')[0].toUpperCase()}
-                    </div>
-                  )}
+                  <UserAvatar
+                    src={user.profile_picture_url}
+                    name={displayName}
+                    className="w-8 h-8"
+                  />
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-white truncate">{displayName}</p>
                   </div>

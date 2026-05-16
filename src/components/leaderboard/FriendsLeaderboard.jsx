@@ -13,6 +13,7 @@ import { api } from '@/api/client';
 import { useQuery } from '@tanstack/react-query';
 import { MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import UserAvatar from '@/components/ui/UserAvatar';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { BadgeMiniRow } from '@/components/badges/BadgeTooltip';
@@ -60,22 +61,11 @@ export default function FriendsLeaderboard({ friends = [], hasEliteAccess = fals
             </div>
 
             {/* Avatar */}
-            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden flex items-center justify-center shrink-0 ${entry.avatar_url && !imgErrors.has(entry.email) ? (entry.isMe ? 'bg-amber-600' : 'bg-zinc-700') : 'bg-amber-500/20'}`}>
-              {entry.avatar_url && !imgErrors.has(entry.email) ? (
-                <img
-                  src={entry.avatar_url}
-                  alt={entry.username}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                  decoding="async"
-                  onError={() => markImgError(entry.email)}
-                />
-              ) : (
-                <span className="text-amber-400 font-bold text-sm">
-                  {(entry.username || entry.email || '?')[0].toUpperCase()}
-                </span>
-              )}
-            </div>
+            <UserAvatar
+              src={entry.avatar_url}
+              name={entry.username || entry.email}
+              className="w-8 h-8 sm:w-10 sm:h-10"
+            />
 
             {/* Name + YOU pill + badges */}
             <div className="flex-1 min-w-0">

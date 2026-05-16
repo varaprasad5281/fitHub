@@ -9,6 +9,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { MessageCircle, MoreVertical, Trash2, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import UserAvatar from '@/components/ui/UserAvatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import {
@@ -111,17 +112,11 @@ export default function FriendsList({ onChatClick }) {
               className="flex items-center gap-3 flex-1 cursor-pointer min-w-0"
               onClick={() => onChatClick?.(friend.email)}
             >
-              {friend.avatar_url ? (
-                <img
-                  src={friend.avatar_url}
-                  alt={friend.username}
-                  className="w-10 h-10 rounded-full object-cover flex-shrink-0"
-                />
-              ) : (
-                <div className="w-10 h-10 rounded-full bg-zinc-700 flex items-center justify-center text-sm font-bold text-white flex-shrink-0">
-                  {(friend.username || friend.email || '?')[0].toUpperCase()}
-                </div>
-              )}
+              <UserAvatar
+                src={friend.avatar_url}
+                name={friend.username || friend.email}
+                className="w-10 h-10"
+              />
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-white truncate">{friend.username || friend.email}</p>
                 <div className="flex items-center gap-2 mt-0.5">

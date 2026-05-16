@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Mail, Phone, MapPin, Loader2, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import { withActionDebug } from '@/components/debug/ActionDebugger';
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -30,23 +29,23 @@ export default function Contact() {
       return;
     }
 
-    await withActionDebug('Send Contact Message', async () => {
+    setLoading(true);
+    try {
       await api.functions.invoke('sendEmail', {
         to: 'team@7percent.info',
         from_name: formData.name,
         subject: `Contact Form: ${formData.subject}`,
-        body: `From: ${formData.name} (${formData.email})\n\n${formData.message}`
+        body: `From: ${formData.name} (${formData.email})\n\n${formData.message}`,
       });
-      
       setSubmitted(true);
       setFormData({ name: '', email: '', subject: '', message: '' });
       toast.success('Message sent successfully!');
-      
       setTimeout(() => setSubmitted(false), 5000);
-    }, {
-      setLoading,
-      onError: () => toast.error('Failed to send message. Please try again.')
-    })();
+    } catch {
+      toast.error('Failed to send message. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

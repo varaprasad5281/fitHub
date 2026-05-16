@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { createPageUrl } from "@/utils";
 import PodiumDisplay from "@/components/leaderboard/PodiumDisplay";
+import UserAvatar from "@/components/ui/UserAvatar";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion as m } from 'framer-motion';
@@ -424,22 +425,11 @@ export default function Leaderboard() {
                             #{rank}
                           </div>
 
-                          <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden flex items-center justify-center shrink-0 ${entry.profile_picture_url && !imgErrors.has(entry.id) ? 'bg-zinc-800' : 'bg-amber-500/20'}`}>
-                            {entry.profile_picture_url && !imgErrors.has(entry.id) ? (
-                              <img
-                                src={entry.profile_picture_url}
-                                alt={entry.username}
-                                className="w-full h-full object-cover"
-                                loading="lazy"
-                                decoding="async"
-                                onError={() => markImgError(entry.id)}
-                              />
-                            ) : (
-                              <span className="text-amber-400 font-bold text-xs sm:text-sm">
-                                {entry.username?.[0]?.toUpperCase() || '?'}
-                              </span>
-                            )}
-                          </div>
+                          <UserAvatar
+                            src={entry.profile_picture_url}
+                            name={entry.username || entry.email}
+                            className="w-8 h-8 sm:w-10 sm:h-10"
+                          />
 
                           <div className="flex-1 min-w-0">
                             <p className="text-white font-medium text-sm truncate">
@@ -483,20 +473,11 @@ export default function Leaderboard() {
                         #{userRank}
                       </div>
 
-                      <div className={`w-10 h-10 rounded-full overflow-hidden flex items-center justify-center shrink-0 ${pinnedUser.profile_picture_url && !imgErrors.has(pinnedUser.id) ? 'bg-zinc-800' : 'bg-amber-500/20'}`}>
-                        {pinnedUser.profile_picture_url && !imgErrors.has(pinnedUser.id) ? (
-                          <img
-                            src={pinnedUser.profile_picture_url}
-                            alt={pinnedUser.username}
-                            className="w-full h-full object-cover"
-                            onError={() => markImgError(pinnedUser.id)}
-                          />
-                        ) : (
-                          <span className="text-amber-400 font-bold">
-                            {pinnedUser.username?.[0]?.toUpperCase() || '?'}
-                          </span>
-                        )}
-                      </div>
+                      <UserAvatar
+                        src={pinnedUser.profile_picture_url}
+                        name={pinnedUser.username || pinnedUser.email}
+                        className="w-10 h-10"
+                      />
 
                       <div className="flex-1">
                         <p className="text-white font-semibold">

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Camera, Loader2 } from "lucide-react";
-import GenderAvatar from "@/components/profile/GenderAvatar";
+import UserAvatar from "@/components/ui/UserAvatar";
 import { toast } from "sonner";
 import { sanitizeHtml } from "@/components/utils/sanitize";
 import { withActionDebug } from "@/components/debug/ActionDebugger";
@@ -140,16 +140,16 @@ export default function ProfileEdit({ profile, onClose }) {
       <div>
         <Label className="text-zinc-400 text-sm mb-3 block">Profile Picture</Label>
         <div className="flex items-center gap-4">
-          <div className="w-20 h-20 rounded-full bg-zinc-800 overflow-hidden flex items-center justify-center relative">
-            {formData.profile_picture_url ? (
-              <img src={formData.profile_picture_url} alt="Profile preview" className="w-full h-full object-cover" loading="lazy" />
-            ) : (
-              <>
-                <GenderAvatar gender={profile?.gender} className="w-10 h-10 text-zinc-500" />
-                <div className="absolute inset-0 flex items-end justify-center pb-1">
-                  <Camera className="w-4 h-4 text-zinc-400" />
-                </div>
-              </>
+          <div className="relative">
+            <UserAvatar
+              src={formData.profile_picture_url}
+              name={profile?.username || profile?.full_name || '?'}
+              className="w-20 h-20"
+            />
+            {!formData.profile_picture_url && (
+              <div className="absolute inset-0 flex items-end justify-center pb-1 pointer-events-none">
+                <Camera className="w-4 h-4 text-zinc-400" />
+              </div>
             )}
           </div>
           <label

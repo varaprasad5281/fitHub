@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { api } from '@/api/client';
 import { MessageCircle, Lock, Trash2 } from 'lucide-react';
+import UserAvatar from '@/components/ui/UserAvatar';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -49,19 +50,11 @@ export default function FriendCard({ friend, leaderboardEntry, subscription, use
   return (
     <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 group">
       <div className="flex items-center gap-3 mb-3">
-        {leaderboardEntry?.profile_picture_url ? (
-          <img
-            src={leaderboardEntry.profile_picture_url}
-            alt={leaderboardEntry.username}
-            className="w-10 h-10 rounded-full object-cover"
-          />
-        ) : (
-          <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center">
-            <span className="text-amber-400 font-semibold text-sm">
-              {leaderboardEntry?.username?.[0]?.toUpperCase() || '?'}
-            </span>
-          </div>
-        )}
+        <UserAvatar
+          src={leaderboardEntry?.profile_picture_url}
+          name={leaderboardEntry?.username || leaderboardEntry?.email}
+          className="w-10 h-10"
+        />
         <div className="flex-1">
           <p className="text-white font-semibold text-sm">{leaderboardEntry?.username || 'Anonymous'}</p>
           <p className="text-zinc-500 text-xs">{friend.connected_date}</p>

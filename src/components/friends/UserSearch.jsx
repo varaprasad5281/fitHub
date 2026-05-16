@@ -8,6 +8,7 @@ import { api } from '@/api/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, UserPlus, Clock, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import UserAvatar from '@/components/ui/UserAvatar';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
@@ -127,13 +128,11 @@ export default function UserSearch() {
                 className="flex items-center justify-between p-3 rounded-lg bg-zinc-800/50 border border-zinc-700/50"
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  {user.profile_picture_url && (
-                    <img
-                      src={user.profile_picture_url}
-                      alt={user.username || user.full_name}
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
-                  )}
+                  <UserAvatar
+                    src={user.profile_picture_url}
+                    name={user.username || user.full_name || user.email}
+                    className="w-8 h-8"
+                  />
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-white truncate">
                       {user.username || user.full_name || user.created_by}
