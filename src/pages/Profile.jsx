@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { withActionDebug } from "@/components/debug/ActionDebugger";
 import { useLanguage } from "@/components/i18n/LanguageContext";
 import { useAuth } from "@/lib/AuthContext";
+import { activeSub, hasProAccess, hasEliteAccess } from "@/lib/subscriptionUtils";
 
 const goalLabels = {
   lose_weight: "Lose Weight",
@@ -115,6 +116,13 @@ export default function Profile() {
           queryClient.invalidateQueries({ queryKey: ['userPoints'] });
         })
         .catch(() => {});
+
+      // Sync subscription status from Stripe so expired plans are reflected immediately
+      api.functions.invoke('syncSubscription')
+        .then(result => {
+          if (result?.success) queryClient.invalidateQueries({ queryKey: ['subscription'] });
+        })
+        .catch(() => {});
     }
   }, [user]);
 
@@ -183,8 +191,10 @@ export default function Profile() {
   const profile = profiles[0];
   const streak = streaks[0];
   const pts = points[0];
-  // Get the most recent active subscription
-  const activeSubscription = subscriptions.find(s => s.status === 'active' || s.status === 'trial') || subscriptions[0];
+  // Pick the best subscription and check real access (expired plans are excluded)
+  const activeSubscription = activeSub(subscriptions);
+  const hasPaidAccess = hasProAccess(activeSubscription);
+  const isEliteMember = hasEliteAccess(activeSubscription);
 
   const calculateDailyPoints = async () => {
     await withActionDebug('Recalculate Points', async () => {
@@ -263,9 +273,9 @@ export default function Profile() {
                       {goalLabels[profile.fitness_goal] || profile.fitness_goal}
                     </span>
                   )}
-                  {activeSubscription?.plan && (
+                  {hasPaidAccess && activeSubscription?.plan && (
                     <span className={`px-2 py-0.5 rounded-full border text-xs font-semibold flex items-center gap-1 ${planColors[activeSubscription.plan] || planColors.starter_monthly}`}>
-                      {(activeSubscription.plan?.includes('elite') || activeSubscription.plan?.includes('pro')) && <Crown className="w-3 h-3" />}
+                      <Crown className="w-3 h-3" />
                       {planLabels[activeSubscription.plan] || activeSubscription.plan}
                     </span>
                   )}
