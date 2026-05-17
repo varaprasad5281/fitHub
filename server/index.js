@@ -18,6 +18,8 @@ connectDB();
 app.use(helmet());
 // Allow web app + mobile app (Expo Go and production builds send no Origin header)
 const allowedOrigins = [
+  'https://7percent.info',
+  'https://www.7percent.info',
   process.env.CLIENT_URL || 'http://localhost:5173',
   'http://localhost:8081',   // Expo dev server
   'http://localhost:19006',  // Expo web

@@ -46,8 +46,8 @@ async function apiFetch(path, { method = 'GET', body } = {}) {
 
 // ── auth ─────────────────────────────────────────────────────────────────────
 const auth = {
-  async register({ email, full_name, password }) {
-    const data = await apiFetch('/auth/register', { method: 'POST', body: { email, full_name, password } });
+  async register({ email, full_name, password, referral_code }) {
+    const data = await apiFetch('/auth/register', { method: 'POST', body: { email, full_name, password, referral_code } });
     setToken(data.token);
     return data.user;
   },

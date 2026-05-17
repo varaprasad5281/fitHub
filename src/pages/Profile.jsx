@@ -448,7 +448,7 @@ export default function Profile() {
                     <p className="text-zinc-600 text-xs mt-1">Complete workouts to earn your first badge!</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                     {earnedBadges.slice(0, 8).map(badge => {
                       const r = BADGE_RARITY[badge.rarity_level] || BADGE_RARITY.common;
                       return (

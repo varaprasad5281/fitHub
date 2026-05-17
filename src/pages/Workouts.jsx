@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import {
   Dumbbell, Loader2, Sparkles, History, X, CheckCircle,
-  Clock, Flame, CalendarDays, Settings2, Play, Timer, Lock
+  Clock, Flame, CalendarDays, Settings2, Play, Timer, Lock, ChevronRight
 } from "lucide-react";
 import WorkoutDetailModal from "@/components/workout/WorkoutDetailModal";
 import WorkoutPreview from "@/components/conversion/WorkoutPreview";
@@ -128,7 +128,7 @@ function CustomizePanel({ params, setParams, type }) {
 const CustomizePanelMemo = memo(CustomizePanel);
 
 // WorkoutTimerCard owns its own timer — parent never ticks, so dropdowns stay open
-function WorkoutTimerCard({ workout, onComplete, isCompleting, locked = false }) {
+function WorkoutTimerCard({ workout, onComplete, isCompleting, onViewDetails, onViewExercise, locked = false }) {
   const STORAGE_KEY = `wk_timer_${workout.id || workout._id}`;
   const totalSecs = (workout.estimated_duration || 30) * 60;
   const [, setTick] = useState(0);
@@ -189,7 +189,12 @@ function WorkoutTimerCard({ workout, onComplete, isCompleting, locked = false })
     <div className={`rounded-xl border p-4 sm:p-5 ${workout.is_completed ? 'border-green-500/30 bg-green-500/5' : locked ? 'border-zinc-800/50 bg-zinc-900/20 opacity-60' : 'border-zinc-800 bg-zinc-900/50'}`}>
       <div className="flex items-start gap-3 mb-4 flex-wrap">
         <div className="flex-1 min-w-0">
-          <p className="text-white font-semibold text-base truncate mb-2">{workout.workout_name}</p>
+          <button
+            onClick={onViewDetails}
+            className="text-white font-semibold text-base truncate mb-2 hover:text-amber-400 transition-colors text-left w-full"
+          >
+            {workout.workout_name}
+          </button>
           <div className="flex flex-wrap gap-2 text-xs">
             <span className={`px-2 py-0.5 rounded-full border capitalize font-medium ${difficultyColors[workout.difficulty] || difficultyColors.beginner}`}>
               {workout.difficulty}
@@ -214,19 +219,24 @@ function WorkoutTimerCard({ workout, onComplete, isCompleting, locked = false })
       {workout.exercises?.length > 0 && (
         <div className="space-y-2 mb-4">
           {workout.exercises.map((ex, i) => (
-            <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-zinc-950/60 border border-zinc-800/50">
+            <button
+              key={i}
+              onClick={() => onViewExercise?.(i)}
+              className="w-full flex items-start gap-3 p-3 rounded-lg bg-zinc-950/60 border border-zinc-800/50 hover:border-amber-500/30 hover:bg-zinc-900/80 transition-all text-left group"
+            >
               <div className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
                 {i + 1}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-baseline gap-2">
-                  <span className="text-white font-medium text-sm">{ex.name}</span>
+                  <span className="text-white font-medium text-sm group-hover:text-amber-400 transition-colors">{ex.name}</span>
                   <span className="text-zinc-500 text-xs">{ex.sets} sets × {ex.reps}</span>
                   {ex.weight_recommendation && <span className="text-amber-400 text-xs">{ex.weight_recommendation}</span>}
                 </div>
-                {ex.instructions && <p className="text-zinc-500 text-xs mt-0.5 leading-relaxed">{ex.instructions}</p>}
+                {ex.instructions && <p className="text-zinc-500 text-xs mt-0.5 leading-relaxed line-clamp-1">{ex.instructions}</p>}
               </div>
-            </div>
+              <ChevronRight className="w-3.5 h-3.5 text-zinc-600 group-hover:text-amber-400 transition-colors shrink-0 mt-0.5" />
+            </button>
           ))}
         </div>
       )}
@@ -241,10 +251,10 @@ function WorkoutTimerCard({ workout, onComplete, isCompleting, locked = false })
       {!workout.is_completed && !locked && (
         <div className="pt-3 border-t border-zinc-800">
           {!timer.started ? (
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
               <Button
                 onClick={startTimer}
-                className="bg-zinc-800 border border-zinc-700 text-zinc-300 hover:bg-zinc-700 rounded-full px-4 h-9 text-sm"
+                className="w-full sm:w-auto bg-zinc-800 border border-zinc-700 text-zinc-300 hover:bg-zinc-700 rounded-full px-4 h-10 text-sm"
               >
                 <Play className="w-3.5 h-3.5 mr-2" />Start Workout
               </Button>
@@ -254,25 +264,27 @@ function WorkoutTimerCard({ workout, onComplete, isCompleting, locked = false })
             <Button
               onClick={handleComplete}
               disabled={isCompleting}
-              className="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-semibold rounded-full px-6 h-9 text-sm"
+              className="w-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-semibold rounded-full px-6 h-10 text-sm"
             >
               {isCompleting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle className="w-4 h-4 mr-2" />}
               Mark as Complete
             </Button>
           ) : (
-            <div className="flex items-center gap-3 flex-wrap">
-              <div className="flex items-center gap-2 text-amber-400">
-                <Timer className="w-4 h-4 animate-pulse" />
-                <span className="font-mono font-bold text-lg">{fmt(timer.remaining)}</span>
-              </div>
-              <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden min-w-[80px]">
-                <div className="h-full bg-amber-500 rounded-full transition-all" style={{ width: `${timer.progress}%` }} />
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 text-amber-400">
+                  <Timer className="w-4 h-4 animate-pulse shrink-0" />
+                  <span className="font-mono font-bold text-lg">{fmt(timer.remaining)}</span>
+                </div>
+                <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-amber-500 rounded-full transition-all" style={{ width: `${timer.progress}%` }} />
+                </div>
               </div>
               <Button
                 disabled
-                className="bg-zinc-800 text-zinc-600 border border-zinc-700 rounded-full px-4 h-9 text-sm cursor-not-allowed opacity-50"
+                className="w-full bg-zinc-800 text-zinc-600 border border-zinc-700 rounded-full px-4 h-10 text-sm cursor-not-allowed opacity-50"
               >
-                <CheckCircle className="w-4 h-4 mr-2" />Complete
+                <CheckCircle className="w-4 h-4 mr-2" />Complete when timer finishes
               </Button>
             </div>
           )}
@@ -295,6 +307,18 @@ export default function Workouts() {
   const [generating, setGenerating] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [historyWorkout, setHistoryWorkout] = useState(null);
+  const [selectedWorkout, setSelectedWorkout] = useState(null);
+  const [selectedExerciseIndex, setSelectedExerciseIndex] = useState(null);
+
+  const openWorkout = (workout, exerciseIndex = null) => {
+    setSelectedWorkout(workout);
+    setSelectedExerciseIndex(exerciseIndex);
+  };
+
+  const closeWorkout = () => {
+    setSelectedWorkout(null);
+    setSelectedExerciseIndex(null);
+  };
   const [showCustomizeSingle, setShowCustomizeSingle] = useState(false);
   const [showCustomizeWeekly, setShowCustomizeWeekly] = useState(false);
   const [singleParams, setSingleParams] = useState({ focus: '', duration: '', difficulty: '', equipment: '', target_muscles: '' });
@@ -455,12 +479,14 @@ export default function Workouts() {
         </div>
 
         <Tabs defaultValue="single" className="w-full">
-          <TabsList className="bg-zinc-900/50 border border-zinc-800 mb-6 w-full sm:w-auto">
-            <TabsTrigger value="single" className="data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-400 flex-1 sm:flex-none">
-              <Dumbbell className="w-4 h-4 mr-2" />Single Workout
+          <TabsList className="bg-zinc-900/50 border border-zinc-800 mb-6 w-full grid grid-cols-2">
+            <TabsTrigger value="single" className="data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-400">
+              <Dumbbell className="w-4 h-4 mr-1.5 shrink-0" />
+              <span className="truncate">Single</span>
             </TabsTrigger>
-            <TabsTrigger value="weekly" className="data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-400 flex-1 sm:flex-none">
-              <CalendarDays className="w-4 h-4 mr-2" />Weekly Plan
+            <TabsTrigger value="weekly" className="data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-400">
+              <CalendarDays className="w-4 h-4 mr-1.5 shrink-0" />
+              <span className="truncate">Weekly Plan</span>
             </TabsTrigger>
           </TabsList>
 
@@ -509,6 +535,8 @@ export default function Workouts() {
                     workout={singleWorkout}
                     onComplete={() => completeWorkout.mutate(singleWorkout.id)}
                     isCompleting={completeWorkout.isPending}
+                    onViewDetails={() => openWorkout(singleWorkout)}
+                    onViewExercise={(i) => openWorkout(singleWorkout, i)}
                   />
                 </div>
               )}
@@ -589,6 +617,8 @@ export default function Workouts() {
                             workout={workout}
                             onComplete={() => completeWorkout.mutate(workout.id)}
                             isCompleting={completeWorkout.isPending}
+                            onViewDetails={() => openWorkout(workout)}
+                            onViewExercise={(i) => openWorkout(workout, i)}
                             locked={locked}
                           />
                         </div>
@@ -673,6 +703,15 @@ export default function Workouts() {
           workout={historyWorkout}
           onClose={() => setHistoryWorkout(null)}
           isCompleted={true}
+        />
+      )}
+
+      {selectedWorkout && (
+        <WorkoutDetailModal
+          workout={selectedWorkout}
+          onClose={closeWorkout}
+          isCompleted={!!selectedWorkout.is_completed}
+          initialExercise={selectedExerciseIndex}
         />
       )}
     </div>

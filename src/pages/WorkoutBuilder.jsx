@@ -210,20 +210,20 @@ export default function WorkoutBuilder() {
           <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Your Workout Plans</h1>
           <p className="text-zinc-500">AI-generated personalized training routines based on your goals</p>
           
-          <div className="flex gap-2 mt-4">
+          <div className="flex gap-2 mt-4 flex-wrap">
             <Button
               onClick={() => setPlanType('single')}
               className={planType === 'single'
-                ? 'bg-amber-500/20 border border-amber-500 text-amber-400 hover:bg-amber-500/30 rounded-full'
-                : 'bg-zinc-900 border border-zinc-700 text-zinc-400 hover:border-amber-500/50 hover:text-white hover:bg-zinc-800 rounded-full'}
+                ? 'flex-1 sm:flex-none bg-amber-500/20 border border-amber-500 text-amber-400 hover:bg-amber-500/30 rounded-full'
+                : 'flex-1 sm:flex-none bg-zinc-900 border border-zinc-700 text-zinc-400 hover:border-amber-500/50 hover:text-white hover:bg-zinc-800 rounded-full'}
             >
               Single Workout
             </Button>
             <Button
               onClick={() => setPlanType('weekly')}
               className={planType === 'weekly'
-                ? 'bg-amber-500/20 border border-amber-500 text-amber-400 hover:bg-amber-500/30 rounded-full'
-                : 'bg-zinc-900 border border-zinc-700 text-zinc-400 hover:border-amber-500/50 hover:text-white hover:bg-zinc-800 rounded-full'}
+                ? 'flex-1 sm:flex-none bg-amber-500/20 border border-amber-500 text-amber-400 hover:bg-amber-500/30 rounded-full'
+                : 'flex-1 sm:flex-none bg-zinc-900 border border-zinc-700 text-zinc-400 hover:border-amber-500/50 hover:text-white hover:bg-zinc-800 rounded-full'}
             >
               Weekly Plan
             </Button>

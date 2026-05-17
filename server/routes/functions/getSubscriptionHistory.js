@@ -75,7 +75,7 @@ async function getPortalUrl(req, res) {
 
   const session = await stripe.billingPortal.sessions.create({
     customer: sub.stripe_customer_id,
-    return_url: `${process.env.CLIENT_URL || 'http://localhost:5173'}/Subscription`,
+    return_url: `${process.env.CLIENT_URL || (process.env.NODE_ENV === 'production' ? 'https://7percent.info' : 'http://localhost:5173')}/Subscription`,
   });
 
   res.json({ data: { url: session.url } });

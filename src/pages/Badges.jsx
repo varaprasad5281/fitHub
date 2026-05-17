@@ -121,9 +121,9 @@ function LockedCard({ badge }) {
 // ── Stat summary card ─────────────────────────────────────────────────────────
 function StatCard({ label, value }) {
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-center">
-      <p className="text-xl font-bold text-white">{value ?? '-'}</p>
-      <p className="text-xs text-zinc-500 mt-0.5">{label}</p>
+    <div className="bg-zinc-900 border border-zinc-800 rounded-xl px-2 sm:px-4 py-3 text-center">
+      <p className="text-base sm:text-xl font-bold text-white">{value ?? '-'}</p>
+      <p className="text-[10px] sm:text-xs text-zinc-500 mt-0.5 truncate">{label}</p>
     </div>
   );
 }
@@ -206,17 +206,17 @@ export default function Badges() {
 
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-white mb-1">Badges</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">Badges</h1>
           <p className="text-zinc-400">Earn badges through discipline, effort, and consistency</p>
         </div>
 
         {/* Stats row */}
-        <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-8">
-          <StatCard label="Workouts"   value={stats.workouts_completed} />
-          <StatCard label="Best Streak" value={stats.streak_days} />
-          <StatCard label="Meals"      value={stats.meals_logged} />
-          <StatCard label="Points"     value={stats.total_points} />
-          <StatCard label="Friends"    value={stats.friends_count} />
+        <div className="grid grid-cols-5 gap-2 sm:gap-3 mb-8">
+          <StatCard label="Workouts"    value={stats.workouts_completed} />
+          <StatCard label="Streak"      value={stats.streak_days} />
+          <StatCard label="Meals"       value={stats.meals_logged} />
+          <StatCard label="Points"      value={stats.total_points} />
+          <StatCard label="Friends"     value={stats.friends_count} />
         </div>
 
         {/* Overall progress bar */}

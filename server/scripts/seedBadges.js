@@ -299,6 +299,28 @@ const BADGES = [
     requirement_value: 10,
   },
 
+  // ─── REFERRAL ─────────────────────────────────────────────────────────────
+  {
+    badge_code: 'REFERRAL_5',
+    name: 'Connector',
+    description: 'Referred 5 users who subscribed to 7%. You are building the community.',
+    icon: '🔗',
+    rarity_level: 'rare',
+    category: 'referral',
+    requirement_type: 'referrals_count',
+    requirement_value: 5,
+  },
+  {
+    badge_code: 'REFERRAL_15',
+    name: 'Influencer',
+    description: 'Referred 15 users who subscribed to 7%. Your impact is undeniable.',
+    icon: '📣',
+    rarity_level: 'epic',
+    category: 'referral',
+    requirement_type: 'referrals_count',
+    requirement_value: 15,
+  },
+
   // ─── EXCLUSIVE ────────────────────────────────────────────────────────────
   // These badges are awarded manually or by scheduled jobs - not via checkAndAwardBadges.
   // requirement_type is null so they never show a progress bar.

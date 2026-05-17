@@ -1,14 +1,20 @@
 ﻿const express = require('express');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const User = require('../models/User');
 const Profile = require('../models/Profile');
 const Points = require('../models/Points');
 const Subscription = require('../models/Subscription');
+const Referral = require('../models/Referral');
 const IPLoginHistory = require('../models/IPLoginHistory');
 const { protect } = require('../middleware/auth');
 const { notify } = require('../utils/notify');
 const Badge = require('../models/Badge');
 const UserBadge = require('../models/UserBadge');
+
+function generateReferralCode() {
+  return crypto.randomBytes(4).toString('hex').toUpperCase();
+}
 
 // Number of early-access users who receive the Founder badge automatically.
 // Override by setting FOUNDER_LIMIT in your .env (default: 100).
@@ -49,7 +55,7 @@ const signToken = (id) =>
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
   try {
-    const { email, full_name, password } = req.body;
+    const { email, full_name, password, referral_code: inboundCode } = req.body;
 
     if (!email || !full_name || !password) {
       return res.status(400).json({ error: 'email, full_name, and password are required' });
@@ -58,7 +64,30 @@ router.post('/register', async (req, res) => {
     const existing = await User.findOne({ email: email.toLowerCase() });
     if (existing) return res.status(409).json({ error: 'Email already registered' });
 
-    const user = await User.create({ email: email.toLowerCase(), full_name, password });
+    // Resolve referrer if a valid code was supplied
+    let referrerEmail = null;
+    if (inboundCode) {
+      const referrer = await User.findOne({ referral_code: inboundCode.toUpperCase().trim() });
+      if (referrer && referrer.email !== email.toLowerCase()) {
+        referrerEmail = referrer.email;
+      }
+    }
+
+    // Generate a unique referral code for the new user
+    let newCode;
+    for (let i = 0; i < 5; i++) {
+      const candidate = generateReferralCode();
+      const taken = await User.findOne({ referral_code: candidate });
+      if (!taken) { newCode = candidate; break; }
+    }
+
+    const user = await User.create({
+      email: email.toLowerCase(),
+      full_name,
+      password,
+      referral_code: newCode,
+      referred_by: referrerEmail,
+    });
 
     // Bootstrap related records
     await Promise.all([
@@ -66,6 +95,11 @@ router.post('/register', async (req, res) => {
       Points.create({ created_by: user.email }),
       Subscription.create({ created_by: user.email }),
     ]);
+
+    // Track the referral (pending until referred user subscribes)
+    if (referrerEmail) {
+      Referral.create({ referrer_email: referrerEmail, referred_email: user.email }).catch(() => {});
+    }
 
     // Welcome notification
     notify(user.email,

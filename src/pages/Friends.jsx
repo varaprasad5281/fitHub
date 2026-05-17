@@ -144,10 +144,10 @@ export default function FriendsPage() {
 
          <Tabs defaultValue="friends" className="w-full">
            <TabsList className="bg-zinc-800 rounded-lg p-1 grid w-full grid-cols-4 mb-4">
-             <TabsTrigger value="friends" className="text-sm">Friends</TabsTrigger>
-             <TabsTrigger value="requests" className="text-sm">Requests</TabsTrigger>
-             <TabsTrigger value="chat" className="text-sm">Messages</TabsTrigger>
-             <TabsTrigger value="activity" className="text-sm">Activity</TabsTrigger>
+             <TabsTrigger value="friends" className="text-xs sm:text-sm">Friends</TabsTrigger>
+             <TabsTrigger value="requests" className="text-xs sm:text-sm">Requests</TabsTrigger>
+             <TabsTrigger value="chat" className="text-xs sm:text-sm">Messages</TabsTrigger>
+             <TabsTrigger value="activity" className="text-xs sm:text-sm">Activity</TabsTrigger>
           </TabsList>
 
           {/* Friends Tab */}

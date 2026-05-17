@@ -7,6 +7,9 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true, select: false },
   passwordResetToken: { type: String, select: false },
   passwordResetExpires: { type: Date, select: false },
+  referral_code: { type: String, unique: true, sparse: true },
+  referred_by: { type: String, lowercase: true, default: null },
+  referral_rewards_granted: { type: [Number], default: [] },
 }, { timestamps: true });
 
 userSchema.pre('save', async function (next) {

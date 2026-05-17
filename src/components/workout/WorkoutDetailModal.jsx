@@ -120,8 +120,8 @@ function ExerciseFullImage({ name, storedUrl }) {
   );
 }
 
-export default function WorkoutDetailModal({ workout, onClose, onComplete, isCompleted }) {
-  const [selectedEx, setSelectedEx] = useState(null);
+export default function WorkoutDetailModal({ workout, onClose, onComplete, isCompleted, initialExercise = null }) {
+  const [selectedEx, setSelectedEx] = useState(initialExercise);
 
   useEffect(() => {
     const prev = document.body.style.overflow;
@@ -138,7 +138,7 @@ export default function WorkoutDetailModal({ workout, onClose, onComplete, isCom
     <AnimatePresence>
       <motion.div
         key="backdrop"
-        className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm"
+        className="fixed inset-0 z-[300] bg-black/80 backdrop-blur-sm"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -147,11 +147,12 @@ export default function WorkoutDetailModal({ workout, onClose, onComplete, isCom
 
       <motion.div
         key="panel"
-        className="fixed inset-0 z-50 flex items-end sm:items-center justify-center pointer-events-none"
+        className="fixed inset-0 z-[300] flex items-end sm:items-center justify-center pointer-events-none"
+        style={{ paddingTop: '64px' }}
       >
         <motion.div
           className="pointer-events-auto w-full sm:max-w-2xl bg-zinc-900 border border-zinc-800 rounded-t-3xl sm:rounded-2xl flex flex-col overflow-auto"
-          style={{ height: '90vh' }}
+          style={{ height: 'calc(100vh - 64px)', maxHeight: 'calc(100vh - 64px)' }}
           initial={{ y: '100%', opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: '100%', opacity: 0 }}
@@ -323,18 +324,22 @@ export default function WorkoutDetailModal({ workout, onClose, onComplete, isCom
 
                 <div className="flex-shrink-0 p-4 sm:p-5 border-t border-zinc-800 bg-zinc-900">
                   {isCompleted ? (
-                    <div className="flex items-center justify-center gap-2 text-amber-400 font-semibold py-2">
+                    <div className="flex items-center justify-center gap-2 text-green-400 font-semibold py-2">
                       <CheckCircle className="w-5 h-5" />
                       Workout Completed
                     </div>
-                  ) : (
+                  ) : onComplete ? (
                     <Button
-                      onClick={() => { onComplete?.(); onClose(); }}
+                      onClick={() => { onComplete(); onClose(); }}
                       className="w-full h-12 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-bold rounded-xl text-base shadow-lg hover:shadow-amber-500/25 transition-all"
                     >
                       <CheckCircle className="w-5 h-5 mr-2" />
                       Mark as Complete
                     </Button>
+                  ) : (
+                    <p className="text-center text-zinc-500 text-sm py-2">
+                      Start the timer on the workout card to complete
+                    </p>
                   )}
                 </div>
               </motion.div>

@@ -106,6 +106,9 @@ const handlers = {
   // Account management
   forgetAccount:                require('./functions/forgetAccount'),
 
+  // Referrals
+  getReferralStats:             require('./functions/getReferralStats'),
+
   // Misc
   smartUpgradePrompt:           require('./functions/miscFunctions').smartUpgradePrompt,
   trackBehaviorMetric:          require('./functions/miscFunctions').trackBehaviorMetric,

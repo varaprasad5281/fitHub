@@ -368,16 +368,18 @@ export default function Progress() {
 
         {/* Goals Section */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2">
-              <Target className="w-5 h-5 text-amber-400" />
-              <h2 className="text-xl font-bold text-white">Your Goals</h2>
+          <div className="flex items-center justify-between gap-3 mb-6">
+            <div className="flex items-center gap-2 min-w-0">
+              <Target className="w-5 h-5 text-amber-400 shrink-0" />
+              <h2 className="text-lg sm:text-xl font-bold text-white truncate">Your Goals</h2>
             </div>
             <Button
               onClick={() => setShowGoalForm(true)}
-              className="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-semibold px-6 rounded-full h-10"
+              className="shrink-0 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-semibold px-4 sm:px-6 rounded-full h-9 sm:h-10 text-sm"
             >
-              <Plus className="w-4 h-4 mr-2" /> Add Goal
+              <Plus className="w-4 h-4 mr-1.5" />
+              <span className="hidden xs:inline">Add Goal</span>
+              <span className="xs:hidden">Add</span>
             </Button>
           </div>
 

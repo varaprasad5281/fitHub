@@ -29,7 +29,7 @@ module.exports = async (req, res) => {
   user.passwordResetExpires = expires;
   await user.save();
 
-  const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/reset-password?token=${token}`;
+  const resetUrl = `${process.env.CLIENT_URL || (process.env.NODE_ENV === 'production' ? 'https://7percent.info' : 'http://localhost:5173')}/reset-password?token=${token}`;
 
   try {
     await sendEmail({

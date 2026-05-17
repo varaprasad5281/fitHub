@@ -152,7 +152,7 @@ export default function Challenges() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6"
           >
             {displayChallenges.map((challenge, idx) => (
               <motion.div

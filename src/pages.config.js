@@ -66,6 +66,7 @@ import QuickLogin from './pages/QuickLogin';
 import Socials from './pages/Socials';
 import Subscription from './pages/Subscription';
 import Terms from './pages/Terms';
+import Referrals from './pages/Referrals';
 import WorkoutBuilder from './pages/WorkoutBuilder';
 import Workouts from './pages/Workouts';
 import __Layout from './Layout.jsx';
@@ -85,6 +86,7 @@ export const PAGES = {
     "Pricing": Pricing,
     "Privacy": Privacy,
     "Profile": Profile,
+    "Referrals": Referrals,
     "Progress": Progress,
     "PublicProfile": PublicProfile,
     "QuickLogin": QuickLogin,

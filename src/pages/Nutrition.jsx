@@ -442,11 +442,11 @@ export default function Nutrition() {
                     mealsByType[type].map((meal) => (
                       <div
                         key={meal.id}
-                        className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 flex items-center justify-between"
+                        className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 flex items-center justify-between gap-3"
                       >
-                        <div>
-                          <p className="text-white font-medium">{meal.meal_name}</p>
-                          <div className="flex gap-3 mt-1 text-xs text-zinc-500">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white font-medium truncate">{meal.meal_name}</p>
+                          <div className="flex flex-wrap gap-2 mt-1 text-xs text-zinc-500">
                             <span>{meal.calories} cal</span>
                             {meal.protein > 0 && <span>P: {meal.protein}g</span>}
                             {meal.carbs > 0 && <span>C: {meal.carbs}g</span>}
@@ -457,7 +457,7 @@ export default function Nutrition() {
                           variant="ghost"
                           size="icon"
                           onClick={() => deleteMeal.mutate(meal.id)}
-                          className="text-zinc-600 hover:text-red-400"
+                          className="text-zinc-600 hover:text-red-400 shrink-0"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>

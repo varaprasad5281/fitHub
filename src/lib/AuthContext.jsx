@@ -57,8 +57,8 @@ export const AuthProvider = ({ children }) => {
     return loggedInUser;
   };
 
-  const register = async ({ email, full_name, password }) => {
-    const newUser = await auth.register({ email, full_name, password });
+  const register = async ({ email, full_name, password, referral_code }) => {
+    const newUser = await auth.register({ email, full_name, password, referral_code });
     setUser(newUser);
     setIsAuthenticated(true);
     return newUser;

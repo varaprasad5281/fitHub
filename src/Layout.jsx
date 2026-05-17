@@ -224,11 +224,12 @@ function LayoutContent({ children, currentPageName }) {
                 {/* Account dropdown */}
                 <NavDropdown
                   label="Account"
-                  active={[createPageUrl("Profile"), createPageUrl("Subscription"), createPageUrl("Contact")]
+                  active={[createPageUrl("Profile"), createPageUrl("Subscription"), createPageUrl("Referrals"), createPageUrl("Contact")]
                     .some(href => location.pathname === href || location.pathname.startsWith(href + '/'))}
                 >
                   <NavDropdownItem to={createPageUrl("Profile")} onClick={() => {}}>{t("nav.profile")}</NavDropdownItem>
                   <NavDropdownItem to={createPageUrl("Subscription")} onClick={() => {}}>Subscription</NavDropdownItem>
+                  <NavDropdownItem to={createPageUrl("Referrals")} onClick={() => {}}>Referrals</NavDropdownItem>
                   <NavDropdownItem to={createPageUrl("Contact")} onClick={() => {}}>{t("nav.contact")}</NavDropdownItem>
                 </NavDropdown>
               </>
@@ -309,6 +310,7 @@ function LayoutContent({ children, currentPageName }) {
                   <p className="text-xs font-semibold text-zinc-600 uppercase tracking-widest px-2 pt-4 pb-1">Account</p>
                   <MobileLink to={createPageUrl("Profile")} onClose={() => setMenuOpen(false)}>{t("nav.profile")}</MobileLink>
                   <MobileLink to={createPageUrl("Subscription")} onClose={() => setMenuOpen(false)}>Subscription</MobileLink>
+                  <MobileLink to={createPageUrl("Referrals")} onClose={() => setMenuOpen(false)}>Referrals</MobileLink>
                   <MobileLink to={createPageUrl("Contact")} onClose={() => setMenuOpen(false)}>{t("nav.contact")}</MobileLink>
                 </>
               ) : (

@@ -16,6 +16,7 @@ const MealLog = require('../models/MealLog');
 const Points = require('../models/Points');
 const Streak = require('../models/Streak');
 const Friendship = require('../models/Friendship');
+const Referral = require('../models/Referral');
 const { notify } = require('./notify');
 
 // Map requirement_type → function that returns the user's current value
@@ -42,6 +43,9 @@ const STAT_FETCHERS = {
       $or: [{ requester_email: email }, { receiver_email: email }],
       status: 'accepted',
     }),
+
+  referrals_count: async (email) =>
+    Referral.countDocuments({ referrer_email: email, status: 'completed' }),
 };
 
 async function checkAndAwardBadges(userEmail) {

@@ -6,7 +6,7 @@ import { LogIn, Calendar, Eye, EyeOff, CheckCircle2, XCircle, Sparkles, Loader2,
 import OnboardingStep from "@/components/onboarding/OnboardingStep";
 import OptionGrid from "@/components/onboarding/OptionGrid";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/AuthContext";
@@ -42,6 +42,8 @@ function calculateAge(dob) {
 
 export default function Onboarding() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const inboundReferralCode = searchParams.get('ref') || null;
   const { register: registerUser } = useAuth();
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -118,6 +120,7 @@ export default function Onboarding() {
         email: reg.email.trim(),
         full_name: reg.fullName.trim(),
         password: reg.password,
+        referral_code: inboundReferralCode,
       });
 
       // Server auto-creates Profile - update it with the onboarding data

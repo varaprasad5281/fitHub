@@ -5,9 +5,12 @@
 const stripe = require('../../services/stripe');
 const Subscription = require('../../models/Subscription');
 const Notification = require('../../models/Notification');
+const Referral = require('../../models/Referral');
+const User = require('../../models/User');
 const { sendEmail } = require('../../services/email');
 const { buildEmail } = require('../../utils/emailTemplate');
 const { PRICE_MAP } = require('../../utils/constants');
+const processReferralMilestones = require('../../utils/processReferralMilestones');
 
 const PLAN_NAMES = {
   pro_monthly: '7% Pro',
@@ -111,6 +114,22 @@ module.exports = async (req, res) => {
         });
 
     sendEmail({ to: userEmail, subject: emailSubject, body: emailPlain, html: emailHtml }).catch(() => {});
+
+    // Complete referral and process milestone rewards (fire-and-forget)
+    setImmediate(async () => {
+      try {
+        const referredUser = await User.findOne({ email: userEmail }).lean();
+        if (referredUser?.referred_by) {
+          await Referral.findOneAndUpdate(
+            { referred_email: userEmail, status: 'pending' },
+            { status: 'completed', completed_at: new Date() }
+          );
+          await processReferralMilestones(referredUser.referred_by);
+        }
+      } catch (err) {
+        console.error('[stripeWebhook] referral completion error:', err.message);
+      }
+    });
   }
 
   // ── customer.subscription.updated ──────────────────────────────────────
