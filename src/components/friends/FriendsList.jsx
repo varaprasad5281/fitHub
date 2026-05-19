@@ -114,13 +114,12 @@ export default function FriendsList({ onChatClick }) {
             >
               <UserAvatar
                 src={friend.avatar_url}
-                name={friend.username || friend.email}
+                name={friend.username || 'User'}
                 className="w-10 h-10"
               />
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-white truncate">{friend.username || friend.email}</p>
+                <p className="text-sm font-semibold text-white truncate">{friend.username || 'Unknown'}</p>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <p className="text-xs text-zinc-500 truncate">{friend.email}</p>
                   <BadgeMiniRow badges={badgeMap[friend.email] || []} size="xs" align="left" above={true} />
                 </div>
               </div>

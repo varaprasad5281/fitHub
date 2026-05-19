@@ -19,7 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 
-export default function ChatWindow({ friendEmail, onClose }) {
+export default function ChatWindow({ friendEmail, friendName, onClose }) {
   const [messageInput, setMessageInput] = useState('');
   const [reportingId, setReportingId] = useState(null);
   const [myEmail, setMyEmail] = useState(null);
@@ -131,7 +131,7 @@ export default function ChatWindow({ friendEmail, onClose }) {
   });
 
   // ── Render ────────────────────────────────────────────────────────────────
-  const friendDisplayName = friendEmail?.split('@')[0];
+  const friendDisplayName = friendName || 'Friend';
 
   return (
     <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 flex flex-col h-[520px]">
@@ -140,7 +140,6 @@ export default function ChatWindow({ friendEmail, onClose }) {
       <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-700/70 flex-shrink-0">
         <div>
           <p className="text-sm font-bold text-white">{friendDisplayName}</p>
-          <p className="text-xs text-zinc-500">{friendEmail}</p>
         </div>
         {onClose && (
           <Button

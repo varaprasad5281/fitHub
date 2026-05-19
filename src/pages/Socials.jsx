@@ -290,9 +290,8 @@ export default function SocialsPage() {
                         )}
                         <div className="min-w-0">
                           <p className="text-sm font-semibold text-white truncate">
-                            {request.username || request.friend_name || request.email}
+                            {request.username || request.friend_name || 'Unknown'}
                           </p>
-                          <p className="text-xs text-zinc-500 truncate">{request.email}</p>
                         </div>
                       </div>
                       <div className="flex gap-2 ml-2">
@@ -341,13 +340,12 @@ export default function SocialsPage() {
                     >
                       <div className="flex items-center gap-2 flex-1">
                         <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center text-xs font-bold text-white">
-                          {(request.username || request.email || '?')[0].toUpperCase()}
+                          {(request.username || request.friend_name || '?')[0].toUpperCase()}
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-white">
-                            {request.username || request.friend_name || request.email}
+                            {request.username || request.friend_name || 'Unknown'}
                           </p>
-                          <p className="text-xs text-zinc-500">{request.email}</p>
                         </div>
                       </div>
                       <span className="text-xs text-zinc-500 bg-zinc-800 px-2 py-1 rounded-full ml-2">Pending</span>
@@ -398,12 +396,12 @@ export default function SocialsPage() {
                         <img src={entry.avatar_url} alt={entry.username} className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
                       ) : (
                         <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0 ${entry.isMe ? 'bg-amber-600' : 'bg-zinc-700'}`}>
-                          {(entry.username || entry.email || '?')[0].toUpperCase()}
+                          {(entry.username || '?')[0].toUpperCase()}
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className="text-sm font-semibold text-white truncate">{entry.username || entry.email}</p>
+                          <p className="text-sm font-semibold text-white truncate">{entry.username || 'Unknown'}</p>
                           {entry.isMe && (
                             <span className="text-[10px] font-bold bg-zinc-600 text-zinc-300 px-1.5 py-0.5 rounded-full flex-shrink-0">YOU</span>
                           )}
@@ -429,6 +427,11 @@ export default function SocialsPage() {
             {selectedChat ? (
               <ChatWindow
                 friendEmail={selectedChat}
+                friendName={
+                  conversations.find(c => c.friend_email === selectedChat)?.friend_username ||
+                  friends.find(f => f.email === selectedChat)?.username ||
+                  'Friend'
+                }
                 onClose={() => {
                   setSelectedChat(null);
                   // Refresh conversation list so unread counts update
@@ -466,7 +469,7 @@ export default function SocialsPage() {
                             <img src={conv.friend_avatar} alt={conv.friend_username} className="w-10 h-10 rounded-full object-cover" />
                           ) : (
                             <div className="w-10 h-10 rounded-full bg-zinc-700 flex items-center justify-center text-sm font-bold text-white">
-                              {(conv.friend_username || conv.friend_email || '?')[0].toUpperCase()}
+                              {(conv.friend_username || '?')[0].toUpperCase()}
                             </div>
                           )}
                           {hasUnread && (
@@ -478,7 +481,7 @@ export default function SocialsPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
                             <p className={`text-sm truncate ${hasUnread ? 'font-bold text-white' : 'font-semibold text-white'}`}>
-                              {conv.friend_username || conv.friend_email}
+                              {conv.friend_username || 'Unknown'}
                             </p>
                             {timeStr && (
                               <span className={`text-[10px] flex-shrink-0 ${hasUnread ? 'text-amber-400 font-semibold' : 'text-zinc-600'}`}>
@@ -507,11 +510,11 @@ export default function SocialsPage() {
                           <img src={friend.avatar_url} alt={friend.username} className="w-10 h-10 rounded-full object-cover" />
                         ) : (
                           <div className="w-10 h-10 rounded-full bg-zinc-700 flex items-center justify-center text-sm font-bold text-white">
-                            {(friend.username || friend.email || '?')[0].toUpperCase()}
+                            {(friend.username || '?')[0].toUpperCase()}
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-white truncate">{friend.username || friend.email}</p>
+                          <p className="text-sm font-semibold text-white truncate">{friend.username || 'Unknown'}</p>
                           <p className="text-xs text-zinc-600 truncate">Start a conversation</p>
                         </div>
                         <MessageCircle className="w-4 h-4 text-zinc-600 flex-shrink-0" />
