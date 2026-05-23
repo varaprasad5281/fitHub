@@ -56,10 +56,19 @@ const PRICE_MAP = {
   elite_yearly: process.env.STRIPE_PRICE_ELITE_YEARLY || 'price_1T0C7zDELQ2VxPfdttBUeBuJ',
 };
 
+// Cumulative XP thresholds to REACH each level.
+// Each level's XP gap = Math.floor(100 * 1.2^(n-1)), compounding 20% per level.
+// Gap sequence: 100, 120, 144, 172, 207, 248, 298, 358, 429, 515, 619, 743, 891 ...
 const LEVEL_THRESHOLDS = {
-  1: 0, 2: 100, 3: 300, 4: 700, 5: 1500,
-  6: 3000, 7: 6000, 8: 11000, 9: 19000, 10: 30000,
+  1: 0,      2: 100,    3: 220,    4: 364,    5: 536,
+  6: 743,    7: 991,    8: 1_289,  9: 1_647,  10: 2_076,
+  11: 2_591, 12: 3_210, 13: 3_953, 14: 4_844, 15: 5_913,
+  16: 7_196, 17: 8_736, 18: 10_584, 19: 12_802, 20: 15_464,
+  21: 18_658, 22: 22_491, 23: 27_091, 24: 32_611, 25: 39_235,
+  26: 47_184, 27: 56_723, 28: 68_170, 29: 81_907, 30: 98_391,
 };
+
+const MAX_LEVEL = Math.max(...Object.keys(LEVEL_THRESHOLDS).map(Number));
 
 function isPremiumPlan(plan) {
   return [PLANS.PRO_MONTHLY, PLANS.PRO_YEARLY, PLANS.ELITE_MONTHLY, PLANS.ELITE_YEARLY].includes(plan);
@@ -80,6 +89,6 @@ function getWeekStart() {
 
 module.exports = {
   POINTS, STREAKS, LEADERBOARD, NUTRITION, ACTIVITY_MULTIPLIERS,
-  PLANS, PRICE_MAP, LEVEL_THRESHOLDS,
+  PLANS, PRICE_MAP, LEVEL_THRESHOLDS, MAX_LEVEL,
   isPremiumPlan, isElitePlan, getWeekStart,
 };

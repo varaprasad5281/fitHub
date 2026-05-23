@@ -17,6 +17,7 @@ const Points = require('../models/Points');
 const Streak = require('../models/Streak');
 const Friendship = require('../models/Friendship');
 const Referral = require('../models/Referral');
+const { LEVEL_THRESHOLDS, MAX_LEVEL } = require('./constants');
 const { notify } = require('./notify');
 
 // Map requirement_type → function that returns the user's current value
@@ -46,6 +47,14 @@ const STAT_FETCHERS = {
 
   referrals_count: async (email) =>
     Referral.countDocuments({ referrer_email: email, status: 'completed' }),
+
+  current_level: async (email) => {
+    const doc = await Points.findOne({ created_by: email }).lean();
+    const total = doc?.total_points || 0;
+    const entries = Object.entries(LEVEL_THRESHOLDS).sort((a, b) => Number(a[0]) - Number(b[0]));
+    const idx = entries.findIndex(([, t]) => total < t);
+    return idx === -1 ? MAX_LEVEL : idx;
+  },
 };
 
 async function checkAndAwardBadges(userEmail) {

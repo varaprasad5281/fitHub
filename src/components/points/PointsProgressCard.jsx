@@ -2,26 +2,50 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Zap, Trophy } from 'lucide-react';
 
-export default function PointsProgressCard({ 
-  totalPoints, 
-  currentLevel, 
-  nextLevelPoints, 
-  pointsInLevel, 
+const LEVEL_COLORS = [
+  'from-zinc-500 to-zinc-400',       // 1
+  'from-blue-500 to-cyan-500',       // 2
+  'from-purple-500 to-pink-500',     // 3
+  'from-orange-500 to-red-500',      // 4
+  'from-blue-500 to-indigo-500',     // 5  ← milestone
+  'from-pink-500 to-purple-500',     // 6
+  'from-indigo-500 to-violet-500',   // 7
+  'from-cyan-500 to-teal-500',       // 8
+  'from-green-500 to-emerald-500',   // 9
+  'from-yellow-500 to-amber-500',    // 10 ← milestone
+  'from-amber-500 to-orange-500',    // 11
+  'from-red-500 to-rose-500',        // 12
+  'from-fuchsia-500 to-pink-500',    // 13
+  'from-violet-500 to-purple-500',   // 14
+  'from-purple-600 to-indigo-500',   // 15 ← milestone
+  'from-sky-500 to-blue-600',        // 16
+  'from-emerald-500 to-green-600',   // 17
+  'from-rose-500 to-pink-600',       // 18
+  'from-amber-400 to-yellow-500',    // 19
+  'from-red-600 to-orange-500',      // 20 ← milestone
+  'from-indigo-600 to-purple-600',   // 21
+  'from-cyan-600 to-blue-600',       // 22
+  'from-teal-500 to-cyan-600',       // 23
+  'from-pink-600 to-rose-600',       // 24
+  'from-amber-500 to-amber-300',     // 25 ← milestone
+  'from-violet-600 to-fuchsia-600',  // 26
+  'from-blue-700 to-indigo-600',     // 27
+  'from-emerald-600 to-teal-600',    // 28
+  'from-orange-600 to-red-600',      // 29
+  'from-yellow-400 to-amber-400',    // 30 ← milestone
+];
+
+const MILESTONE_LEVELS = [5, 10, 15, 20, 25, 30];
+
+export default function PointsProgressCard({
+  totalPoints,
+  currentLevel,
+  nextLevelPoints,
+  pointsInLevel,
   pointsNeededForNextLevel,
-  progressPercentage 
+  progressPercentage
 }) {
-  const levelColors = {
-    1: 'from-blue-500 to-cyan-500',
-    2: 'from-purple-500 to-pink-500',
-    3: 'from-orange-500 to-red-500',
-    4: 'from-red-500 to-pink-500',
-    5: 'from-pink-500 to-purple-500',
-    6: 'from-purple-500 to-indigo-500',
-    7: 'from-indigo-500 to-blue-500',
-    8: 'from-blue-500 to-cyan-500',
-    9: 'from-cyan-500 to-teal-500',
-    10: 'from-yellow-500 to-amber-500',
-  };
+  const gradient = LEVEL_COLORS[(currentLevel - 1) % LEVEL_COLORS.length] || LEVEL_COLORS[0];
 
   return (
     <motion.div
@@ -41,7 +65,7 @@ export default function PointsProgressCard({
         <motion.div
           animate={{ scale: [1, 1.05, 1] }}
           transition={{ duration: 2, repeat: Infinity }}
-          className={`w-24 h-24 rounded-2xl bg-gradient-to-br ${levelColors[currentLevel] || levelColors[5]} flex items-center justify-center border-2 border-white/20`}
+          className={`w-24 h-24 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center border-2 border-white/20`}
         >
           <div className="text-center">
             <Trophy className="w-8 h-8 text-white mx-auto mb-1" />
@@ -53,7 +77,7 @@ export default function PointsProgressCard({
       {/* Progress bar to next level */}
       <div className="space-y-2">
         <div className="flex justify-between items-baseline">
-          <p className="text-zinc-400 text-sm">Progress to Level {currentLevel + 1}</p>
+          <p className="text-zinc-400 text-sm">Progress to Level {currentLevel + 1}{currentLevel >= 30 ? ' (Max)' : ''}</p>
           <p className="text-zinc-500 text-xs">
             {pointsInLevel.toLocaleString()} / {pointsNeededForNextLevel.toLocaleString()}
           </p>
@@ -71,25 +95,30 @@ export default function PointsProgressCard({
         <p className="text-zinc-500 text-xs text-right">{progressPercentage}%</p>
       </div>
 
-      {/* Level badges */}
+      {/* Level milestone badges */}
       <div className="mt-6 pt-6 border-t border-zinc-800">
         <p className="text-zinc-500 text-xs uppercase tracking-widest mb-3">Level Milestones</p>
-        <div className="grid grid-cols-5 gap-2">
-          {[1, 2, 3, 4, 5].map(level => {
-            const isReached = currentLevel >= level;
+        <div className="grid grid-cols-6 gap-1.5">
+          {MILESTONE_LEVELS.map(level => {
+            const reached = currentLevel >= level;
+            const isCurrent = currentLevel >= level && currentLevel < (MILESTONE_LEVELS[MILESTONE_LEVELS.indexOf(level) + 1] ?? Infinity);
+            const g = LEVEL_COLORS[(level - 1) % LEVEL_COLORS.length];
             return (
               <motion.div
                 key={level}
-                animate={{ y: isReached ? -2 : 0 }}
-                className={`p-2 rounded-lg text-center transition-all ${
-                  isReached
-                    ? 'bg-amber-500/20 border border-amber-500/50'
+                animate={{ y: reached ? -2 : 0 }}
+                className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+                  reached
+                    ? `bg-gradient-to-br ${g} border border-white/20 shadow-sm`
                     : 'bg-zinc-800/50 border border-zinc-700/50'
                 }`}
               >
-                <p className={`font-bold text-sm ${isReached ? 'text-amber-400' : 'text-zinc-600'}`}>
+                <p className={`font-black text-sm leading-none ${reached ? 'text-white' : 'text-zinc-600'}`}>
                   {level}
                 </p>
+                {isCurrent && (
+                  <span className="text-[8px] font-bold text-white/80 leading-none">NOW</span>
+                )}
               </motion.div>
             );
           })}

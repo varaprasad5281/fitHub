@@ -170,7 +170,7 @@ export default function Profile() {
   });
 
   const { data: earnedBadges = [] } = useQuery({
-    queryKey: ['badges-progress', user?.email],
+    queryKey: ['badges-earned', user?.email],
     queryFn: async () => {
       const res = await api.functions.invoke('getBadges', { action: 'progress' });
       const all = res?.data || [];

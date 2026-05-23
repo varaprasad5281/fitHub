@@ -99,7 +99,6 @@ function MobileLink({ to, onClose, children, badge }) {
 
 function LayoutContent({ children, currentPageName }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [unreadActivityCount, setUnreadActivityCount] = useState(0);
   const compatDebugger = useCompatibilityDebugger();
   const { t } = useLanguage();
   const { user, isLoadingAuth: loading } = useAuth();
@@ -130,32 +129,6 @@ function LayoutContent({ children, currentPageName }) {
     };
   }, []);
 
-  useEffect(() => {
-    if (!user?.email) {
-      setUnreadActivityCount(0);
-      return;
-    }
-
-    let unsubscribe;
-
-    api.entities.ActivityFeed.list()
-      .then(activities => {
-        const count = activities.filter(a => !a.read_by_friends?.includes(user.email)).length;
-        setUnreadActivityCount(count);
-      })
-      .catch(() => {});
-
-    unsubscribe = api.entities.ActivityFeed.subscribe(() => {
-      api.entities.ActivityFeed.list().then(updatedActivities => {
-        const count = updatedActivities.filter(a => !a.read_by_friends?.includes(user.email)).length;
-        setUnreadActivityCount(count);
-      });
-    });
-
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
-  }, [user?.email]);
 
   const isPublic = publicPages.includes(currentPageName);
   const isOnboarding = currentPageName === "Onboarding";
@@ -164,7 +137,6 @@ function LayoutContent({ children, currentPageName }) {
   if (isOnboarding) return <>{children}</>;
 
   return (
-    <ErrorBoundary>
     <>
     <CompatibilityInitializer />
     <PerformanceMonitor />
@@ -211,14 +183,13 @@ function LayoutContent({ children, currentPageName }) {
                 {/* Community dropdown */}
                 <NavDropdown
                   label="Community"
-                  hasbadge={unreadActivityCount > 0}
                   active={[createPageUrl("Challenges"), createPageUrl("Leaderboard"), createPageUrl("Badges"), createPageUrl("Socials")]
                     .some(href => location.pathname === href || location.pathname.startsWith(href + '/'))}
                 >
                   <NavDropdownItem to={createPageUrl("Challenges")} onClick={() => {}}>Challenges</NavDropdownItem>
                   <NavDropdownItem to={createPageUrl("Leaderboard")} onClick={() => {}}>Leaderboard</NavDropdownItem>
                   <NavDropdownItem to={createPageUrl("Badges")} onClick={() => {}}>Badges</NavDropdownItem>
-                  <NavDropdownItem to={createPageUrl("Socials")} onClick={() => {}} badge={unreadActivityCount}>Social</NavDropdownItem>
+                  <NavDropdownItem to={createPageUrl("Socials")} onClick={() => {}}>Social</NavDropdownItem>
                 </NavDropdown>
 
                 {/* Account dropdown */}
@@ -304,7 +275,7 @@ function LayoutContent({ children, currentPageName }) {
                   <MobileLink to={createPageUrl("Challenges")} onClose={() => setMenuOpen(false)}>Challenges</MobileLink>
                   <MobileLink to={createPageUrl("Leaderboard")} onClose={() => setMenuOpen(false)}>Leaderboard</MobileLink>
                   <MobileLink to={createPageUrl("Badges")} onClose={() => setMenuOpen(false)}>Badges</MobileLink>
-                  <MobileLink to={createPageUrl("Socials")} onClose={() => setMenuOpen(false)} badge={unreadActivityCount}>Social</MobileLink>
+                  <MobileLink to={createPageUrl("Socials")} onClose={() => setMenuOpen(false)}>Social</MobileLink>
 
                   {/* Account group */}
                   <p className="text-xs font-semibold text-zinc-600 uppercase tracking-widest px-2 pt-4 pb-1">Account</p>
@@ -339,10 +310,13 @@ function LayoutContent({ children, currentPageName }) {
       </nav>
 
       {/* Page content */}
-      <main className="pt-16 pb-20 sm:pb-8">{children}</main>
+      <main className="pt-16 pb-20 sm:pb-8">
+        <ErrorBoundary key={location.pathname}>
+          {children}
+        </ErrorBoundary>
+      </main>
     </div>
     </>
-    </ErrorBoundary>
   );
 }
 

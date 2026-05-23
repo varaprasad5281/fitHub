@@ -16,8 +16,9 @@ import { useAuth } from '@/lib/AuthContext';
 import { activeSub, hasProAccess } from '@/lib/subscriptionUtils';
 
 
-const SINGLE_KEY = 'wk_single_ids';
-const WEEKLY_KEY = 'wk_weekly_ids';
+const SINGLE_KEY         = 'wk_single_ids';
+const WEEKLY_KEY         = 'wk_weekly_ids';         // all-time weekly IDs (current + past completed)
+const WEEKLY_CURRENT_KEY = 'wk_weekly_current_ids'; // current active plan only
 const loadIds = (key) => { try { return new Set(JSON.parse(localStorage.getItem(key) || '[]')); } catch { return new Set(); } };
 const saveIds = (key, set) => localStorage.setItem(key, JSON.stringify([...set]));
 
@@ -306,9 +307,11 @@ function WorkoutTimerCard({ workout, onComplete, isCompleting, onViewDetails, on
 export default function Workouts() {
   const [generating, setGenerating] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showWeeklyHistory, setShowWeeklyHistory] = useState(false);
   const [historyWorkout, setHistoryWorkout] = useState(null);
   const [selectedWorkout, setSelectedWorkout] = useState(null);
   const [selectedExerciseIndex, setSelectedExerciseIndex] = useState(null);
+  const [weeklyCurrentIds, setWeeklyCurrentIds] = useState(() => loadIds(WEEKLY_CURRENT_KEY));
 
   const openWorkout = (workout, exerciseIndex = null) => {
     setSelectedWorkout(workout);
@@ -358,9 +361,17 @@ export default function Workouts() {
     .filter(w => w.is_completed)
     .sort((a, b) => (b.completed_date || '').localeCompare(a.completed_date || ''));
 
-  const weeklyWorkouts = workouts.filter(w =>
-    typeIds.weekly.size > 0 ? typeIds.weekly.has(w.id) : !!w.day_of_week
-  );
+  // Current active weekly plan (only this plan's workouts — active + completed within it)
+  const weeklyWorkouts = workouts.filter(w => {
+    if (weeklyCurrentIds.size > 0) return weeklyCurrentIds.has(w.id);
+    if (typeIds.weekly.size > 0) return typeIds.weekly.has(w.id);
+    return !!w.day_of_week;
+  });
+
+  // Completed workouts from previous weekly plans (not in current plan)
+  const completedWeeklyHistory = workouts
+    .filter(w => typeIds.weekly.has(w.id) && w.is_completed && !weeklyCurrentIds.has(w.id))
+    .sort((a, b) => (b.completed_date || '').localeCompare(a.completed_date || ''));
 
   const completeWorkout = useMutation({
     mutationFn: async (workoutId) => {
@@ -418,9 +429,16 @@ export default function Workouts() {
       queryClient.setQueryData(['workouts', user?.email], fresh);
 
       if (type === 'weekly') {
-        const next = new Set(newIds);
-        saveIds(WEEKLY_KEY, next);
-        setTypeIds(prev => ({ ...prev, weekly: next }));
+        // Preserve completed IDs from previous plans so history is not lost
+        const completedOldIds = new Set(
+          [...typeIds.weekly].filter(id => fresh.find(w => w.id === id)?.is_completed)
+        );
+        const allWeeklyIds = new Set([...completedOldIds, ...newIds]);
+        const currentIds   = new Set(newIds);
+        saveIds(WEEKLY_KEY, allWeeklyIds);
+        saveIds(WEEKLY_CURRENT_KEY, currentIds);
+        setTypeIds(prev => ({ ...prev, weekly: allWeeklyIds }));
+        setWeeklyCurrentIds(currentIds);
         toast.success(`Weekly plan generated! ${newIds.length} workout${newIds.length !== 1 ? 's' : ''} ready.`);
         setShowCustomizeWeekly(false);
       } else {
@@ -555,7 +573,7 @@ export default function Workouts() {
           </TabsContent>
 
           {/* ─── WEEKLY PLAN TAB ─── */}
-          <TabsContent value="weekly" className="mt-0">
+          <TabsContent value="weekly" className="mt-0 space-y-4">
             <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5">
               {/* Generate header */}
               <div className="p-5 sm:p-6">
@@ -592,7 +610,7 @@ export default function Workouts() {
                 </div>
               </div>
 
-              {/* Weekly workouts — shown directly below inside the same card */}
+              {/* Weekly workouts — current plan */}
               {weeklyWorkouts.length > 0 && (
                 <div className="border-t border-amber-500/20 p-5 sm:p-6 space-y-4">
                   {(() => {
@@ -628,6 +646,17 @@ export default function Workouts() {
                 </div>
               )}
             </div>
+
+            {completedWeeklyHistory.length > 0 && (
+              <div className="text-center">
+                <Button
+                  onClick={() => setShowWeeklyHistory(true)}
+                  className="bg-amber-500/20 border border-amber-500/50 text-amber-400 hover:bg-amber-500/30 rounded-full px-6 gap-2"
+                >
+                  <History className="w-4 h-4" />Previously Completed ({completedWeeklyHistory.length})
+                </Button>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </div>
@@ -672,6 +701,75 @@ export default function Workouts() {
                       {workout.workout_name}
                     </p>
                     <div className="flex items-center gap-3 mt-1 flex-wrap">
+                      {workout.completed_date && <span className="text-zinc-500 text-xs">{workout.completed_date}</span>}
+                      {workout.estimated_duration && (
+                        <span className="flex items-center gap-1 text-xs text-zinc-500">
+                          <Clock className="w-3 h-3 text-amber-400/50" />{workout.estimated_duration} min
+                        </span>
+                      )}
+                      {workout.calories_burned && (
+                        <span className="flex items-center gap-1 text-xs text-zinc-500">
+                          <Flame className="w-3 h-3 text-orange-400/50" />~{workout.calories_burned} cal
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex-shrink-0 flex flex-col items-end gap-1">
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border capitalize ${difficultyColors[workout.difficulty] || difficultyColors.beginner}`}>
+                      {workout.difficulty}
+                    </span>
+                    <span className="text-zinc-600 text-xs">{workout.exercises?.length || 0} exercises</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Weekly history drawer */}
+      {showWeeklyHistory && (
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-sm"
+          onClick={() => setShowWeeklyHistory(false)}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            className="w-full sm:max-w-2xl max-h-[90vh] bg-zinc-950 border border-zinc-800 rounded-t-3xl sm:rounded-3xl flex flex-col overflow-hidden"
+          >
+            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 flex-shrink-0">
+              <div className="flex items-center gap-2">
+                <History className="w-5 h-5 text-amber-400" />
+                <h2 className="text-white font-bold text-lg">Completed Weekly Workouts</h2>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-zinc-500 text-sm">{completedWeeklyHistory.length} workouts</span>
+                <button
+                  onClick={() => setShowWeeklyHistory(false)}
+                  className="w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 flex items-center justify-center transition-colors"
+                >
+                  <X className="w-4 h-4 text-zinc-400" />
+                </button>
+              </div>
+            </div>
+            <div className="overflow-y-auto flex-1 px-4 sm:px-6 py-4 space-y-3">
+              {completedWeeklyHistory.map(workout => (
+                <div
+                  key={workout.id}
+                  onClick={() => { setHistoryWorkout(workout); setShowWeeklyHistory(false); }}
+                  className="flex items-center gap-4 p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800 cursor-pointer hover:border-amber-500/30 hover:bg-zinc-900 transition-all group"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-amber-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-semibold text-sm group-hover:text-amber-400 transition-colors truncate">
+                      {workout.workout_name}
+                    </p>
+                    <div className="flex items-center gap-3 mt-1 flex-wrap">
+                      {workout.day_of_week && (
+                        <span className="text-amber-400/70 text-xs font-medium capitalize">{workout.day_of_week}</span>
+                      )}
                       {workout.completed_date && <span className="text-zinc-500 text-xs">{workout.completed_date}</span>}
                       {workout.estimated_duration && (
                         <span className="flex items-center gap-1 text-xs text-zinc-500">

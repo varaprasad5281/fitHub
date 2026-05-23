@@ -4,7 +4,7 @@
 const Points = require('../../models/Points');
 const PointsTransaction = require('../../models/PointsTransaction');
 const UserActivityEvent = require('../../models/UserActivityEvent');
-const { LEVEL_THRESHOLDS } = require('../../utils/constants');
+const { LEVEL_THRESHOLDS, MAX_LEVEL } = require('../../utils/constants');
 
 module.exports = async (req, res) => {
   const user = req.user;
@@ -15,16 +15,16 @@ module.exports = async (req, res) => {
   }
 
   const currentLevel = pointsRecord.level;
-  const nextLevelPoints = LEVEL_THRESHOLDS[currentLevel + 1] || LEVEL_THRESHOLDS[10];
+  const nextLevelPoints = LEVEL_THRESHOLDS[currentLevel + 1] || LEVEL_THRESHOLDS[MAX_LEVEL];
   const currentLevelPoints = LEVEL_THRESHOLDS[currentLevel] || 0;
   const pointsInLevel = pointsRecord.total_points - currentLevelPoints;
   const pointsNeededForNextLevel = nextLevelPoints - currentLevelPoints;
   const progressPercentage = Math.min(Math.round((pointsInLevel / pointsNeededForNextLevel) * 100), 100);
 
   // Check level-up
-  const thresholdEntries = Object.entries(LEVEL_THRESHOLDS);
+  const thresholdEntries = Object.entries(LEVEL_THRESHOLDS).sort((a, b) => Number(a[0]) - Number(b[0]));
   const newLevelIdx = thresholdEntries.findIndex(([, t]) => pointsRecord.total_points < t);
-  const actualLevel = newLevelIdx === -1 ? 10 : newLevelIdx;
+  const actualLevel = newLevelIdx === -1 ? MAX_LEVEL : newLevelIdx;
   if (actualLevel > currentLevel) {
     await Points.findOneAndUpdate({ created_by: user.email }, { level: actualLevel });
     UserActivityEvent.create({

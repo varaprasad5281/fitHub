@@ -24,6 +24,8 @@ const CATEGORY_LABEL = {
   nutrition: '🥗 Nutrition',
   points:    '⭐ Points',
   social:    '🤝 Social',
+  level:     '🎯 Level',
+  referral:  '🔗 Referral',
   exclusive: '🏅 Exclusive',
 };
 

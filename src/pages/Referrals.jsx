@@ -41,19 +41,36 @@ const MILESTONES = [
   {
     count: 25,
     label: '25 referrals',
-    reward: 'Coming Soon',
-    icon: '🚀',
-    detail: 'Something big is being planned...',
-    rarity: 'coming_soon',
+    reward: 'Legendary Badge + 500 Points',
+    icon: '🌟',
+    detail: '"Legend Maker" legendary badge + 500 points',
+    rarity: 'legendary',
+  },
+  {
+    count: 50,
+    label: '50 referrals',
+    reward: '3 Months Free Elite + 1000 Points',
+    icon: '💎',
+    detail: 'Full Elite access for 3 months + 1,000 bonus points',
+    rarity: 'elite',
+  },
+  {
+    count: 100,
+    label: '100 referrals',
+    reward: 'Affiliate Partner',
+    icon: '🤝',
+    detail: 'Join the 7% Affiliate Partner program — we\'ll reach out to you',
+    rarity: 'affiliate',
   },
 ];
 
 const RARITY_STYLES = {
-  rare:        { border: 'border-blue-500/50',   bg: 'bg-blue-900/20',   label: 'text-blue-400',   badge: 'bg-blue-500/20 text-blue-300' },
-  epic:        { border: 'border-purple-500/50', bg: 'bg-purple-900/20', label: 'text-purple-400', badge: 'bg-purple-500/20 text-purple-300' },
-  pro:         { border: 'border-amber-500/50',  bg: 'bg-amber-900/20',  label: 'text-amber-400',  badge: 'bg-amber-500/20 text-amber-300' },
-  elite:       { border: 'border-amber-400/60',  bg: 'bg-amber-900/25',  label: 'text-amber-300',  badge: 'bg-amber-400/20 text-amber-200' },
-  coming_soon: { border: 'border-zinc-700',      bg: 'bg-zinc-900/40',   label: 'text-zinc-500',   badge: 'bg-zinc-800 text-zinc-500' },
+  rare:      { border: 'border-blue-500/50',    bg: 'bg-blue-900/20',    label: 'text-blue-400',    badge: 'bg-blue-500/20 text-blue-300' },
+  epic:      { border: 'border-purple-500/50',  bg: 'bg-purple-900/20',  label: 'text-purple-400',  badge: 'bg-purple-500/20 text-purple-300' },
+  pro:       { border: 'border-amber-500/50',   bg: 'bg-amber-900/20',   label: 'text-amber-400',   badge: 'bg-amber-500/20 text-amber-300' },
+  elite:     { border: 'border-amber-400/60',   bg: 'bg-amber-900/25',   label: 'text-amber-300',   badge: 'bg-amber-400/20 text-amber-200' },
+  legendary: { border: 'border-yellow-400/70',  bg: 'bg-yellow-900/20',  label: 'text-yellow-300',  badge: 'bg-yellow-500/20 text-yellow-200' },
+  affiliate: { border: 'border-emerald-500/60', bg: 'bg-emerald-900/20', label: 'text-emerald-400', badge: 'bg-emerald-500/20 text-emerald-300' },
 };
 
 function MilestoneCard({ milestone, completed, granted }) {

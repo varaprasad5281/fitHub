@@ -16,11 +16,13 @@ const { notify } = require('./notify');
 
 // Milestone definitions in ascending order
 const MILESTONES = [
-  { count: 5,  type: 'badge',        badge_code: 'REFERRAL_5',  points: 100 },
-  { count: 10, type: 'subscription', plan: 'pro_monthly' },
-  { count: 15, type: 'badge',        badge_code: 'REFERRAL_15', points: 250 },
-  { count: 20, type: 'subscription', plan: 'elite_monthly' },
-  { count: 25, type: 'notify' },
+  { count: 5,   type: 'badge',        badge_code: 'REFERRAL_5',  points: 100 },
+  { count: 10,  type: 'subscription', plan: 'pro_monthly' },
+  { count: 15,  type: 'badge',        badge_code: 'REFERRAL_15', points: 250 },
+  { count: 20,  type: 'subscription', plan: 'elite_monthly' },
+  { count: 25,  type: 'badge',        badge_code: 'REFERRAL_25', points: 500 },
+  { count: 50,  type: 'subscription', plan: 'elite_monthly',     months: 3, points: 1000 },
+  { count: 100, type: 'affiliate' },
 ];
 
 async function processReferralMilestones(referrerEmail) {
@@ -59,7 +61,7 @@ async function processReferralMilestones(referrerEmail) {
             { $inc: { total_points: milestone.points, weekly_points: milestone.points } }
           );
         }
-        const rarityEmoji = { rare: '🥈', epic: '🥇' };
+        const rarityEmoji = { rare: '🥈', epic: '🥇', legendary: '🌟' };
         const emoji = badge ? (rarityEmoji[badge.rarity_level] || '🏅') : '🏅';
         notify(
           referrerEmail,
@@ -73,15 +75,17 @@ async function processReferralMilestones(referrerEmail) {
         const isElitePlan = milestone.plan === 'elite_monthly';
         const alreadyOnElite = sub?.plan?.includes('elite') &&
           (sub.status === 'active' || sub.status === 'trial');
+        const durationMonths = milestone.months || 1;
+        const durationDays = durationMonths * 30;
 
         if (!isElitePlan && alreadyOnElite) {
           notify(
             referrerEmail,
-            `🎉 ${milestone.count} referrals! You earned 1 month free Pro — you're already on Elite, so you're all set.`,
+            `🎉 ${milestone.count} referrals! You earned ${durationMonths} month${durationMonths > 1 ? 's' : ''} free Pro — you're already on Elite, so you're all set.`,
             'general'
           );
         } else {
-          const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+          const endDate = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000);
           await Subscription.findOneAndUpdate(
             { created_by: referrerEmail },
             {
@@ -95,16 +99,22 @@ async function processReferralMilestones(referrerEmail) {
           const planLabel = isElitePlan ? 'Elite' : 'Pro';
           notify(
             referrerEmail,
-            `🎉 ${milestone.count} referrals! You've earned 1 month free ${planLabel} access. Enjoy!`,
+            `🎉 ${milestone.count} referrals! You've earned ${durationMonths} month${durationMonths > 1 ? 's' : ''} free ${planLabel} access. Enjoy!`,
             'general'
+          );
+        }
+        if (milestone.points) {
+          await Points.findOneAndUpdate(
+            { created_by: referrerEmail },
+            { $inc: { total_points: milestone.points, weekly_points: milestone.points } }
           );
         }
       }
 
-      if (milestone.type === 'notify') {
+      if (milestone.type === 'affiliate') {
         notify(
           referrerEmail,
-          `🚀 Incredible — ${milestone.count} referrals! You've hit the top tier. Something special is coming for you. Stay tuned.`,
+          `🤝 Incredible — ${milestone.count} referrals! You've qualified for the 7% Affiliate Partner program. Our team will reach out to you soon.`,
           'general'
         );
       }
