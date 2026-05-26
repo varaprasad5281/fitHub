@@ -313,7 +313,7 @@ export default function Coaching() {
       {/* History Drawer */}
       {showHistory && (
         <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-sm"
+          className="fixed inset-0 z-[300] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-sm"
           onClick={() => setShowHistory(false)}
         >
           <div

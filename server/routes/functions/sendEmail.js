@@ -18,6 +18,7 @@ module.exports = async (req, res) => {
   const html = buildEmail({
     title: subject,
     preheader: body.replace(/\n/g, ' ').slice(0, 120),
+    icon: '✉️',
     body: textToHtml(body),
   });
 

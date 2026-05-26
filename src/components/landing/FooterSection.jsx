@@ -1,7 +1,23 @@
 import React from 'react';
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Youtube, Linkedin, Music, Instagram } from "lucide-react";
+import { Youtube, Instagram } from "lucide-react";
+
+function TikTokIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z"/>
+    </svg>
+  );
+}
+
+function XIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+    </svg>
+  );
+}
 
 export default function FooterSection() {
   return (
@@ -69,36 +85,40 @@ export default function FooterSection() {
             </ul>
             <div className="flex gap-3">
               <a
-                href="https://instagram.com/7percent"
+                href="https://www.instagram.com/7percent.info?igsh=bnM1YjI3ZGUyc29r&utm_source=qr"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full bg-zinc-800 hover:bg-amber-500/10 border border-zinc-700 hover:border-amber-500/30 flex items-center justify-center text-zinc-500 hover:text-amber-400 transition-all"
+                aria-label="Instagram"
               >
                 <Instagram className="w-4 h-4" />
               </a>
               <a
-                href="https://youtube.com/@7percent"
+                href="https://www.youtube.com/@7Percent-info"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full bg-zinc-800 hover:bg-amber-500/10 border border-zinc-700 hover:border-amber-500/30 flex items-center justify-center text-zinc-500 hover:text-amber-400 transition-all"
+                aria-label="YouTube"
               >
                 <Youtube className="w-4 h-4" />
               </a>
               <a
-                href="https://tiktok.com/@7percent"
+                href="https://www.tiktok.com/@7percent.info"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full bg-zinc-800 hover:bg-amber-500/10 border border-zinc-700 hover:border-amber-500/30 flex items-center justify-center text-zinc-500 hover:text-amber-400 transition-all"
+                aria-label="TikTok"
               >
-                <Music className="w-4 h-4" />
+                <TikTokIcon className="w-4 h-4" />
               </a>
               <a
-                href="https://linkedin.com/company/7percent"
+                href="https://x.com/7percenthq?s=21"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full bg-zinc-800 hover:bg-amber-500/10 border border-zinc-700 hover:border-amber-500/30 flex items-center justify-center text-zinc-500 hover:text-amber-400 transition-all"
+                aria-label="X (Twitter)"
               >
-                <Linkedin className="w-4 h-4" />
+                <XIcon className="w-4 h-4" />
               </a>
             </div>
           </div>
