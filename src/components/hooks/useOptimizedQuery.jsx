@@ -4,7 +4,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { useMemo, useCallback } from 'react';
+import { useMemo } from 'react';
 
 /**
  * Memoized query with built-in caching

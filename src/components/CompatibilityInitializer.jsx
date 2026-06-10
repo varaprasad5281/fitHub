@@ -21,8 +21,6 @@ export default function CompatibilityInitializer() {
     
     // 4. Setup session persistence
     setupSessionPersistence();
-    
-    console.log('[7%] Compatibility initialized');
   }, []);
 
   return null;

@@ -9,10 +9,8 @@ import { api } from '@/api/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Crown, X, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
 import { createPageUrl } from '@/utils';
 import { Link } from 'react-router-dom';
-import { withActionDebug } from '@/components/debug/ActionDebugger';
 
 export default function SmartUpgradePrompt() {
   const [promptData, setPromptData] = useState(null);

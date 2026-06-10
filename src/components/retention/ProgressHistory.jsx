@@ -9,7 +9,7 @@ import { api } from '@/api/client';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Calendar, TrendingUp, Award } from 'lucide-react';
+import { Award } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 

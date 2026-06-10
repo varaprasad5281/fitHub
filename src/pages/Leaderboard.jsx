@@ -2,16 +2,14 @@
 import { motion } from 'framer-motion';
 import { api } from '@/api/client';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Trophy, Crown, Lock, Loader2, Users, TrendingUp, Check, X } from "lucide-react";
+import { Trophy, Lock, Users, TrendingUp, Check, X } from "lucide-react";
 import { activeSub, hasEliteAccess } from '@/lib/subscriptionUtils';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { createPageUrl } from "@/utils";
 import PodiumDisplay from "@/components/leaderboard/PodiumDisplay";
 import UserAvatar from "@/components/ui/UserAvatar";
 
 import { Skeleton } from "@/components/ui/skeleton";
-import { motion as m } from 'framer-motion';
 import AddFriendForm from "@/components/friends/AddFriendForm";
 import FriendsLeaderboard from "@/components/leaderboard/FriendsLeaderboard";
 import ProUpsellModalEnhanced from "@/components/conversion/ProUpsellModalEnhanced";

@@ -102,6 +102,6 @@ Today's Date: ${new Date().toDateString()}`;
     res.json({ success: true, session, is_candidate: sessionType === "daily_candidate" });
   } catch (err) {
     console.error("[generateDailyCoaching]", err.message);
-    res.status(500).json({ error: "Failed to generate coaching", message: err.message });
+    res.status(500).json({ error: "Could not generate today's coaching. Please try again later." });
   }
 };

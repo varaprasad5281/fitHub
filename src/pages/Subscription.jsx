@@ -1,7 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { api } from '@/api/client';
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Crown, CheckCircle, ExternalLink, AlertCircle, Loader2, Download } from "lucide-react";
 import { toast } from "sonner";
 import CancelModal from "@/components/subscription/CancelModal";
@@ -130,11 +129,11 @@ export default function Subscription() {
       const status = response.status;
 
       if (status !== 200) {
-        throw new Error((data && data.error) || ('Server error: ' + status));
+        throw new Error((data && data.error) || 'Could not start checkout. Please try again.');
       }
 
       if (!data || !data.url) {
-        throw new Error('No checkout URL returned from server');
+        throw new Error('Could not start checkout. Please try again.');
       }
 
       window.location.href = data.url;
@@ -145,7 +144,7 @@ export default function Subscription() {
           eventName: 'subscription_checkout_failed',
           properties: { plan: billingPeriod, error: error ? error.message : 'unknown' }
         });
-        toast.error((error && error.message) || 'Failed to start checkout. Please try again.');
+        toast.error((error && error.message) || 'Could not start checkout. Please try again.');
       }
     })();
   };
@@ -166,7 +165,7 @@ export default function Subscription() {
       });
     }, {
       setLoading: setCancelling,
-      onError: () => toast.error('Failed to cancel subscription')
+      onError: (error) => toast.error((error && error.message) || 'Could not cancel your subscription. Please try again or contact support.')
     })();
   };
 
@@ -177,10 +176,10 @@ export default function Subscription() {
       if (url) {
         window.open(url, '_blank');
       } else {
-        throw new Error('No billing portal URL returned');
+        throw new Error('Could not open billing management. Please try again or contact support.');
       }
     }, {
-      onError: () => toast.error('Failed to open billing portal')
+      onError: (error) => toast.error((error && error.message) || 'Could not open billing management. Please try again or contact support.')
     })();
   };
 

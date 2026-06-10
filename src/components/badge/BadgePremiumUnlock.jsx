@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { RARITY_STYLES, BADGE_ANIMATIONS } from './badgeDesignTokens';
+import { RARITY_STYLES } from './badgeDesignTokens';
 import RewardShowcase from './RewardShowcase';
 
 const BadgePremiumUnlock = ({ badge, userBadge, rewards, onFeature, onClose }) => {

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, memo } from 'react';
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { api } from "@/api/client";
 import { Menu, X, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NotificationCenter from "@/components/notifications/NotificationCenter";

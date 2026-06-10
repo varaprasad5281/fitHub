@@ -22,7 +22,8 @@ module.exports = async (req, res) => {
       expand: ['subscription'],
     });
   } catch (err) {
-    return res.status(400).json({ error: 'Invalid session ID', detail: err.message });
+    console.error('[verifyCheckout] Stripe error:', err.message);
+    return res.status(400).json({ error: 'We could not verify your payment session. If you were charged, please contact support.' });
   }
 
   if (session.status !== 'complete' && session.payment_status !== 'paid') {

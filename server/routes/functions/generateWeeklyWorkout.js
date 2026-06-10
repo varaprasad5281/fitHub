@@ -1,12 +1,8 @@
-const https = require('https');
 const Profile = require('../../models/Profile');
 const WorkoutCompletion = require('../../models/WorkoutCompletion');
 const Workout = require('../../models/Workout');
 const { invokeLLM } = require('../../services/ai');
-
-function prewarm(url) {
-  https.get(url, (res) => res.resume()).on('error', () => {});
-}
+const { getExerciseImage } = require('../../services/exerciseMedia');
 
 const DAY_TEMPLATES = {
   1: [
@@ -95,18 +91,14 @@ Return ONLY compact JSON (no extra whitespace):
     };
   }
 
-  const exercisesWithImages = (workoutPlan.exercises || []).map((ex) => {
-    const seed = ex.name.toLowerCase().split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-    const prompt = encodeURIComponent(`man doing ${ex.name} exercise in gym, fitness, correct form, realistic photo`);
-    return {
-      ...ex,
-      image_url: `https://image.pollinations.ai/prompt/${prompt}?width=512&height=512&seed=${seed}&nologo=true`,
-    };
-  });
+  const exercisesWithMedia = await Promise.all(
+    (workoutPlan.exercises || []).map(async (ex) => {
+      const imageUrl = await getExerciseImage(ex.name);
+      return { ...ex, image_url: imageUrl || '' };
+    })
+  );
 
-  exercisesWithImages.forEach((ex) => prewarm(ex.image_url));
-
-  return { workoutPlan, exercisesWithImages };
+  return { workoutPlan, exercisesWithMedia };
 }
 
 module.exports = async (req, res) => {
@@ -140,11 +132,11 @@ module.exports = async (req, res) => {
   // Save all to the database
   const savedWorkouts = await Promise.all(
     templates.map(async (template, i) => {
-      const { workoutPlan, exercisesWithImages } = generated[i];
+      const { workoutPlan, exercisesWithMedia } = generated[i];
       return Workout.create({
         created_by:         user.email,
         workout_name:       workoutPlan.workout_name,
-        exercises:          exercisesWithImages,
+        exercises:          exercisesWithMedia,
         estimated_duration: workoutPlan.estimated_duration,
         calories_burned:    workoutPlan.calories_burned,
         difficulty:         workoutPlan.difficulty,

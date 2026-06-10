@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Lock, Crown, Dumbbell, Flame, Clock, CheckCircle, History, ArrowRight, Zap, Target, TrendingUp } from 'lucide-react';
+import { Lock, Crown, Dumbbell, Flame, Clock, CheckCircle, ArrowRight, Zap, Target, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';

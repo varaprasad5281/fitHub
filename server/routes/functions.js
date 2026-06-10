@@ -140,7 +140,7 @@ router.all('/:name', async (req, res) => {
     await handler(req, res);
   } catch (err) {
     console.error(`[function/${name}]`, err.message, err.stack);
-    res.status(500).json({ error: err.message || 'Internal server error' });
+    res.status(500).json({ error: 'Something went wrong on our end. Please try again in a moment.' });
   }
 });
 

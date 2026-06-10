@@ -7,7 +7,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { api } from '@/api/client';
 import { useQuery } from '@tanstack/react-query';
-import { Gift, Clock, Check } from 'lucide-react';
+import { Gift, Check } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const REWARD_DISPLAY = {

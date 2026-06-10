@@ -1,6 +1,6 @@
 ﻿import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Smartphone, Bell, Dumbbell, Apple, Play, CheckCircle, Zap, Trophy, Flame } from 'lucide-react';
+import { Bell, Dumbbell, Apple, Play, CheckCircle, Zap, Trophy, Flame } from 'lucide-react';
 
 const MOCK_STATS = [
   { icon: Flame, label: '21-day streak', color: 'text-orange-400' },

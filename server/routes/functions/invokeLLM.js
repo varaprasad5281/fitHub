@@ -13,6 +13,6 @@ module.exports = async (req, res) => {
     res.json(response_json_schema ? result : { result });
   } catch (err) {
     console.error('[invokeLLM] error:', err.message);
-    res.status(500).json({ error: 'AI request failed', message: err.message });
+    res.status(500).json({ error: 'AI is temporarily unavailable. Please try again shortly.' });
   }
 };

@@ -3,7 +3,6 @@ import { api } from '@/api/client';
 import { MessageCircle, Lock, Trash2 } from 'lucide-react';
 import UserAvatar from '@/components/ui/UserAvatar';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
 

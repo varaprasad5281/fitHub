@@ -34,7 +34,7 @@ export default function FriendSocialNudge({ userEmail, onNudgeAction }) {
           setShowNudge(true);
         }
       } catch (error) {
-        console.log('Nudge check error:', error);
+        console.error('Nudge check error:', error);
       }
     };
 

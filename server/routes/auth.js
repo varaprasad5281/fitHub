@@ -116,7 +116,12 @@ router.post('/register', async (req, res) => {
   } catch (err) {
     console.error('[register]', err);
     const isDbError = err.name === 'MongoNetworkError' || err.name === 'AggregateError' || err.message?.includes('connect');
-    res.status(500).json({ error: isDbError ? 'Service temporarily unavailable. Please try again shortly.' : err.message });
+    const message = isDbError
+      ? 'Service temporarily unavailable. Please try again shortly.'
+      : err.name === 'ValidationError'
+        ? 'Please check your details and try again.'
+        : 'Could not create your account. Please try again.';
+    res.status(500).json({ error: message });
   }
 });
 
@@ -139,7 +144,7 @@ router.post('/login', async (req, res) => {
     res.json({ token, user: { id: user._id, email: user.email, full_name: user.full_name } });
   } catch (err) {
     console.error('[login]', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Login failed. Please try again.' });
   }
 });
 
@@ -149,7 +154,8 @@ router.get('/me', protect, async (req, res) => {
     const user = req.user;
     res.json({ id: user._id, email: user.email, full_name: user.full_name });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('[auth/me]', err.message);
+    res.status(500).json({ error: 'Could not load your profile. Please refresh the page.' });
   }
 });
 
@@ -175,7 +181,8 @@ router.post('/reset-password', async (req, res) => {
     const newToken = signToken(user._id);
     res.json({ success: true, token: newToken, user: { id: user._id, email: user.email, full_name: user.full_name } });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('[reset-password]', err.message);
+    res.status(500).json({ error: 'Could not reset your password. Please try again or request a new link.' });
   }
 });
 
@@ -183,15 +190,22 @@ router.post('/reset-password', async (req, res) => {
 router.post('/change-password', protect, async (req, res) => {
   try {
     const { current_password, new_password } = req.body;
+    if (!current_password || !new_password) {
+      return res.status(400).json({ error: 'Current and new password are required.' });
+    }
+    if (new_password.length < 6) {
+      return res.status(400).json({ error: 'New password must be at least 6 characters.' });
+    }
     const user = await User.findById(req.user._id).select('+password');
     if (!(await user.matchPassword(current_password))) {
-      return res.status(401).json({ error: 'Current password is incorrect' });
+      return res.status(401).json({ error: 'Current password is incorrect.' });
     }
     user.password = new_password;
     await user.save();
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('[change-password]', err.message);
+    res.status(500).json({ error: 'Could not update your password. Please try again.' });
   }
 });
 

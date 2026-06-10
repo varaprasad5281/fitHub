@@ -24,14 +24,21 @@ function authHeaders() {
 
 // ── Low-level fetch helper ────────────────────────────────────────────────────
 async function apiFetch(path, { method = 'GET', body } = {}) {
-  const res = await fetch(`${API_BASE}${path}`, {
-    method,
-    headers: {
-      'Content-Type': 'application/json',
-      ...authHeaders(),
-    },
-    body: body !== undefined ? JSON.stringify(body) : undefined,
-  });
+  let res;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeaders(),
+      },
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+    });
+  } catch {
+    const err = new Error('Cannot reach the server. Check your internet connection and try again.');
+    err.status = 0;
+    throw err;
+  }
 
   const data = await res.json().catch(() => ({}));
 

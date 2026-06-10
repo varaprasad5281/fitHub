@@ -5,7 +5,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Button } from "@/components/ui/button";
 import {
   Bell, Flame, TrendingUp, Award, Check, Dumbbell,
-  Sparkles, Crown, Lightbulb, Star, Trash2,
+  Sparkles, Crown, Lightbulb, Trash2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import FriendRequestNotification from './FriendRequestNotification';

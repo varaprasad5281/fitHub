@@ -1,16 +1,11 @@
 ﻿/**
  * Replaces: base44/functions/generatePersonalizedWorkout/entry.ts
  */
-const https = require('https');
 const Profile = require('../../models/Profile');
 const WorkoutCompletion = require('../../models/WorkoutCompletion');
 const Workout = require('../../models/Workout');
 const { invokeLLM } = require('../../services/ai');
-
-/** Fire-and-forget GET - warms the Pollinations cache before the user opens the modal */
-function prewarm(url) {
-  https.get(url, (res) => res.resume()).on('error', () => {});
-}
+const { getExerciseImage } = require('../../services/exerciseMedia');
 
 module.exports = async (req, res) => {
   const user = req.user;
@@ -81,18 +76,18 @@ ${userGoals.length > 0 ? `- Active Goals: ${userGoals.map((g) => `${g.name || g.
             items: {
               type: 'object',
               properties: {
-                name: { type: 'string' },
-                sets: { type: 'number' },
-                reps: { type: 'string' },
-                weight_recommendation: { type: 'string' },
-                instructions: { type: 'string' },
+                name:                 { type: 'string' },
+                sets:                 { type: 'number' },
+                reps:                 { type: 'string' },
+                weight_recommendation:{ type: 'string' },
+                instructions:         { type: 'string' },
               },
             },
           },
-          estimated_duration: { type: 'number' },
-          calories_burned: { type: 'number' },
-          difficulty: { type: 'string' },
-          personalization_notes: { type: 'string' },
+          estimated_duration:   { type: 'number' },
+          calories_burned:      { type: 'number' },
+          difficulty:           { type: 'string' },
+          personalization_notes:{ type: 'string' },
         },
       },
     });
@@ -115,25 +110,17 @@ ${userGoals.length > 0 ? `- Active Goals: ${userGoals.map((g) => `${g.name || g.
     };
   }
 
-  // Attach a deterministic Pollinations image URL to every exercise
-  const exercisesWithImages = workoutPlan.exercises.map((ex) => {
-    const seed = ex.name.toLowerCase().split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-    const prompt = encodeURIComponent(
-      `man doing ${ex.name} exercise in gym, fitness, correct form, realistic photo`
-    );
-    return {
-      ...ex,
-      image_url: `https://image.pollinations.ai/prompt/${prompt}?width=512&height=512&seed=${seed}&nologo=true`,
-    };
-  });
-
-  // Pre-warm all exercise images so Pollinations caches them before the user opens the modal
-  exercisesWithImages.forEach((ex) => prewarm(ex.image_url));
+  const exercisesWithMedia = await Promise.all(
+    workoutPlan.exercises.map(async (ex) => {
+      const imageUrl = await getExerciseImage(ex.name);
+      return { ...ex, image_url: imageUrl || '' };
+    })
+  );
 
   const savedWorkout = await Workout.create({
     created_by: user.email,
     workout_name: workoutPlan.workout_name,
-    exercises: exercisesWithImages,
+    exercises: exercisesWithMedia,
     estimated_duration: workoutPlan.estimated_duration,
     calories_burned: workoutPlan.calories_burned,
     difficulty: workoutPlan.difficulty,

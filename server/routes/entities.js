@@ -62,7 +62,8 @@ router.get('/:model', async (req, res) => {
     const docs = await Model.find(scope).sort({ createdAt: -1 }).lean();
     res.json(normalize(docs));
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(`[entities/list/${req.params.model}]`, err.message);
+    res.status(500).json({ error: 'Could not load your data. Please try again.' });
   }
 });
 
@@ -77,7 +78,8 @@ router.post('/:model/filter', async (req, res) => {
     const docs = await Model.find(query).sort({ createdAt: -1 }).lean();
     res.json(normalize(docs));
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(`[entities/filter/${req.params.model}]`, err.message);
+    res.status(500).json({ error: 'Could not load your data. Please try again.' });
   }
 });
 
@@ -101,7 +103,11 @@ router.post('/:model', async (req, res) => {
       );
     }
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(`[entities/create/${req.params.model}]`, err.message);
+    const message = err.name === 'ValidationError'
+      ? 'Could not save - please check your input and try again.'
+      : 'Could not save. Please try again.';
+    res.status(500).json({ error: message });
   }
 });
 
@@ -115,10 +121,14 @@ router.put('/:model/:id', async (req, res) => {
     const filter = { _id: req.params.id, ...scope };
 
     const doc = await Model.findOneAndUpdate(filter, req.body, { new: true, runValidators: true });
-    if (!doc) return res.status(404).json({ error: 'Document not found or unauthorized' });
+    if (!doc) return res.status(404).json({ error: 'Item not found.' });
     res.json(normalize(doc));
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(`[entities/update/${req.params.model}]`, err.message);
+    const message = err.name === 'ValidationError'
+      ? 'Could not save your changes - please check your input and try again.'
+      : 'Could not save your changes. Please try again.';
+    res.status(500).json({ error: message });
   }
 });
 
@@ -132,10 +142,11 @@ router.delete('/:model/:id', async (req, res) => {
     const filter = { _id: req.params.id, ...scope };
 
     const doc = await Model.findOneAndDelete(filter);
-    if (!doc) return res.status(404).json({ error: 'Document not found or unauthorized' });
+    if (!doc) return res.status(404).json({ error: 'Item not found.' });
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(`[entities/delete/${req.params.model}]`, err.message);
+    res.status(500).json({ error: 'Could not delete this item. Please try again.' });
   }
 });
 

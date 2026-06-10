@@ -3,7 +3,7 @@
  * Displays the badge user is closest to unlocking with progress and CTA
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { api } from '@/api/client';
 import { useQuery } from '@tanstack/react-query';

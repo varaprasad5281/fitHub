@@ -7,7 +7,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { api } from '@/api/client';
 import { useQuery } from '@tanstack/react-query';
-import { TrendingUp, Award, Crown } from 'lucide-react';
+import { Award, Crown } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const LEVEL_DESCRIPTIONS = {

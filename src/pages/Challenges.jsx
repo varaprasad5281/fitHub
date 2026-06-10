@@ -2,11 +2,10 @@ import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { api } from '@/api/client';
 import { useQuery } from "@tanstack/react-query";
-import { Trophy, Zap, Users, Plus, Loader2, Lock, X, AlertCircle } from "lucide-react";
+import { Trophy, Plus, Loader2, Lock, X, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ChallengeCard from "@/components/challenges/ChallengeCard";
 import CreateChallengeForm from "@/components/challenges/CreateChallengeForm";
-import { toast } from "sonner";
 
 export default function Challenges() {
   const [showCreateForm, setShowCreateForm] = useState(false);

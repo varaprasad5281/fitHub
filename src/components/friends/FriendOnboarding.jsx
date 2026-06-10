@@ -26,7 +26,7 @@ export default function FriendOnboarding({ onComplete, onSkip }) {
       const res = await api.functions.invoke('suggestedFriends');
       setSuggested(res?.data || []);  // server returns { data: [...] }
     } catch (error) {
-      console.log('Error fetching suggestions:', error);
+      console.error('Error fetching suggestions:', error);
       toast.error('Could not load suggestions');
     } finally {
       setLoading(false);
@@ -39,7 +39,7 @@ export default function FriendOnboarding({ onComplete, onSkip }) {
       toast.success('Friend request sent');
       setSuggested(suggested.filter(s => s.email !== email));
     } catch (error) {
-      console.log('Error sending request:', error);
+      console.error('Error sending request:', error);
       toast.error('Could not send request');
     }
   };

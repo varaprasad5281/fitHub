@@ -2,7 +2,7 @@
 import { api } from '@/api/client';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LogIn, Calendar, Eye, EyeOff, CheckCircle2, XCircle, Sparkles, Loader2, CreditCard, SkipForward, ArrowLeft } from "lucide-react";
+import { LogIn, Calendar, Eye, EyeOff, CheckCircle2, XCircle, Loader2, CreditCard, SkipForward, ArrowLeft } from "lucide-react";
 import OnboardingStep from "@/components/onboarding/OnboardingStep";
 import OptionGrid from "@/components/onboarding/OptionGrid";
 import { Button } from "@/components/ui/button";

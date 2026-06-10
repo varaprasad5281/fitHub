@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { api } from '@/api/client';
 import { useQueryClient } from '@tanstack/react-query';
-import { Heart, Flame, Zap, Share2 } from 'lucide-react';
+import { Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const reactionEmojis = {
@@ -40,7 +40,7 @@ export default function ActivityCard({ activity, reactions = [] }) {
       queryClient.invalidateQueries({ queryKey: ['activity-feed'] });
       queryClient.invalidateQueries({ queryKey: ['social-reactions'] });
     } catch (error) {
-      toast.error('Failed to react');
+      toast.error('Could not react to this post. Please try again.');
     } finally {
       setIsReacting(false);
     }
@@ -61,7 +61,7 @@ export default function ActivityCard({ activity, reactions = [] }) {
       }
     } catch (error) {
       if (error.name !== 'AbortError') {
-        toast.error('Failed to share');
+        toast.error('Could not share this post. Please try again.');
       }
     }
   };

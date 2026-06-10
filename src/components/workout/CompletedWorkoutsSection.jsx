@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { api } from '@/api/client';
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Loader2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";

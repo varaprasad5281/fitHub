@@ -3,7 +3,7 @@
  * Shows incoming and outgoing requests
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { api } from '@/api/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';

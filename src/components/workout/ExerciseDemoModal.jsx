@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Loader2, RefreshCw } from 'lucide-react';
+import { X, Dumbbell } from 'lucide-react';
 
 const MUSCLES = {
   squat:    ['Quads', 'Glutes', 'Hamstrings'],
@@ -32,14 +32,6 @@ const classify = (name) => {
   return 'generic';
 };
 
-const FALLBACK_SVG = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' style='background:%2318181b'><g fill='%23f59e0b' opacity='0.7'><rect x='10' y='44' width='80' height='12' rx='6'/><rect x='8' y='36' width='14' height='28' rx='5'/><rect x='78' y='36' width='14' height='28' rx='5'/><rect x='2' y='40' width='12' height='20' rx='4'/><rect x='86' y='40' width='12' height='20' rx='4'/></g></svg>`;
-
-/** @param {string} name */
-function buildPollinationsUrl(name) {
-  const seed = name.toLowerCase().split('').reduce((/** @type {number} */ a, /** @type {string} */ c) => a + c.charCodeAt(0), 0);
-  const prompt = encodeURIComponent(`man doing ${name} exercise in gym, fitness, correct form, realistic photo`);
-  return `https://image.pollinations.ai/prompt/${prompt}?width=768&height=768&seed=${seed}&nologo=true`;
-}
 
 /**
  * @param {{ exercise: any, onClose: () => void }} props
@@ -47,46 +39,8 @@ function buildPollinationsUrl(name) {
 export default function ExerciseDemoModal({ exercise, onClose }) {
   const type = classify(exercise.name);
   const muscles = MUSCLES[type];
-
-  const [src, setSrc] = useState(exercise.image_url || buildPollinationsUrl(exercise.name));
-  const [loaded, setLoaded] = useState(false);
-  const [timedOut, setTimedOut] = useState(false);
-  const loadedRef = useRef(false);
-  const retriedRef = useRef(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!loadedRef.current) {
-        setTimedOut(true);
-        setSrc(FALLBACK_SVG);
-      }
-    }, 30000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handleLoad = () => {
-    loadedRef.current = true;
-    setLoaded(true);
-    setTimedOut(false);
-  };
-
-  const handleError = () => {
-    // If the stored URL failed, try a freshly-generated URL once
-    if (!retriedRef.current && exercise.image_url && src === exercise.image_url) {
-      retriedRef.current = true;
-      setSrc(buildPollinationsUrl(exercise.name));
-    } else {
-      setSrc(FALLBACK_SVG);
-    }
-  };
-
-  const regenerate = () => {
-    loadedRef.current = false;
-    retriedRef.current = true;
-    setLoaded(false);
-    setTimedOut(false);
-    setSrc(buildPollinationsUrl(exercise.name) + `&t=${Date.now()}`);
-  };
+  const [imgErr, setImgErr] = useState(false);
+  const hasGif = !!exercise.image_url && !imgErr;
 
   return (
     <AnimatePresence>
@@ -120,32 +74,20 @@ export default function ExerciseDemoModal({ exercise, onClose }) {
             </button>
           </div>
 
-          {/* Image */}
+          {/* Image demo area */}
           <div className="mx-4 my-3 rounded-2xl bg-zinc-900 border border-zinc-800/60 overflow-hidden relative flex-1 min-h-[300px] sm:min-h-[400px]">
-            {!loaded && !timedOut && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10">
-                <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
-                <p className="text-zinc-500 text-xs">Loading demo…</p>
+            {hasGif ? (
+              <img
+                src={exercise.image_url}
+                alt={exercise.name}
+                className="w-full h-full object-cover"
+                onError={() => setImgErr(true)}
+              />
+            ) : (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-zinc-900 to-zinc-800">
+                <Dumbbell className="w-10 h-10 text-amber-400/30" />
+                <p className="text-zinc-500 text-sm">{exercise.name}</p>
               </div>
-            )}
-
-            <img
-              key={src}
-              src={src}
-              alt={exercise.name}
-              className={`w-full h-full object-cover transition-opacity duration-700 ${loaded ? 'opacity-100' : 'opacity-0'}`}
-              onLoad={handleLoad}
-              onError={handleError}
-            />
-
-            {loaded && (
-              <button
-                onClick={regenerate}
-                className="absolute bottom-3 right-3 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors backdrop-blur-sm"
-                title="Reload image"
-              >
-                <RefreshCw className="w-3.5 h-3.5 text-white" />
-              </button>
             )}
           </div>
 

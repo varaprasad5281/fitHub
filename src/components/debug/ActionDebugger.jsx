@@ -54,7 +54,7 @@ export function withActionDebug(actionName, fn, { setLoading, onError } = {}) {
       if (controller) controller.abort();
       if (setLoading) setLoading(false);
       log(actionName, 'TIMEOUT after 10s');
-      toast.error('Something went wrong. Please try again.');
+      toast.error('This is taking longer than expected. Please check your connection and try again.');
     }, 10000);
 
     try {
@@ -73,7 +73,7 @@ export function withActionDebug(actionName, fn, { setLoading, onError } = {}) {
       if (onError) {
         onError(err);
       } else {
-        toast.error(err.message || 'Something went wrong. Please try again.');
+        toast.error(err.message || 'Something went wrong on our end. Please try again.');
       }
       throw err;
     } finally {

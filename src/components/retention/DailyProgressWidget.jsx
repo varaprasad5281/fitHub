@@ -4,7 +4,7 @@
  * Core of retention loop: daily visibility + next milestone clarity
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { api } from '@/api/client';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';

@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Clock, Flame, Dumbbell, CheckCircle, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, Clock, Flame, Dumbbell, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const difficultyColors = {
@@ -9,113 +9,46 @@ const difficultyColors = {
   advanced:     'text-red-400    bg-red-400/10    border-red-400/20',
 };
 
-const FALLBACK_SVG = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' style='background:%2318181b'><g fill='%23f59e0b' opacity='0.7'><rect x='10' y='44' width='80' height='12' rx='6'/><rect x='8' y='36' width='14' height='28' rx='5'/><rect x='78' y='36' width='14' height='28' rx='5'/><rect x='2' y='40' width='12' height='20' rx='4'/><rect x='86' y='40' width='12' height='20' rx='4'/></g></svg>`;
-
-/** @param {string} name */
-function freshUrl(name) {
-  const seed = name.toLowerCase().split('').reduce((/** @type {number} */ a, /** @type {string} */ c) => a + c.charCodeAt(0), 0);
-  const prompt = encodeURIComponent(`man doing ${name} exercise in gym, fitness, correct form, realistic photo`);
-  return `https://image.pollinations.ai/prompt/${prompt}?width=512&height=512&seed=${seed}&nologo=true`;
-}
-
 /**
- * @param {{ name: string, storedUrl?: string }} props
+ * @param {{ name: string, gifUrl?: string }} props
  */
-function ExerciseThumb({ name, storedUrl }) {
-  const [src, setSrc] = useState(storedUrl || freshUrl(name));
-  const [loaded, setLoaded] = useState(false);
-  // Use a ref so the timeout closure always reads the latest loaded value
-  const loadedRef = useRef(false);
-  const retriedRef = useRef(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!loadedRef.current) setSrc(FALLBACK_SVG);
-    }, 30000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handleLoad = () => {
-    loadedRef.current = true;
-    setLoaded(true);
-  };
-
-  const handleError = () => {
-    // If stored URL failed, try a freshly-generated URL once before giving up
-    if (!retriedRef.current && storedUrl && src === storedUrl) {
-      retriedRef.current = true;
-      setSrc(freshUrl(name));
-    } else {
-      setSrc(FALLBACK_SVG);
-    }
-  };
-
+function ExerciseThumb({ name, gifUrl }) {
+  const [err, setErr] = useState(false);
   return (
-    <div className="relative flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden bg-zinc-800 border border-zinc-700/50">
-      {!loaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-zinc-800 z-10">
-          <Loader2 className="w-4 h-4 text-amber-400 animate-spin" />
-        </div>
+    <div aria-label={name} className="relative flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-zinc-700 to-zinc-800 border border-zinc-700/50 flex items-center justify-center">
+      {gifUrl && !err ? (
+        <img src={gifUrl} alt={name} className="w-full h-full object-cover" onError={() => setErr(true)} />
+      ) : (
+        <Dumbbell className="w-6 h-6 text-amber-400/40" />
       )}
-      <img
-        key={src}
-        src={src}
-        alt={name}
-        className={`w-full h-full object-cover transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}
-        onLoad={handleLoad}
-        onError={handleError}
-      />
     </div>
   );
 }
 
 /**
- * @param {{ name: string, storedUrl?: string }} props
+ * @param {{ name: string, gifUrl?: string }} props
  */
-function ExerciseFullImage({ name, storedUrl }) {
-  const [src, setSrc] = useState(storedUrl || freshUrl(name));
-  const [loaded, setLoaded] = useState(false);
-  const loadedRef = useRef(false);
-  const retriedRef = useRef(false);
+function ExerciseFullMedia({ name, gifUrl }) {
+  const [imgErr, setImgErr] = useState(false);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!loadedRef.current) setSrc(FALLBACK_SVG);
-    }, 30000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handleLoad = () => {
-    loadedRef.current = true;
-    setLoaded(true);
-  };
-
-  const handleError = () => {
-    if (!retriedRef.current && storedUrl && src === storedUrl) {
-      retriedRef.current = true;
-      setSrc(freshUrl(name));
-    } else {
-      setSrc(FALLBACK_SVG);
-    }
-  };
+  if (gifUrl && !imgErr) {
+    return (
+      <div className="relative w-full h-56 sm:h-72 rounded-2xl overflow-hidden bg-zinc-800">
+        <img src={gifUrl} alt={name} className="w-full h-full object-cover" onError={() => setImgErr(true)} />
+        <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/80 via-transparent to-transparent pointer-events-none" />
+      </div>
+    );
+  }
 
   return (
-    <div className="relative w-full h-56 sm:h-72 rounded-2xl overflow-hidden bg-zinc-800">
-      {!loaded && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-zinc-800 z-10">
-          <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
-          <span className="text-xs text-zinc-500">Loading image…</span>
-        </div>
-      )}
-      <img
-        key={src}
-        src={src}
-        alt={name}
-        className={`w-full h-full object-cover transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}
-        onLoad={handleLoad}
-        onError={handleError}
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/80 via-transparent to-transparent pointer-events-none" />
+    <div className="relative w-full h-56 sm:h-72 rounded-2xl overflow-hidden bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700/40 flex flex-col items-center justify-center gap-3">
+      <div className="w-16 h-16 rounded-2xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center">
+        <Dumbbell className="w-7 h-7 text-amber-400/60" />
+      </div>
+      <div className="text-center px-6">
+        <p className="text-white font-semibold text-base">{name}</p>
+        <p className="text-zinc-500 text-xs mt-1">No demo available</p>
+      </div>
     </div>
   );
 }
@@ -204,7 +137,10 @@ export default function WorkoutDetailModal({ workout, onClose, onComplete, isCom
                 </div>
 
                 <div className="overflow-y-auto flex-1 min-h-0 p-4 sm:p-5 overscroll-contain">
-                  <ExerciseFullImage name={ex.name} storedUrl={ex.image_url} />
+                  <ExerciseFullMedia
+                    name={ex.name}
+                    gifUrl={ex.image_url}
+                  />
 
                   <div className="mt-4">
                     <div className="flex items-start justify-between gap-3 mb-3">
@@ -290,7 +226,10 @@ export default function WorkoutDetailModal({ workout, onClose, onComplete, isCom
                         onClick={() => setSelectedEx(i)}
                         className="flex gap-4 p-4 rounded-2xl bg-zinc-800/50 border border-zinc-700/40 cursor-pointer hover:border-amber-400/30 hover:bg-zinc-800/80 transition-all group"
                       >
-                        <ExerciseThumb name={exercise.name} storedUrl={exercise.image_url} />
+                        <ExerciseThumb
+                          name={exercise.name}
+                          gifUrl={exercise.image_url}
+                        />
 
                         <div className="flex-1 min-w-0 flex flex-col justify-center">
                           <div className="flex items-start justify-between gap-2 mb-1">

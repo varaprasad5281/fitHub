@@ -1,7 +1,7 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Trophy, TrendingUp, Target, X } from "lucide-react";
+import { Trophy, TrendingUp, Target } from "lucide-react";
 
 export default function CancelModal({ isOpen, onClose, onConfirmCancel, cancelling }) {
   return (

@@ -1,7 +1,6 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Crown, Zap, TrendingUp, Users } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { createPageUrl } from '@/utils';
 import { useNavigate } from 'react-router-dom';
 

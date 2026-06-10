@@ -3,13 +3,12 @@
  * Shows weekly/monthly performance challenges focused on consistency
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '@/api/client';
 import { useQuery } from '@tanstack/react-query';
 import { CheckCircle2, Target, Activity } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { toast } from 'sonner';
 
 export default function ChallengeTracker() {
   const [selectedType, setSelectedType] = useState('weekly');

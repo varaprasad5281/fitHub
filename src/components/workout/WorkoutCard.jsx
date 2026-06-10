@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Dumbbell, Clock, Flame, ChevronRight } from "lucide-react";
+import { CheckCircle, Clock, Flame, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import WorkoutDetailModal from './WorkoutDetailModal';
 

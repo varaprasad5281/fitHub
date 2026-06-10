@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Flame, Zap, Trophy } from 'lucide-react';
+import { Flame } from 'lucide-react';
 
 export default function SmartActivitySummary({ activities, friends }) {
   const today = new Date();

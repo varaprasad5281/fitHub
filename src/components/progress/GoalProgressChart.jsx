@@ -1,5 +1,5 @@
 import React from 'react';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { TrendingUp, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 export default function GoalProgressChart({ goal, historicalData = [] }) {

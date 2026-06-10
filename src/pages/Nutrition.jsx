@@ -13,8 +13,6 @@ import MealPlanCard from "@/components/nutrition/MealPlanCard";
 import MealDetailView from "@/components/nutrition/MealDetailView";
 import NutritionPreview from "@/components/conversion/NutritionPreview";
 import { toast } from "sonner";
-import { createPageUrl } from "@/utils";
-import { Link } from "react-router-dom";
 import { initCSRFProtection } from "@/components/utils/csrfToken";
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { activeSub, hasProAccess } from '@/lib/subscriptionUtils';

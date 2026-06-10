@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { auth, setToken } from '@/api/client';
+import { setToken } from '@/api/client';
 import { Button } from '@/components/ui/button';
 import { Loader2, Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'sonner';

@@ -4,10 +4,18 @@
  * Performance monitoring component
  * Tracks Web Vitals and reports to analytics
  */
+function isDebug() {
+  try {
+    return localStorage.getItem('7pct_debug') === '1';
+  } catch {
+    return false;
+  }
+}
+
 export default function PerformanceMonitor() {
   useEffect(() => {
-    // Track Web Vitals
-    if (typeof window !== 'undefined' && 'PerformanceObserver' in window) {
+    // Track Web Vitals (debug mode only)
+    if (isDebug() && typeof window !== 'undefined' && 'PerformanceObserver' in window) {
       try {
         // Guard each observer individually - older browsers/Safari
         // may support PerformanceObserver but not every entry type

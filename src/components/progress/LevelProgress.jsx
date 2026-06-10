@@ -1,6 +1,5 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Trophy } from 'lucide-react';
 
 export default function LevelProgress({ currentLevel, nextLevelPoints, progressPercentage }) {
   const levelColors = {

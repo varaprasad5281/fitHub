@@ -92,6 +92,6 @@ module.exports = async (req, res) => {
     res.status(400).json({ error: `Unknown action: ${action}` });
   } catch (err) {
     console.error("[resolveCoachingReview]", err.message);
-    res.status(500).json({ error: err.message || "Internal server error" });
+    res.status(500).json({ error: "Could not process your coaching review. Please try again." });
   }
 };

@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Gift, Zap, Shield, Star } from 'lucide-react';
+import { Gift } from 'lucide-react';
 
 const REWARD_ICONS = {
   points: '⭐',

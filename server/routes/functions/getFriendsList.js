@@ -10,15 +10,11 @@ module.exports = async (req, res) => {
   const user = req.user;
   const type = req.body?.type || 'accepted';
 
-  console.log(`[getFriendsList] user=${user.email} type=${type}`);
-
   if (type === 'pending') {
     const pendingFriendships = await Friendship.find({
       $or: [{ requester_email: user.email }, { receiver_email: user.email }],
       status: 'pending',
     }).lean();
-
-    console.log(`[getFriendsList] pending count: ${pendingFriendships.length}`);
 
     const otherEmails = pendingFriendships.map(f =>
       f.requester_email === user.email ? f.receiver_email : f.requester_email
@@ -53,9 +49,6 @@ module.exports = async (req, res) => {
     status: 'accepted',
   }).lean();
 
-  console.log(`[getFriendsList] accepted friendships found: ${friendships.length}`,
-    friendships.map(f => `(${f.requester_email} → ${f.receiver_email})`));
-
   const friendEmails = friendships.map((f) =>
     f.requester_email === user.email ? f.receiver_email : f.requester_email
   );
@@ -82,8 +75,6 @@ module.exports = async (req, res) => {
     weekly_points: pointsMap[email]?.weekly_points || 0,
     fitness_goal: profileMap[email]?.fitness_goal,
   }));
-
-  console.log(`[getFriendsList] returning ${friends.length} accepted friends`);
 
   res.json({ success: true, friends });
 };

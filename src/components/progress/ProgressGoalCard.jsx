@@ -63,7 +63,7 @@ export default function ProgressGoalCard({ goal, onDelete }) {
         toast.error('Could not verify goal completion. ' + (verification.message || ''));
       }
     } catch (error) {
-      toast.error('Failed to verify image');
+      toast.error('Could not verify your progress photo. Please try a different image.');
     } finally {
       setUploading(false);
     }

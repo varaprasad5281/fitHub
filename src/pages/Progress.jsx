@@ -1,8 +1,8 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿import React, { useState } from 'react';
 import { api } from '@/api/client';
 import { useQuery } from "@tanstack/react-query";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from 'recharts';
-import { TrendingUp, Target, Calendar, Plus, AlertCircle, Zap, Flame, ArrowUp, ArrowDown, Minus, Weight, Loader2 } from "lucide-react";
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { TrendingUp, Target, Plus, Zap, Flame, ArrowUp, ArrowDown, Minus, Weight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProgressGoalForm from "@/components/progress/ProgressGoalForm";
 import ProgressGoalCard from "@/components/progress/ProgressGoalCard";

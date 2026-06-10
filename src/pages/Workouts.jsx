@@ -158,7 +158,7 @@ function WorkoutTimerCard({ workout, onComplete, isCompleting, onViewDetails, on
         tickRef.current = setInterval(() => setTick(t => t + 1), 1000);
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, []);
 
   useEffect(() => () => { if (tickRef.current) clearInterval(tickRef.current); }, []);
@@ -452,7 +452,7 @@ export default function Workouts() {
         setShowCustomizeSingle(false);
       }
     } catch {
-      toast.error('Failed to generate workout');
+      toast.error('Could not generate your workout. Please try again, or adjust your preferences.');
     } finally {
       setGenerating(false);
     }

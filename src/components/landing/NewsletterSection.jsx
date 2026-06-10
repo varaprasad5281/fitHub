@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mail, Sparkles } from "lucide-react";
+import { Mail } from "lucide-react";
 import { toast } from "sonner";
 import { api } from '@/api/client';
 import { withActionDebug } from '@/components/debug/ActionDebugger';

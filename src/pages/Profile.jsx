@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { api } from '@/api/client';
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Flame, Trophy, Star, TrendingUp, Target, Sparkles, Award, Loader2, Calendar, Edit2, Dumbbell, Apple, ChevronRight, Crown, User, LogOut } from "lucide-react";
+import { Star, Target, Sparkles, Award, Loader2, Calendar, Edit2, Dumbbell, Apple, ChevronRight, Crown, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";

@@ -17,7 +17,7 @@ export default function FriendRequestCard({ request, onRespond }) {
       toast.success(action === 'accept' ? 'Friend added!' : 'Request declined');
       onRespond();
     } catch (error) {
-      toast.error('Something went wrong');
+      toast.error('Could not respond to this friend request. Please try again.');
     } finally {
       setLoading(false);
     }

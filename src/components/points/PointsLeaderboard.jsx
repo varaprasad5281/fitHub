@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Crown, Award, TrendingUp } from 'lucide-react';
+import { Trophy, TrendingUp } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 
 export default function PointsLeaderboard({ leaderboard = [], isLoading = false, currentUserEmail = '' }) {

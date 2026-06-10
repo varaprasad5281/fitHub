@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { api } from '@/api/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { UserPlus, X, Check } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 export default function FriendRequestNotification({ user }) {

@@ -5,7 +5,7 @@ import { api } from '@/api/client';
 import { useAuth } from '@/lib/AuthContext';
 import SEOHead from '@/components/SEOHead';
 import HeroSection from "@/components/landing/HeroSection";
-import { LayoutDashboard, Utensils, Dumbbell, TrendingUp, Sparkles, Trophy, Award, Users, CreditCard, Mail, LogOut } from "lucide-react";
+import { LayoutDashboard, Utensils, Dumbbell, Sparkles, Trophy, Award, Users, CreditCard, Mail, LogOut } from "lucide-react";
 import { lazyWithPreload } from "@/components/utils/lazyWithPreload";
 
 const TrustSignals = lazyWithPreload(() => import("@/components/landing/TrustSignals"));

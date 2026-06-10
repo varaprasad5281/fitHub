@@ -15,7 +15,7 @@ export default function FriendComparison({ friendEmail, friendName }) {
         });
         setComparison(data);
       } catch (error) {
-        console.log('Comparison error:', error);
+        console.error('Comparison error:', error);
       } finally {
         setLoading(false);
       }

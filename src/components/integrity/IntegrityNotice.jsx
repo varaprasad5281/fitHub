@@ -1,6 +1,6 @@
 import React from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle, Info } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 
 export default function IntegrityNotice({ integrity }) {
   if (!integrity || integrity.integrity_status === 'normal') {

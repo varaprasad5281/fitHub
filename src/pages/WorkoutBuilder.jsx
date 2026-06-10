@@ -9,7 +9,6 @@ import { toast } from "sonner";
 import ExerciseDemoModal from "@/components/workout/ExerciseDemoModal";
 import { withActionDebug } from '@/components/debug/ActionDebugger';
 import ProUpsellModalEnhanced from '@/components/conversion/ProUpsellModalEnhanced';
-import { getUpgradeTrigger, recordUpgradeTriggerShown } from '@/components/conversion/UpgradeTriggerManager';
 
 const pointsPerDifficulty = {
   beginner: 10,
