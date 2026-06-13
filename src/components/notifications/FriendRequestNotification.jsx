@@ -12,10 +12,10 @@ export default function FriendRequestNotification({ user }) {
 
   const { data: friendRequests = [], refetch } = useQuery({
     queryKey: ['friend-requests-notifications', user?.email],
-    queryFn: () => api.entities.FriendRequest.filter({
-      receiver_email: user?.email,
-      status: 'pending',
-    }),
+    queryFn: async () => {
+      const response = await api.functions.invoke('getFriendsList', { type: 'pending' });
+      return (response?.friends || []).filter(f => !f.is_requester);
+    },
     enabled: !!user?.email,
     staleTime: 1000 * 30,
     refetchInterval: 1000 * 30,
@@ -25,7 +25,7 @@ export default function FriendRequestNotification({ user }) {
   useEffect(() => {
     friendRequests.forEach(r => {
       if (!shownIds.has(r.id)) {
-        toast.info(`${r.requester_email} sent you a friend request!`, {
+        toast.info(`${r.username || r.friend_name} sent you a friend request!`, {
           icon: <UserPlus className="w-4 h-4" />,
           duration: 5000,
         });
@@ -49,18 +49,18 @@ export default function FriendRequestNotification({ user }) {
   };
 
   const accept = useMutation({
-    mutationFn: (requesterEmail) =>
-      api.functions.invoke('friendRequest', { action: 'accept', target_email: requesterEmail }),
-    onSuccess: (_, requesterEmail) => {
-      toast.success(`You and ${requesterEmail.split('@')[0]} are now friends!`);
+    mutationFn: (request) =>
+      api.functions.invoke('friendRequest', { action: 'accept', target_email: request.email }),
+    onSuccess: (_, request) => {
+      toast.success(`You and ${request.username || request.friend_name} are now friends!`);
       invalidate();
     },
     onError: () => toast.error('Could not accept request. Please try again.'),
   });
 
   const decline = useMutation({
-    mutationFn: (requesterEmail) =>
-      api.functions.invoke('friendRequest', { action: 'reject', target_email: requesterEmail }),
+    mutationFn: (request) =>
+      api.functions.invoke('friendRequest', { action: 'reject', target_email: request.email }),
     onSuccess: () => {
       toast.success('Request declined.');
       invalidate();
@@ -102,7 +102,7 @@ export default function FriendRequestNotification({ user }) {
           {/* List */}
           <div className="max-h-80 overflow-y-auto divide-y divide-zinc-800/60">
             {friendRequests.map(request => {
-              const name = request.requester_email.split('@')[0];
+              const name = request.username || request.friend_name || 'Unknown';
               const busy = accept.isPending || decline.isPending;
               return (
                 <div key={request.id} className="flex items-center gap-3 px-4 py-3">
@@ -114,13 +114,12 @@ export default function FriendRequestNotification({ user }) {
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <p className="text-white text-sm font-semibold truncate">{name}</p>
-                    <p className="text-zinc-500 text-xs truncate">{request.requester_email}</p>
                   </div>
 
                   {/* Actions */}
                   <div className="flex gap-1.5 flex-shrink-0">
                     <button
-                      onClick={() => accept.mutate(request.requester_email)}
+                      onClick={() => accept.mutate(request)}
                       disabled={busy}
                       className="w-8 h-8 rounded-full bg-green-500/20 hover:bg-green-500/40 border border-green-500/40 flex items-center justify-center text-green-400 transition-colors disabled:opacity-40"
                       title="Accept"
@@ -128,7 +127,7 @@ export default function FriendRequestNotification({ user }) {
                       <Check className="w-3.5 h-3.5" />
                     </button>
                     <button
-                      onClick={() => decline.mutate(request.requester_email)}
+                      onClick={() => decline.mutate(request)}
                       disabled={busy}
                       className="w-8 h-8 rounded-full bg-zinc-800 hover:bg-red-500/20 border border-zinc-700 hover:border-red-500/40 flex items-center justify-center text-zinc-400 hover:text-red-400 transition-colors disabled:opacity-40"
                       title="Decline"

@@ -110,7 +110,6 @@ export default function FriendRequests() {
                     <p className="text-sm font-semibold text-white truncate">
                       {request.friend_name || request.username || request.email}
                     </p>
-                    <p className="text-xs text-zinc-500 truncate">{request.email}</p>
                   </div>
                 </div>
 
