@@ -21,7 +21,7 @@ app.use(
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
         // Allow blob: URLs so client-side image previews (e.g. avatar cropper) can render
-        imgSrc: ["'self'", "data:", "blob:"],
+        "img-src": ["'self'", "data:", "blob:"],
       },
     },
   }),
