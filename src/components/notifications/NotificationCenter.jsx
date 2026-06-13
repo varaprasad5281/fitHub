@@ -5,7 +5,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Button } from "@/components/ui/button";
 import {
   Bell, Flame, TrendingUp, Award, Check, Dumbbell,
-  Sparkles, Crown, Lightbulb, Trash2,
+  Sparkles, Crown, Lightbulb, Trash2, UserPlus, MessageCircle,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import FriendRequestNotification from './FriendRequestNotification';
@@ -20,6 +20,8 @@ const TYPE_CONFIG = {
   podium_near:       { icon: TrendingUp,color: 'text-blue-400',   bg: 'bg-blue-500/20' },
   streak_building:   { icon: Flame,     color: 'text-orange-400', bg: 'bg-orange-500/20' },
   workout_missed:    { icon: Flame,     color: 'text-red-400',    bg: 'bg-red-500/20' },
+  friend_request:    { icon: UserPlus,  color: 'text-amber-400',  bg: 'bg-amber-500/20' },
+  new_message:       { icon: MessageCircle, color: 'text-blue-400', bg: 'bg-blue-500/20' },
   general:           { icon: Bell,      color: 'text-zinc-400',   bg: 'bg-zinc-700/40' },
 };
 

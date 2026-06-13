@@ -24,6 +24,7 @@ const workoutSchema = new mongoose.Schema({
   day_of_week: { type: String, enum: ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'] },
   is_completed: { type: Boolean, default: false },
   completed_date: { type: String }, // YYYY-MM-DD
+  is_custom: { type: Boolean, default: false }, // true = manually created by the user, not AI-generated
 }, { timestamps: true });
 
 workoutSchema.index({ created_by: 1 });

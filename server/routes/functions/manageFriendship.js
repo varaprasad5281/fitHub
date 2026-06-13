@@ -7,6 +7,7 @@ const Profile = require('../../models/Profile');
 const Points = require('../../models/Points');
 const User = require('../../models/User');
 const checkAndAwardBadges = require('../../utils/checkAndAwardBadges');
+const { notify } = require('../../utils/notify');
 
 // ── friendRequest ──────────────────────────────────────────────────────────────
 // action: 'send' | 'accept' | 'reject' | 'remove'
@@ -27,6 +28,11 @@ async function friendRequest(req, res) {
     if (existing) return res.json({ data: existing, message: 'Request already exists' });
 
     const friendship = await Friendship.create({ requester_email: userEmail, receiver_email: target_email });
+
+    const senderProfile = await Profile.findOne({ created_by: userEmail }).lean();
+    const senderName = senderProfile?.username || userEmail.split('@')[0];
+    notify(target_email, `${senderName} sent you a friend request!`, 'friend_request', { requester_email: userEmail });
+
     return res.json({ data: friendship });
   }
 

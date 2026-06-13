@@ -14,6 +14,8 @@ import { useAuth } from "@/lib/AuthContext";
 const _api = /** @type {any} */ (api);
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const NAME_RE = /^[A-Za-z ]+$/;
+const MIN_AGE = 12;
 
 /** @param {string} pw */
 function pwStrength(pw) {
@@ -90,6 +92,7 @@ export default function Onboarding() {
   ];
   const regValid =
     reg.fullName.trim().length >= 2 &&
+    NAME_RE.test(reg.fullName.trim()) &&
     EMAIL_RE.test(reg.email.trim()) &&
     reg.password.length >= 8 &&
     /[A-Z]/.test(reg.password) &&
@@ -97,7 +100,7 @@ export default function Onboarding() {
 
   const canProceed = () => {
     switch (step) {
-      case 0: return !!(data.date_of_birth && data.gender);
+      case 0: return !!(data.date_of_birth && data.gender) && calculateAge(data.date_of_birth) >= MIN_AGE;
       case 1: return !!(data.height_cm && data.weight_kg);
       case 2: return !!data.fitness_goal;
       case 3: return !!data.activity_level;
@@ -210,11 +213,16 @@ export default function Onboarding() {
                 type="date"
                 value={data.date_of_birth}
                 onChange={(/** @type {React.ChangeEvent<HTMLInputElement>} */ e) => update('date_of_birth', e.target.value)}
-                className="bg-zinc-900 border-zinc-800 text-white rounded-xl h-12 pl-10 [color-scheme:dark]"
+                max={new Date().toISOString().split('T')[0]}
+                className={`bg-zinc-900 border-zinc-800 text-white rounded-xl h-12 pl-10 [color-scheme:dark] ${data.date_of_birth && calculateAge(data.date_of_birth) < MIN_AGE ? 'border-red-500' : ''}`}
               />
             </div>
             {data.date_of_birth && (
-              <p className="text-zinc-500 text-xs mt-2">Age: {calculateAge(data.date_of_birth)}</p>
+              calculateAge(data.date_of_birth) < MIN_AGE ? (
+                <p className="text-red-400 text-xs mt-2">You must be at least {MIN_AGE} years old to use 7%.</p>
+              ) : (
+                <p className="text-zinc-500 text-xs mt-2">Age: {calculateAge(data.date_of_birth)}</p>
+              )
             )}
           </div>
           <div>
@@ -337,10 +345,13 @@ export default function Onboarding() {
               onBlur={() => setRegTouched(t => ({ ...t, fullName: true }))}
               placeholder="John Doe"
               autoComplete="name"
-              className={`w-full px-4 py-3 rounded-lg border bg-zinc-900 text-white placeholder-zinc-600 focus:outline-none transition-colors ${regTouched.fullName && reg.fullName.trim().length < 2 ? 'border-red-500' : 'border-zinc-700 focus:border-amber-500'}`}
+              className={`w-full px-4 py-3 rounded-lg border bg-zinc-900 text-white placeholder-zinc-600 focus:outline-none transition-colors ${regTouched.fullName && (reg.fullName.trim().length < 2 || !NAME_RE.test(reg.fullName.trim())) ? 'border-red-500' : 'border-zinc-700 focus:border-amber-500'}`}
             />
             {regTouched.fullName && reg.fullName.trim().length < 2 && (
               <p className="text-red-400 text-xs mt-1">Name must be at least 2 characters</p>
+            )}
+            {regTouched.fullName && reg.fullName.trim().length >= 2 && !NAME_RE.test(reg.fullName.trim()) && (
+              <p className="text-red-400 text-xs mt-1">Name can only contain letters and spaces</p>
             )}
           </div>
 

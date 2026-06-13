@@ -122,6 +122,16 @@ module.exports = async (req, res) => {
 
   const templates = DAY_TEMPLATES[selectedDays];
 
+  // Remove any existing incomplete weekly-plan workouts so regenerating a
+  // plan doesn't leave behind duplicate entries for this user. Custom
+  // (user-created) workouts are left untouched.
+  await Workout.deleteMany({
+    created_by: user.email,
+    day_of_week: { $ne: null },
+    is_completed: false,
+    is_custom: { $ne: true },
+  });
+
   // Generate all day workouts in parallel
   const generated = await Promise.all(
     templates.map(template =>

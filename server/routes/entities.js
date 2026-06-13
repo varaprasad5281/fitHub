@@ -18,6 +18,9 @@ const checkAndAwardBadges = require('../utils/checkAndAwardBadges');
 // Models whose creation should trigger a badge check (lowercase model name → true)
 const BADGE_CHECK_ON_CREATE = new Set(['meallog']);
 
+// Minimum age (years) required to use the app, enforced on Profile.date_of_birth
+const MIN_AGE = 12;
+
 const router = express.Router();
 router.use(protect);
 
@@ -89,6 +92,18 @@ router.post('/:model', async (req, res) => {
     const Model = getModel(req.params.model);
     if (!Model) return res.status(404).json({ error: 'Unknown model' });
 
+    if (req.params.model.toLowerCase() === 'workout' && req.body.is_custom) {
+      if (!String(req.body.workout_name || '').trim()) {
+        return res.status(400).json({ error: 'Workout name is required' });
+      }
+      if (!Array.isArray(req.body.exercises) || req.body.exercises.length === 0) {
+        return res.status(400).json({ error: 'Add at least one exercise' });
+      }
+      if (req.body.exercises.some(ex => !String(ex?.name || '').trim())) {
+        return res.status(400).json({ error: 'Each exercise needs a name' });
+      }
+    }
+
     const paths = Model.schema.paths;
     const data = { ...req.body };
     if (paths.created_by && !data.created_by) data.created_by = req.user.email;
@@ -116,6 +131,30 @@ router.put('/:model/:id', async (req, res) => {
   try {
     const Model = getModel(req.params.model);
     if (!Model) return res.status(404).json({ error: 'Unknown model' });
+
+    if (req.params.model.toLowerCase() === 'profile' && req.body.username !== undefined) {
+      const username = String(req.body.username).trim();
+      if (username.length < 8 || username.length > 20) {
+        return res.status(400).json({ error: 'Username must be between 8 and 20 characters' });
+      }
+      if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+        return res.status(400).json({ error: 'Username can only contain letters, numbers, underscores and hyphens' });
+      }
+    }
+
+    if (req.params.model.toLowerCase() === 'profile' && req.body.date_of_birth !== undefined) {
+      const birth = new Date(req.body.date_of_birth);
+      if (isNaN(birth.getTime()) || birth > new Date()) {
+        return res.status(400).json({ error: 'Please provide a valid date of birth' });
+      }
+      const today = new Date();
+      let age = today.getFullYear() - birth.getFullYear();
+      const m = today.getMonth() - birth.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+      if (age < MIN_AGE) {
+        return res.status(400).json({ error: `You must be at least ${MIN_AGE} years old to use 7%` });
+      }
+    }
 
     const scope = userScope(Model, req.user.email);
     const filter = { _id: req.params.id, ...scope };

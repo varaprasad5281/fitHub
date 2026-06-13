@@ -9,6 +9,8 @@ const Referral = require('../models/Referral');
 const IPLoginHistory = require('../models/IPLoginHistory');
 const { protect } = require('../middleware/auth');
 const { notify } = require('../utils/notify');
+const { sendEmail } = require('../services/email');
+const { buildEmail } = require('../utils/emailTemplate');
 const Badge = require('../models/Badge');
 const UserBadge = require('../models/UserBadge');
 
@@ -61,6 +63,10 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'email, full_name, and password are required' });
     }
 
+    if (!/^[A-Za-z ]+$/.test(full_name.trim())) {
+      return res.status(400).json({ error: 'Full name can only contain letters and spaces' });
+    }
+
     const existing = await User.findOne({ email: email.toLowerCase() });
     if (existing) return res.status(409).json({ error: 'Email already registered' });
 
@@ -106,6 +112,26 @@ router.post('/register', async (req, res) => {
       `Welcome to 7%, ${full_name}! 🎉 Start by logging your first workout or meal to earn points.`,
       'welcome'
     );
+
+    // Welcome email - never blocks the response
+    sendEmail({
+      to: user.email,
+      subject: 'Welcome to 7%! 🎉',
+      from_name: '7% Team',
+      body: `Hi ${full_name},\n\nWelcome to 7%! We're excited to have you on board.\n\nStart by logging your first workout or meal to earn points and kick off your streak.\n\n- The 7% Team`,
+      html: buildEmail({
+        title: `Welcome to 7%, ${full_name}!`,
+        preheader: 'Your account is ready - start logging your first workout or meal to earn points.',
+        icon: '🎉',
+        body: `
+          <p style="margin:0 0 16px 0;color:#ffffff;font-weight:600;font-size:16px;">Hi ${full_name},</p>
+          <p style="margin:0 0 16px 0;">Welcome to <strong style="color:#f59e0b;">7%</strong>! We're excited to have you on board.</p>
+          <p style="margin:0 0 0 0;">Start by logging your first workout or meal to earn points and kick off your streak.</p>
+        `,
+        buttonText: 'Go to Dashboard',
+        buttonUrl: `${process.env.CLIENT_URL || (process.env.NODE_ENV === 'production' ? 'https://7percent.info' : 'http://localhost:5173')}/dashboard`,
+      }),
+    }).catch((err) => console.error('[register] Welcome email error:', err.message));
 
     // Founder badge - check eligibility async, never block the response
     const totalUsers = await User.countDocuments({});

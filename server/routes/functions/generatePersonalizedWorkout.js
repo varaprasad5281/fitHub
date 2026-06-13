@@ -117,6 +117,16 @@ ${userGoals.length > 0 ? `- Active Goals: ${userGoals.map((g) => `${g.name || g.
     })
   );
 
+  // Remove any existing incomplete single workouts so regenerating doesn't
+  // leave behind duplicate entries for this user. Custom (user-created)
+  // workouts are left untouched.
+  await Workout.deleteMany({
+    created_by: user.email,
+    day_of_week: null,
+    is_completed: false,
+    is_custom: { $ne: true },
+  });
+
   const savedWorkout = await Workout.create({
     created_by: user.email,
     workout_name: workoutPlan.workout_name,

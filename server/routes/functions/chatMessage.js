@@ -12,6 +12,7 @@ const Conversation = require('../../models/Conversation');
 const Message = require('../../models/Message');
 const Friendship = require('../../models/Friendship');
 const Profile = require('../../models/Profile');
+const { notify } = require('../../utils/notify');
 
 // Basic profanity filter
 const BLOCKED_WORDS = ['spam', 'scam'];
@@ -174,6 +175,11 @@ module.exports = async (req, res) => {
       last_message_at: new Date(),
       last_message_preview: cleanBody.substring(0, 60),
     });
+
+    const recipientEmail = conversation.participant_emails.find(e => e !== user.email);
+    const senderProfile = await Profile.findOne({ created_by: user.email }).lean();
+    const senderName = senderProfile?.username || user.email.split('@')[0];
+    notify(recipientEmail, `${senderName} sent you a new message: "${cleanBody.substring(0, 60)}"`, 'new_message', { conversation_id, sender_email: user.email });
 
     return res.status(201).json({ success: true, message });
   }

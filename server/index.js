@@ -69,7 +69,22 @@ const storage = multer.diskStorage({
       `${Date.now()}-${file.originalname.replace(/[^a-zA-Z0-9.]/g, "_")}`,
     ),
 });
-const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } }); // 5MB limit
+
+// Only allow common image formats - blocks SVG (can carry scripts) and
+// arbitrary file types from being uploaded and served from /uploads.
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (_, file, cb) => {
+    if (!ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
+      const err = new Error("Only JPEG, PNG, WebP, and GIF images are allowed");
+      err.status = 400;
+      return cb(err);
+    }
+    cb(null, true);
+  },
+});
 
 app.post(
   "/api/upload",

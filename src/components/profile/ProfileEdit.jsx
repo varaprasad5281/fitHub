@@ -96,8 +96,8 @@ export default function ProfileEdit({ profile, onClose }) {
     e.preventDefault();
 
     return withActionDebug('Save Profile Changes', async () => {
-      if (formData.username && formData.username.trim().length < 3) {
-        throw new Error('Username must be at least 3 characters');
+      if (formData.username && formData.username.trim().length < 8) {
+        throw new Error('Username must be at least 8 characters');
       }
       if (formData.username && formData.username.length > 20) {
         throw new Error('Username must be 20 characters or less');
@@ -184,7 +184,7 @@ export default function ProfileEdit({ profile, onClose }) {
           maxLength={20}
           className="bg-zinc-900 border-zinc-800 text-white placeholder:text-zinc-600 rounded-xl h-12"
         />
-        <p className="text-zinc-600 text-xs mt-1">{formData.username?.length || 0}/20</p>
+        <p className="text-zinc-600 text-xs mt-1">{formData.username?.length || 0}/20 (min 8 characters)</p>
       </div>
 
       {/* Bio */}

@@ -8,7 +8,8 @@ const Notification = require('../models/Notification');
  * @param {string} email - The user's email (created_by)
  * @param {string} message - The notification text
  * @param {string} [type] - One of: welcome, workout_completed, streak_milestone,
- *                          coaching_ready, subscription, goal_achieved, general
+ *                          coaching_ready, subscription, goal_achieved, friend_request,
+ *                          new_message, general
  * @param {object} [metadata]
  */
 async function notify(email, message, type = 'general', metadata = {}) {
