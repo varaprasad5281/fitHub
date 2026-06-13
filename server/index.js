@@ -15,7 +15,17 @@ const PORT = process.env.PORT || 3001;
 connectDB();
 
 // Security middleware
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        // Allow blob: URLs so client-side image previews (e.g. avatar cropper) can render
+        imgSrc: ["'self'", "data:", "blob:"],
+      },
+    },
+  }),
+);
 // Allow web app + mobile app (Expo Go and production builds send no Origin header)
 const allowedOrigins = [
   "https://7percent.info",
