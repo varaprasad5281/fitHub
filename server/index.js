@@ -20,8 +20,9 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-        // Allow blob: URLs so client-side image previews (e.g. avatar cropper) can render
-        "img-src": ["'self'", "data:", "blob:"],
+        // blob: for client-side image previews (e.g. avatar cropper); https: for
+        // exercise images served from raw.githubusercontent.com / RapidAPI's exercisedb CDN
+        "img-src": ["'self'", "data:", "blob:", "https:"],
       },
     },
   }),
