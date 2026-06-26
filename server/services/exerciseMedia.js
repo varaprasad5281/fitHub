@@ -101,14 +101,18 @@ async function fromFreeDb(exerciseName) {
   for (const ex of db) {
     const cWords = words(ex.name);
     const hits = qWords.filter((w) => cWords.includes(w)).length;
-    const score = hits / Math.max(qWords.length, cWords.length);
+    // Jaccard similarity (shared words / all distinct words across both names) -
+    // penalizes names that only share one word but are otherwise unrelated
+    // (e.g. "Jumping Jacks" vs "Rope Jumping"), unlike a plain hits/max-length ratio.
+    const union = new Set([...qWords, ...cWords]).size;
+    const score = hits / union;
     if (score > bestScore) {
       bestScore = score;
       best = ex;
     }
   }
 
-  return best && bestScore >= 0.3 && best.images?.length
+  return best && bestScore >= 0.4 && best.images?.length
     ? FREE_BASE + best.images[0]
     : null;
 }
