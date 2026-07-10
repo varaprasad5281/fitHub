@@ -2,7 +2,6 @@ const Profile = require('../../models/Profile');
 const WorkoutCompletion = require('../../models/WorkoutCompletion');
 const Workout = require('../../models/Workout');
 const { invokeLLM } = require('../../services/ai');
-const { getExerciseImage } = require('../../services/exerciseMedia');
 
 const DAY_TEMPLATES = {
   1: [
@@ -50,11 +49,11 @@ const DAY_TEMPLATES = {
 };
 
 const FALLBACK_EXERCISES = [
-  { name: 'Warm-up March in Place', sets: 1, reps: '3 min', weight_recommendation: 'Bodyweight', instructions: 'Light march to raise heart rate.' },
-  { name: 'Bodyweight Squat',        sets: 3, reps: '15',    weight_recommendation: 'Bodyweight', instructions: 'Feet shoulder-width apart, lower until thighs parallel.' },
-  { name: 'Push-up',                 sets: 3, reps: '12',    weight_recommendation: 'Bodyweight', instructions: 'Keep core tight, chest to floor, push back up.' },
-  { name: 'Reverse Lunge',           sets: 3, reps: '10 each leg', weight_recommendation: 'Bodyweight', instructions: 'Step back, lower rear knee toward floor.' },
-  { name: 'Plank Hold',              sets: 3, reps: '30 sec',weight_recommendation: 'Bodyweight', instructions: 'Elbows under shoulders, body in a straight line.' },
+  { name: 'Warm-up March in Place', sets: 1, reps: '3 min', weight_recommendation: 'Bodyweight', instructions: 'Stand tall and march in place at a light, comfortable pace to gradually raise your heart rate. Breathe steadily through your nose. Avoid starting too fast - the goal is to warm up, not tire out.' },
+  { name: 'Bodyweight Squat',        sets: 3, reps: '15',    weight_recommendation: 'Bodyweight', instructions: 'Stand with feet shoulder-width apart, toes slightly out. Bend your knees and push your hips back as if sitting into a chair, lowering until thighs are parallel to the floor, then drive through your heels back to standing. Keep your chest up and exhale on the way up. Avoid letting your knees cave inward.' },
+  { name: 'Push-up',                 sets: 3, reps: '12',    weight_recommendation: 'Bodyweight', instructions: 'Start in a plank with hands slightly wider than shoulders. Keep your core tight and body in a straight line as you lower your chest toward the floor, elbows at about a 45-degree angle, then push back up. Exhale as you push up. Avoid letting your hips sag or pike up.' },
+  { name: 'Reverse Lunge',           sets: 3, reps: '10 each leg', weight_recommendation: 'Bodyweight', instructions: 'Stand tall, then step one foot back and lower your rear knee toward the floor until both knees are bent about 90 degrees. Push through your front heel to return to standing. Keep your torso upright and breathe out as you rise. Avoid letting your front knee collapse inward.' },
+  { name: 'Plank Hold',              sets: 3, reps: '30 sec',weight_recommendation: 'Bodyweight', instructions: 'Rest on your forearms and toes with elbows directly under your shoulders, body forming a straight line from head to heels. Squeeze your core and glutes, and breathe normally throughout. Avoid letting your hips sag down or pike up toward the ceiling.' },
 ];
 
 async function generateOneDayWorkout(template, { profile, difficulty, duration, equipment }) {
@@ -66,6 +65,7 @@ async function generateOneDayWorkout(template, { profile, difficulty, duration, 
       prompt: `Create a structured ${focus} workout for ${day}.
 User: difficulty=${difficulty}, duration=${duration}min, equipment=${equipment}, fitness_goal=${profile.fitness_goal || 'general fitness'}.
 Target muscles: ${muscles}.
+There are no demo images or videos, so "instructions" is the user's only guidance for performing each exercise - write clear, step-by-step cues (starting position, the movement itself, breathing, and a common form mistake to avoid), in plain language, 2-4 sentences.
 Return ONLY compact JSON (no extra whitespace):
 {"workout_name":"...","exercises":[{"name":"...","sets":3,"reps":"10","weight_recommendation":"...","instructions":"..."}],"estimated_duration":${duration},"calories_burned":300,"difficulty":"${difficulty}","personalization_notes":"..."}`,
       response_json_schema: {
@@ -91,14 +91,7 @@ Return ONLY compact JSON (no extra whitespace):
     };
   }
 
-  const exercisesWithMedia = await Promise.all(
-    (workoutPlan.exercises || []).map(async (ex) => {
-      const imageUrl = await getExerciseImage(ex.name);
-      return { ...ex, image_url: imageUrl || '' };
-    })
-  );
-
-  return { workoutPlan, exercisesWithMedia };
+  return { workoutPlan };
 }
 
 module.exports = async (req, res) => {
@@ -142,11 +135,11 @@ module.exports = async (req, res) => {
   // Save all to the database
   const savedWorkouts = await Promise.all(
     templates.map(async (template, i) => {
-      const { workoutPlan, exercisesWithMedia } = generated[i];
+      const { workoutPlan } = generated[i];
       return Workout.create({
         created_by:         user.email,
         workout_name:       workoutPlan.workout_name,
-        exercises:          exercisesWithMedia,
+        exercises:          workoutPlan.exercises,
         estimated_duration: workoutPlan.estimated_duration,
         calories_burned:    workoutPlan.calories_burned,
         difficulty:         workoutPlan.difficulty,

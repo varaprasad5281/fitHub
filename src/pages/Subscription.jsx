@@ -174,7 +174,7 @@ export default function Subscription() {
       const response = await api.functions.invoke('getPortalUrl');
       const url = response && response.data && response.data.url;
       if (url) {
-        window.open(url, '_blank');
+        window.location.href = url;
       } else {
         throw new Error('Could not open billing management. Please try again or contact support.');
       }

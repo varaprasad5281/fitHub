@@ -5,13 +5,14 @@
 
 const Subscription = require('../../models/Subscription');
 const Points = require('../../models/Points');
+const { hasProAccess } = require('../../utils/subscriptionAccess');
 
 // ── smartUpgradePrompt ─────────────────────────────────────────────────────────
 async function smartUpgradePrompt(req, res) {
   const userEmail = req.user.email;
   const sub = await Subscription.findOne({ created_by: userEmail });
 
-  const isPro = sub?.plan && sub.plan !== 'starter';
+  const isPro = hasProAccess(sub);
   res.json({
     data: {
       show_prompt: !isPro,

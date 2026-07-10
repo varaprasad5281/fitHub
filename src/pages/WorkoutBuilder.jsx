@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import ExerciseDemoModal from "@/components/workout/ExerciseDemoModal";
 import { withActionDebug } from '@/components/debug/ActionDebugger';
 import ProUpsellModalEnhanced from '@/components/conversion/ProUpsellModalEnhanced';
+import { activeSub, hasProAccess as checkProAccess } from '@/lib/subscriptionUtils';
 
 const pointsPerDifficulty = {
   beginner: 10,
@@ -105,8 +106,8 @@ export default function WorkoutBuilder() {
     initialData: [],
   });
 
-  const subscription = subscriptions[0];
-  const hasProAccess = subscription?.plan?.startsWith('pro') || subscription?.plan?.startsWith('elite');
+  const subscription = activeSub(subscriptions);
+  const hasProAccess = checkProAccess(subscription);
 
   const generateMutation = useMutation({
     mutationFn: async ({ params, type }) => {
@@ -355,6 +356,11 @@ export default function WorkoutBuilder() {
               <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                 <Button
                   onClick={() => {
+                    if (!hasProAccess) {
+                      setUpsellTrigger('default');
+                      setShowUpsell(true);
+                      return;
+                    }
                     const params = Object.fromEntries(
                       Object.entries(workoutParams).filter(([k, v]) => {
                         if (planType === 'single' && k === 'days_per_week') return false;
