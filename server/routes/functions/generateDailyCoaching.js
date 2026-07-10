@@ -11,6 +11,7 @@ const Subscription = require("../../models/Subscription");
 const CoachingSession = require("../../models/CoachingSession");
 const { invokeLLM } = require("../../services/ai");
 const { notify } = require("../../utils/notify");
+const { hasProAccess } = require("../../utils/subscriptionAccess");
 
 module.exports = async (req, res) => {
   try {
@@ -23,11 +24,8 @@ module.exports = async (req, res) => {
       Subscription.findOne({ created_by: user.email }),
     ]);
 
-    const plan = subscription?.plan || "starter";
-    const proPlans = ['pro_monthly', 'pro_yearly', 'elite_monthly', 'elite_yearly'];
-    const isActiveStatus = subscription?.status === 'active' || subscription?.status === 'trial' || (subscription?.status === 'cancelled' && subscription?.end_date && new Date(subscription.end_date) > new Date());
-    if (!proPlans.includes(plan) || !isActiveStatus) {
-      return res.status(403).json({ error: 'Coaching requires a Pro or Elite subscription' });
+    if (!hasProAccess(subscription)) {
+      return res.status(403).json({ error: 'Coaching requires an active Pro or Elite subscription' });
     }
 
     const context = `User: ${user.full_name}

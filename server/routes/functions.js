@@ -10,8 +10,20 @@
 
 const express = require('express');
 const { protect } = require('../middleware/auth');
+const Subscription = require('../models/Subscription');
+const { hasProAccess } = require('../utils/subscriptionAccess');
 
 const router = express.Router();
+
+// Wraps a handler so it 403s unless the caller has an active Pro/Elite subscription.
+// Use for regeneration/on-demand endpoints; NOT for the one-time free onboarding calls.
+const requirePro = (handler) => async (req, res) => {
+  const subscription = await Subscription.findOne({ created_by: req.user.email });
+  if (!hasProAccess(subscription)) {
+    return res.status(403).json({ error: 'This feature requires an active Pro or Elite subscription' });
+  }
+  return handler(req, res);
+};
 
 // ── Function handlers ─────────────────────────────────────────────────────────
 const handlers = {
@@ -23,11 +35,16 @@ const handlers = {
   awardWorkoutPoints:           require('./functions/validateWorkoutCompletion'),
 
   // Workout generation
-  generatePersonalizedWorkout:  require('./functions/generatePersonalizedWorkout'),
+  // NOTE: generatePersonalizedWorkout is shared by two very different call sites -
+  // Onboarding.jsx's one-time free initial plan (generateWorkoutFromProfile /
+  // generateInitialWorkout) and the paid regenerate-a-plan actions on
+  // Workouts.jsx / WorkoutBuilder.jsx (generatePersonalizedWorkout /
+  // generateWorkoutRateLimited). Only the latter two require an active subscription.
+  generatePersonalizedWorkout:  requirePro(require('./functions/generatePersonalizedWorkout')),
   generateWorkoutFromProfile:   require('./functions/generatePersonalizedWorkout'),
-  generateWorkoutRateLimited:   require('./functions/generatePersonalizedWorkout'),
+  generateWorkoutRateLimited:   requirePro(require('./functions/generatePersonalizedWorkout')),
   generateInitialWorkout:       require('./functions/generatePersonalizedWorkout'),
-  generateWeeklyWorkout:        require('./functions/generateWeeklyWorkout'),
+  generateWeeklyWorkout:        requirePro(require('./functions/generateWeeklyWorkout')),
 
   // Coaching
   generateDailyCoaching:        require('./functions/generateDailyCoaching'),
@@ -58,8 +75,10 @@ const handlers = {
   sendEmail:                    require('./functions/sendEmail'),
   generateImage:                require('./functions/generateImage'),
   generateRecipeSuggestions:    require('./functions/generateRecipeSuggestions'),
+  // generateMealPlan is Onboarding.jsx's one-time free initial plan; mealPlan is
+  // Nutrition.jsx's on-demand regeneration, which requires an active subscription.
   generateMealPlan:             require('./functions/generateMealPlan'),
-  mealPlan:                     require('./functions/generateMealPlan'),
+  mealPlan:                     requirePro(require('./functions/generateMealPlan')),
 
   // Badges
   getBadges:                    require('./functions/getBadges'),

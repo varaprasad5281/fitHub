@@ -1,6 +1,5 @@
-import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Dumbbell } from 'lucide-react';
+import { X } from 'lucide-react';
 
 const MUSCLES = {
   squat:    ['Quads', 'Glutes', 'Hamstrings'],
@@ -39,8 +38,6 @@ const classify = (name) => {
 export default function ExerciseDemoModal({ exercise, onClose }) {
   const type = classify(exercise.name);
   const muscles = MUSCLES[type];
-  const [imgErr, setImgErr] = useState(false);
-  const hasGif = !!exercise.image_url && !imgErr;
 
   return (
     <AnimatePresence>
@@ -72,23 +69,6 @@ export default function ExerciseDemoModal({ exercise, onClose }) {
             >
               <X className="w-4 h-4 text-zinc-400" />
             </button>
-          </div>
-
-          {/* Image demo area */}
-          <div className="mx-4 my-3 rounded-2xl bg-zinc-900 border border-zinc-800/60 overflow-hidden relative flex-1 min-h-[300px] sm:min-h-[400px]">
-            {hasGif ? (
-              <img
-                src={exercise.image_url}
-                alt={exercise.name}
-                className="w-full h-full object-cover"
-                onError={() => setImgErr(true)}
-              />
-            ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-zinc-900 to-zinc-800">
-                <Dumbbell className="w-10 h-10 text-amber-400/30" />
-                <p className="text-zinc-500 text-sm">{exercise.name}</p>
-              </div>
-            )}
           </div>
 
           {/* Muscle tags */}
