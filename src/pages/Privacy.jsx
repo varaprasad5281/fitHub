@@ -1,6 +1,6 @@
-import React from 'react';
-import { Shield, ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { Shield, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function Privacy() {
   const navigate = useNavigate();
@@ -23,17 +23,28 @@ export default function Privacy() {
         <div className="prose prose-invert prose-zinc max-w-none space-y-8">
           <section>
             <p className="text-zinc-400 text-lg mb-8">
-              Last updated: {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+              Last updated:{" "}
+              {new Date().toLocaleDateString("en-GB", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
             </p>
 
-            <h2 className="text-2xl font-bold text-white mb-4">Your Data, Your Control</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">
+              Your Data, Your Control
+            </h2>
             <p className="text-zinc-400 leading-relaxed">
-              At 7%, we believe in transparency and protecting your privacy. This policy outlines how we collect, use, and safeguard your information.
+              At 7%, we believe in transparency and protecting your privacy.
+              This policy outlines how we collect, use, and safeguard your
+              information.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-white mb-4">Information We Collect</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">
+              Information We Collect
+            </h2>
             <p className="text-zinc-400 leading-relaxed mb-4">
               We collect information you provide directly to us, including:
             </p>
@@ -47,12 +58,16 @@ export default function Privacy() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-white mb-4">How We Use Your Information</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">
+              How We Use Your Information
+            </h2>
             <p className="text-zinc-400 leading-relaxed mb-4">
               We use your data to:
             </p>
             <ul className="list-disc list-inside text-zinc-400 space-y-2 ml-4">
-              <li>Provide personalized fitness and nutrition recommendations</li>
+              <li>
+                Provide personalized fitness and nutrition recommendations
+              </li>
               <li>Calculate BMR and calorie targets</li>
               <li>Generate AI-powered workouts and meal plans</li>
               <li>Display leaderboard rankings (if you opt in)</li>
@@ -63,16 +78,24 @@ export default function Privacy() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-white mb-4">Data Security</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">
+              Data Security
+            </h2>
             <p className="text-zinc-400 leading-relaxed">
-              We implement industry-standard security measures to protect your data. All payment information is processed securely through Stripe. We never store your credit card details on our servers.
+              We implement industry-standard security measures to protect your
+              data. All payment information is processed securely through
+              Stripe. We never store your credit card details on our servers.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-white mb-4">Leaderboard Privacy</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">
+              Leaderboard Privacy
+            </h2>
             <p className="text-zinc-400 leading-relaxed">
-              Your leaderboard participation is opt-in. You control whether your profile appears publicly. You can toggle this setting anytime in your profile.
+              Your leaderboard participation is opt-in. You control whether your
+              profile appears publicly. You can toggle this setting anytime in
+              your profile.
             </p>
           </section>
 
@@ -91,24 +114,35 @@ export default function Privacy() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-white mb-4">Data Retention</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">
+              Data Retention
+            </h2>
             <p className="text-zinc-400 leading-relaxed">
-              We retain your data for as long as your account is active. If you delete your account, we will remove your personal information within 30 days, except where legally required to retain it.
+              We retain your data for as long as your account is active. If you
+              delete your account, we will remove your personal information
+              within 30 days, except where legally required to retain it.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-white mb-4">Changes to This Policy</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">
+              Changes to This Policy
+            </h2>
             <p className="text-zinc-400 leading-relaxed">
-              We may update this policy from time to time. We will notify you of significant changes via email or in-app notification.
+              We may update this policy from time to time. We will notify you of
+              significant changes via email or in-app notification.
             </p>
           </section>
 
           <section className="border-t border-zinc-800 pt-8">
             <h2 className="text-2xl font-bold text-white mb-4">Contact Us</h2>
             <p className="text-zinc-400 leading-relaxed">
-              If you have questions about this Privacy Policy or your data, contact us at:{' '}
-              <a href="mailto:team@7percent.info" className="text-amber-400 hover:text-amber-300 underline">
+              If you have questions about this Privacy Policy or your data,
+              contact us at:{" "}
+              <a
+                href="mailto:team@7percent.info"
+                className="text-amber-400 hover:text-amber-300 underline"
+              >
                 team@7percent.info
               </a>
             </p>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, memo } from 'react';
+import React, { useState, useEffect, useRef, memo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Menu, X, ChevronDown } from "lucide-react";
@@ -7,20 +7,32 @@ import NotificationCenter from "@/components/notifications/NotificationCenter";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import PerformanceMonitor from "@/components/performance/PerformanceMonitor";
 import DebugModeToggle from "@/components/debug/DebugModeToggle";
-import CompatibilityDebugger, { useCompatibilityDebugger } from "@/components/debug/CompatibilityDebugger";
+import CompatibilityDebugger, {
+  useCompatibilityDebugger,
+} from "@/components/debug/CompatibilityDebugger";
 import CompatibilityInitializer from "@/components/CompatibilityInitializer";
 import InteractionAudit from "@/components/debug/InteractionAudit";
 import { InteractionAuditPanel } from "@/components/InteractionGuardian";
-import { LanguageProvider, useLanguage } from "@/components/i18n/LanguageContext";
+import {
+  LanguageProvider,
+  useLanguage,
+} from "@/components/i18n/LanguageContext";
 import { GOLD } from "@/components/config/constants";
 import { useAuth } from "@/lib/AuthContext";
 
-const publicPages = ["Home", "Features", "Pricing", "Contact", "Terms", "Privacy"];
+const publicPages = [
+  "Home",
+  "Features",
+  "Pricing",
+  "Contact",
+  "Terms",
+  "Privacy",
+];
 
 // Active-page helper — returns true when location matches the given href
 function useIsActive(href) {
   const location = useLocation();
-  return location.pathname === href || location.pathname.startsWith(href + '/');
+  return location.pathname === href || location.pathname.startsWith(href + "/");
 }
 
 // Reusable dropdown for desktop nav
@@ -29,22 +41,26 @@ function NavDropdown({ label, children, hasbadge, active }) {
   const ref = useRef(null);
 
   useEffect(() => {
-    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    const handler = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
   return (
     <div ref={ref} className="relative">
       <button
-        onClick={() => setOpen(o => !o)}
+        onClick={() => setOpen((o) => !o)}
         className={`flex items-center gap-1 text-sm transition-colors ${
-          active ? 'text-white font-bold' : 'text-zinc-400 hover:text-white'
+          active ? "text-white font-bold" : "text-zinc-400 hover:text-white"
         }`}
       >
         {label}
         {hasbadge && <span className="w-2 h-2 rounded-full bg-red-500 mb-2" />}
-        <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown
+          className={`w-3.5 h-3.5 transition-transform ${open ? "rotate-180" : ""}`}
+        />
       </button>
       {open && (
         <div className="absolute top-full right-0 mt-2 w-44 rounded-xl border border-zinc-800 bg-zinc-900/95 backdrop-blur-xl shadow-xl py-1 z-50">
@@ -62,13 +78,15 @@ function NavDropdownItem({ to, onClick, children, badge }) {
       to={to}
       onClick={onClick}
       className={`flex items-center justify-between px-4 py-2.5 text-sm hover:bg-zinc-800/60 transition-colors ${
-        active ? 'text-white font-bold bg-zinc-800/40' : 'text-zinc-400 hover:text-white'
+        active
+          ? "text-white font-bold bg-zinc-800/40"
+          : "text-zinc-400 hover:text-white"
       }`}
     >
       {children}
       {badge > 0 && (
         <span className="bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-semibold">
-          {badge > 9 ? '9+' : badge}
+          {badge > 9 ? "9+" : badge}
         </span>
       )}
     </Link>
@@ -82,14 +100,17 @@ function MobileLink({ to, onClose, children, badge }) {
       to={to}
       onClick={onClose}
       className={`flex items-center justify-between text-base py-3 px-2 rounded-lg active:bg-zinc-800 transition-colors touch-target ${
-        active ? 'text-white font-bold' : 'text-zinc-400'
+        active ? "text-white font-bold" : "text-zinc-400"
       }`}
-      style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
+      style={{
+        touchAction: "manipulation",
+        WebkitTapHighlightColor: "transparent",
+      }}
     >
       {children}
       {badge > 0 && (
         <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
-          {badge > 9 ? '9+' : badge}
+          {badge > 9 ? "9+" : badge}
         </span>
       )}
     </Link>
@@ -104,7 +125,9 @@ function LayoutContent({ children, currentPageName }) {
   const location = useLocation();
 
   // Close mobile menu on route change
-  useEffect(() => { setMenuOpen(false); }, [location.pathname]);
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
 
   // Store debugger globally for polyfills to access
   useEffect(() => {
@@ -117,17 +140,16 @@ function LayoutContent({ children, currentPageName }) {
   useEffect(() => {
     const setVH = () => {
       const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
+      document.documentElement.style.setProperty("--vh", `${vh}px`);
     };
     setVH();
-    window.addEventListener('resize', setVH);
-    window.addEventListener('orientationchange', setVH);
+    window.addEventListener("resize", setVH);
+    window.addEventListener("orientationchange", setVH);
     return () => {
-      window.removeEventListener('resize', setVH);
-      window.removeEventListener('orientationchange', setVH);
+      window.removeEventListener("resize", setVH);
+      window.removeEventListener("orientationchange", setVH);
     };
   }, []);
-
 
   const isPublic = publicPages.includes(currentPageName);
   const isOnboarding = currentPageName === "Onboarding";
@@ -137,184 +159,353 @@ function LayoutContent({ children, currentPageName }) {
 
   return (
     <>
-    <CompatibilityInitializer />
-    <PerformanceMonitor />
-    <DebugModeToggle />
-    <CompatibilityDebugger debugger={compatDebugger} />
-    <InteractionAudit />
-    <InteractionAuditPanel />
-    <div className="min-h-screen bg-zinc-950">
-      {/* Top nav */}
-      <nav className="fixed top-0 left-0 right-0 z-[200] border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-xl safe-top">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link to={createPageUrl("Home")} className="flex items-center gap-2 group">
-            <div className="relative">
-              <span className="text-3xl sm:text-4xl font-black bg-gradient-to-b from-amber-200 via-amber-400 to-amber-600 bg-clip-text text-transparent group-hover:from-amber-300 group-hover:via-amber-500 group-hover:to-amber-700 transition-all">
-                7%
-              </span>
-            </div>
-          </Link>
+      <CompatibilityInitializer />
+      <PerformanceMonitor />
+      <DebugModeToggle />
+      <CompatibilityDebugger debugger={compatDebugger} />
+      <InteractionAudit />
+      <InteractionAuditPanel />
+      <div className="min-h-screen bg-zinc-950">
+        {/* Top nav */}
+        <nav className="fixed top-0 left-0 right-0 z-[200] border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-xl safe-top">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+            <Link
+              to={createPageUrl("Home")}
+              className="flex items-center gap-2 group"
+            >
+              <div className="relative">
+                <span className="text-3xl sm:text-4xl font-black bg-gradient-to-b from-amber-200 via-amber-400 to-amber-600 bg-clip-text text-transparent group-hover:from-amber-300 group-hover:via-amber-500 group-hover:to-amber-700 transition-all">
+                  7%
+                </span>
+              </div>
+            </Link>
 
-          {/* Desktop nav */}
-          <div className="hidden md:flex items-center gap-5 lg:gap-6">
-            {user ? (
-              <>
-                {[
-                  { label: 'Workouts', page: 'Workouts' },
-                  { label: t('nav.nutrition'), page: 'Nutrition' },
-                  { label: t('nav.coaching'), page: 'Coaching' },
-                ].map(({ label, page }) => {
-                  const href = createPageUrl(page);
-                  const isActive = location.pathname === href || location.pathname.startsWith(href + '/');
-                  return (
-                    <Link
-                      key={page}
-                      to={href}
-                      className={`text-sm transition-colors ${
-                        isActive ? 'text-white font-bold' : 'text-zinc-400 hover:text-white'
-                      }`}
-                    >
-                      {label}
-                    </Link>
-                  );
-                })}
-
-                {/* Community dropdown */}
-                <NavDropdown
-                  label="Community"
-                  active={[createPageUrl("Challenges"), createPageUrl("Leaderboard"), createPageUrl("Badges"), createPageUrl("Socials")]
-                    .some(href => location.pathname === href || location.pathname.startsWith(href + '/'))}
-                >
-                  <NavDropdownItem to={createPageUrl("Challenges")} onClick={() => {}}>Challenges</NavDropdownItem>
-                  <NavDropdownItem to={createPageUrl("Leaderboard")} onClick={() => {}}>Leaderboard</NavDropdownItem>
-                  <NavDropdownItem to={createPageUrl("Badges")} onClick={() => {}}>Badges</NavDropdownItem>
-                  <NavDropdownItem to={createPageUrl("Socials")} onClick={() => {}}>Social</NavDropdownItem>
-                </NavDropdown>
-
-                {/* Account dropdown */}
-                <NavDropdown
-                  label="Account"
-                  active={[createPageUrl("Profile"), createPageUrl("Subscription"), createPageUrl("Referrals"), createPageUrl("Contact")]
-                    .some(href => location.pathname === href || location.pathname.startsWith(href + '/'))}
-                >
-                  <NavDropdownItem to={createPageUrl("Profile")} onClick={() => {}}>{t("nav.profile")}</NavDropdownItem>
-                  <NavDropdownItem to={createPageUrl("Subscription")} onClick={() => {}}>Subscription</NavDropdownItem>
-                  <NavDropdownItem to={createPageUrl("Referrals")} onClick={() => {}}>Referrals</NavDropdownItem>
-                  <NavDropdownItem to={createPageUrl("Contact")} onClick={() => {}}>{t("nav.contact")}</NavDropdownItem>
-                </NavDropdown>
-              </>
-            ) : (
-              <>
-                {[
-                  { label: t('nav.home'), page: 'Home' },
-                  { label: 'Pricing', page: 'Pricing' },
-                  { label: t('nav.contact'), page: 'Contact' },
-                ].map(({ label, page }) => {
-                  const href = createPageUrl(page);
-                  const isActive = location.pathname === href || location.pathname.startsWith(href + '/');
-                  return (
-                    <Link
-                      key={page}
-                      to={href}
-                      className={`text-sm transition-colors ${
-                        isActive ? 'text-white font-bold' : 'text-zinc-400 hover:text-white'
-                      }`}
-                    >
-                      {label}
-                    </Link>
-                  );
-                })}
-              </>
-            )}
-            <div className="flex items-center gap-4 ml-2">
-              {user && <NotificationCenter />}
-              {!loading && !user && (
-                <>
-                  <Link to="/login">
-                    <Button variant="outline" className="border-amber-500/50 text-black-400 hover:bg-amber-500/10 hover:border-amber-400 hover:text-amber-300 text-sm rounded-full touch-target transition-colors">
-                      Log in
-                    </Button>
-                  </Link>
-                  <Link to="/register">
-                    <Button className={`bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-semibold text-sm px-5 rounded-full touch-target ${GOLD.shine}`}>
-                      Start Free
-                    </Button>
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Mobile menu toggle */}
-          <button
-            type="button"
-            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-            aria-expanded={menuOpen}
-            className="md:hidden text-zinc-400 w-10 h-10 flex items-center justify-center rounded-lg active:bg-zinc-800 transition-colors"
-            onClick={() => setMenuOpen(!menuOpen)}
-            style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
-          >
-            {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
-        </div>
-
-        {/* Mobile menu */}
-        {menuOpen && (
-          <div className="md:hidden border-t border-zinc-800/50 bg-zinc-950/95 backdrop-blur-xl">
-            <div className="px-4 py-4 space-y-1 overflow-y-auto momentum-scroll" style={{ maxHeight: 'calc(var(--vh, 1vh) * 100 - 4rem)' }}>
+            {/* Desktop nav */}
+            <div className="hidden md:flex items-center gap-5 lg:gap-6">
               {user ? (
                 <>
-                  {/* Core */}
-                  <MobileLink to={createPageUrl("Workouts")} onClose={() => setMenuOpen(false)}>Workouts</MobileLink>
-                  <MobileLink to={createPageUrl("Nutrition")} onClose={() => setMenuOpen(false)}>{t("nav.nutrition")}</MobileLink>
-                  <MobileLink to={createPageUrl("Coaching")} onClose={() => setMenuOpen(false)}>{t("nav.coaching")}</MobileLink>
+                  {[
+                    { label: "Workouts", page: "Workouts" },
+                    { label: t("nav.nutrition"), page: "Nutrition" },
+                    { label: t("nav.coaching"), page: "Coaching" },
+                  ].map(({ label, page }) => {
+                    const href = createPageUrl(page);
+                    const isActive =
+                      location.pathname === href ||
+                      location.pathname.startsWith(href + "/");
+                    return (
+                      <Link
+                        key={page}
+                        to={href}
+                        className={`text-sm transition-colors ${
+                          isActive
+                            ? "text-white font-bold"
+                            : "text-zinc-400 hover:text-white"
+                        }`}
+                      >
+                        {label}
+                      </Link>
+                    );
+                  })}
 
-                  {/* Community group */}
-                  <p className="text-xs font-semibold text-zinc-600 uppercase tracking-widest px-2 pt-4 pb-1">Community</p>
-                  <MobileLink to={createPageUrl("Challenges")} onClose={() => setMenuOpen(false)}>Challenges</MobileLink>
-                  <MobileLink to={createPageUrl("Leaderboard")} onClose={() => setMenuOpen(false)}>Leaderboard</MobileLink>
-                  <MobileLink to={createPageUrl("Badges")} onClose={() => setMenuOpen(false)}>Badges</MobileLink>
-                  <MobileLink to={createPageUrl("Socials")} onClose={() => setMenuOpen(false)}>Social</MobileLink>
+                  {/* Community dropdown */}
+                  <NavDropdown
+                    label="Community"
+                    active={[
+                      createPageUrl("Challenges"),
+                      createPageUrl("Leaderboard"),
+                      createPageUrl("Badges"),
+                      createPageUrl("Socials"),
+                    ].some(
+                      (href) =>
+                        location.pathname === href ||
+                        location.pathname.startsWith(href + "/"),
+                    )}
+                  >
+                    <NavDropdownItem
+                      to={createPageUrl("Challenges")}
+                      onClick={() => {}}
+                    >
+                      Challenges
+                    </NavDropdownItem>
+                    <NavDropdownItem
+                      to={createPageUrl("Leaderboard")}
+                      onClick={() => {}}
+                    >
+                      Leaderboard
+                    </NavDropdownItem>
+                    <NavDropdownItem
+                      to={createPageUrl("Badges")}
+                      onClick={() => {}}
+                    >
+                      Badges
+                    </NavDropdownItem>
+                    <NavDropdownItem
+                      to={createPageUrl("Socials")}
+                      onClick={() => {}}
+                    >
+                      Social
+                    </NavDropdownItem>
+                  </NavDropdown>
 
-                  {/* Account group */}
-                  <p className="text-xs font-semibold text-zinc-600 uppercase tracking-widest px-2 pt-4 pb-1">Account</p>
-                  <MobileLink to={createPageUrl("Profile")} onClose={() => setMenuOpen(false)}>{t("nav.profile")}</MobileLink>
-                  <MobileLink to={createPageUrl("Subscription")} onClose={() => setMenuOpen(false)}>Subscription</MobileLink>
-                  <MobileLink to={createPageUrl("Referrals")} onClose={() => setMenuOpen(false)}>Referrals</MobileLink>
-                  <MobileLink to={createPageUrl("Contact")} onClose={() => setMenuOpen(false)}>{t("nav.contact")}</MobileLink>
+                  {/* Account dropdown */}
+                  <NavDropdown
+                    label="Account"
+                    active={[
+                      createPageUrl("Profile"),
+                      createPageUrl("Subscription"),
+                      createPageUrl("Referrals"),
+                      createPageUrl("Contact"),
+                    ].some(
+                      (href) =>
+                        location.pathname === href ||
+                        location.pathname.startsWith(href + "/"),
+                    )}
+                  >
+                    <NavDropdownItem
+                      to={createPageUrl("Profile")}
+                      onClick={() => {}}
+                    >
+                      {t("nav.profile")}
+                    </NavDropdownItem>
+                    <NavDropdownItem
+                      to={createPageUrl("Subscription")}
+                      onClick={() => {}}
+                    >
+                      Subscription
+                    </NavDropdownItem>
+                    <NavDropdownItem
+                      to={createPageUrl("Referrals")}
+                      onClick={() => {}}
+                    >
+                      Referrals
+                    </NavDropdownItem>
+                    <NavDropdownItem
+                      to={createPageUrl("Contact")}
+                      onClick={() => {}}
+                    >
+                      {t("nav.contact")}
+                    </NavDropdownItem>
+                  </NavDropdown>
                 </>
               ) : (
                 <>
-                  <MobileLink to={createPageUrl("Home")} onClose={() => setMenuOpen(false)}>{t("nav.home")}</MobileLink>
-                  <MobileLink to={createPageUrl("Pricing")} onClose={() => setMenuOpen(false)}>Pricing</MobileLink>
-                  <MobileLink to={createPageUrl("Contact")} onClose={() => setMenuOpen(false)}>{t("nav.contact")}</MobileLink>
+                  {[
+                    { label: t("nav.home"), page: "Home" },
+                    { label: "Pricing", page: "Pricing" },
+                    { label: t("nav.contact"), page: "Contact" },
+                  ].map(({ label, page }) => {
+                    const href = createPageUrl(page);
+                    const isActive =
+                      location.pathname === href ||
+                      location.pathname.startsWith(href + "/");
+                    return (
+                      <Link
+                        key={page}
+                        to={href}
+                        className={`text-sm transition-colors ${
+                          isActive
+                            ? "text-white font-bold"
+                            : "text-zinc-400 hover:text-white"
+                        }`}
+                      >
+                        {label}
+                      </Link>
+                    );
+                  })}
                 </>
               )}
-
-              {!loading && !user && (
-                <div className="pt-4 flex flex-col gap-3">
-                  <Link to="/login" onClick={() => setMenuOpen(false)} className="block">
-                    <Button variant="outline" className="w-full border-amber-500/50 text-amber-400 hover:border-amber-400 hover:text-amber-300 rounded-full touch-target transition-colors">
-                      Log in
-                    </Button>
-                  </Link>
-                  <Link to="/register" onClick={() => setMenuOpen(false)} className="block">
-                    <Button className={`w-full bg-gradient-to-r from-amber-400 to-amber-500 text-black font-semibold rounded-full touch-target ${GOLD.shine}`}>Start Free</Button>
-                  </Link>
-                </div>
-              )}
+              <div className="flex items-center gap-4 ml-2">
+                {user && <NotificationCenter />}
+                {!loading && !user && (
+                  <>
+                    <Link to="/login">
+                      <Button
+                        variant="outline"
+                        className="border-amber-500/50 text-black-400 hover:bg-amber-500/10 hover:border-amber-400 hover:text-amber-300 text-sm rounded-full touch-target transition-colors"
+                      >
+                        Log in
+                      </Button>
+                    </Link>
+                    <Link to="/register">
+                      <Button
+                        className={`bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-semibold text-sm px-5 rounded-full touch-target ${GOLD.shine}`}
+                      >
+                        Start Free
+                      </Button>
+                    </Link>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
-        )}
-      </nav>
 
-      {/* Page content */}
-      <main className="pt-16 pb-20 sm:pb-8">
-        <ErrorBoundary key={location.pathname}>
-          {children}
-        </ErrorBoundary>
-      </main>
-    </div>
+            {/* Mobile menu toggle */}
+            <button
+              type="button"
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={menuOpen}
+              className="md:hidden text-zinc-400 w-10 h-10 flex items-center justify-center rounded-lg active:bg-zinc-800 transition-colors"
+              onClick={() => setMenuOpen(!menuOpen)}
+              style={{
+                WebkitTapHighlightColor: "transparent",
+                touchAction: "manipulation",
+              }}
+            >
+              {menuOpen ? (
+                <X className="w-5 h-5" />
+              ) : (
+                <Menu className="w-5 h-5" />
+              )}
+            </button>
+          </div>
+
+          {/* Mobile menu */}
+          {menuOpen && (
+            <div className="md:hidden border-t border-zinc-800/50 bg-zinc-950/95 backdrop-blur-xl">
+              <div
+                className="px-4 py-4 space-y-1 overflow-y-auto momentum-scroll"
+                style={{ maxHeight: "calc(var(--vh, 1vh) * 100 - 4rem)" }}
+              >
+                {user ? (
+                  <>
+                    {/* Core */}
+                    <MobileLink
+                      to={createPageUrl("Workouts")}
+                      onClose={() => setMenuOpen(false)}
+                    >
+                      Workouts
+                    </MobileLink>
+                    <MobileLink
+                      to={createPageUrl("Nutrition")}
+                      onClose={() => setMenuOpen(false)}
+                    >
+                      {t("nav.nutrition")}
+                    </MobileLink>
+                    <MobileLink
+                      to={createPageUrl("Coaching")}
+                      onClose={() => setMenuOpen(false)}
+                    >
+                      {t("nav.coaching")}
+                    </MobileLink>
+
+                    {/* Community group */}
+                    <p className="text-xs font-semibold text-zinc-600 uppercase tracking-widest px-2 pt-4 pb-1">
+                      Community
+                    </p>
+                    <MobileLink
+                      to={createPageUrl("Challenges")}
+                      onClose={() => setMenuOpen(false)}
+                    >
+                      Challenges
+                    </MobileLink>
+                    <MobileLink
+                      to={createPageUrl("Leaderboard")}
+                      onClose={() => setMenuOpen(false)}
+                    >
+                      Leaderboard
+                    </MobileLink>
+                    <MobileLink
+                      to={createPageUrl("Badges")}
+                      onClose={() => setMenuOpen(false)}
+                    >
+                      Badges
+                    </MobileLink>
+                    <MobileLink
+                      to={createPageUrl("Socials")}
+                      onClose={() => setMenuOpen(false)}
+                    >
+                      Social
+                    </MobileLink>
+
+                    {/* Account group */}
+                    <p className="text-xs font-semibold text-zinc-600 uppercase tracking-widest px-2 pt-4 pb-1">
+                      Account
+                    </p>
+                    <MobileLink
+                      to={createPageUrl("Profile")}
+                      onClose={() => setMenuOpen(false)}
+                    >
+                      {t("nav.profile")}
+                    </MobileLink>
+                    <MobileLink
+                      to={createPageUrl("Subscription")}
+                      onClose={() => setMenuOpen(false)}
+                    >
+                      Subscription
+                    </MobileLink>
+                    <MobileLink
+                      to={createPageUrl("Referrals")}
+                      onClose={() => setMenuOpen(false)}
+                    >
+                      Referrals
+                    </MobileLink>
+                    <MobileLink
+                      to={createPageUrl("Contact")}
+                      onClose={() => setMenuOpen(false)}
+                    >
+                      {t("nav.contact")}
+                    </MobileLink>
+                  </>
+                ) : (
+                  <>
+                    <MobileLink
+                      to={createPageUrl("Home")}
+                      onClose={() => setMenuOpen(false)}
+                    >
+                      {t("nav.home")}
+                    </MobileLink>
+                    <MobileLink
+                      to={createPageUrl("Pricing")}
+                      onClose={() => setMenuOpen(false)}
+                    >
+                      Pricing
+                    </MobileLink>
+                    <MobileLink
+                      to={createPageUrl("Contact")}
+                      onClose={() => setMenuOpen(false)}
+                    >
+                      {t("nav.contact")}
+                    </MobileLink>
+                  </>
+                )}
+
+                {!loading && !user && (
+                  <div className="pt-4 flex flex-col gap-3">
+                    <Link
+                      to="/login"
+                      onClick={() => setMenuOpen(false)}
+                      className="block"
+                    >
+                      <Button
+                        variant="outline"
+                        className="w-full border-amber-500/50 text-amber-400 hover:border-amber-400 hover:text-amber-300 rounded-full touch-target transition-colors"
+                      >
+                        Log in
+                      </Button>
+                    </Link>
+                    <Link
+                      to="/register"
+                      onClick={() => setMenuOpen(false)}
+                      className="block"
+                    >
+                      <Button
+                        className={`w-full bg-gradient-to-r from-amber-400 to-amber-500 text-black font-semibold rounded-full touch-target ${GOLD.shine}`}
+                      >
+                        Start Free
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </nav>
+
+        {/* Page content */}
+        <main className="pt-16 pb-20 sm:pb-8">
+          <ErrorBoundary key={location.pathname}>{children}</ErrorBoundary>
+        </main>
+      </div>
     </>
   );
 }

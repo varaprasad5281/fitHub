@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { api } from '@/api/client';
+import React, { useState, useMemo } from "react";
+import { motion } from "framer-motion";
+import { api } from "@/api/client";
 import { useQuery } from "@tanstack/react-query";
 import { Trophy, Plus, Loader2, Lock, X, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,17 +10,19 @@ import CreateChallengeForm from "@/components/challenges/CreateChallengeForm";
 export default function Challenges() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showLimitModal, setShowLimitModal] = useState(false);
-  const [filter, setFilter] = useState('active'); // active, upcoming, completed
+  const [filter, setFilter] = useState("active"); // active, upcoming, completed
 
   const { data: user } = useQuery({
-    queryKey: ['user'],
+    queryKey: ["user"],
     queryFn: () => api.auth.me(),
   });
 
   const { data: challenges = [], isLoading } = useQuery({
-    queryKey: ['challenges', filter],
+    queryKey: ["challenges", filter],
     queryFn: async () => {
-      const res = await api.functions.invoke('getChallenges', { status: filter });
+      const res = await api.functions.invoke("getChallenges", {
+        status: filter,
+      });
       return Array.isArray(res?.data) ? res.data : [];
     },
     placeholderData: [],
@@ -29,9 +31,11 @@ export default function Challenges() {
   });
 
   const { data: createdChallenges = [] } = useQuery({
-    queryKey: ['created-challenges', user?.email],
+    queryKey: ["created-challenges", user?.email],
     queryFn: async () => {
-      const res = await api.functions.invoke('getChallenges', { created_by: user.email });
+      const res = await api.functions.invoke("getChallenges", {
+        created_by: user.email,
+      });
       return Array.isArray(res?.data) ? res.data : [];
     },
     enabled: !!user?.email,
@@ -42,22 +46,32 @@ export default function Challenges() {
   const canCreateMore = createdChallenges.length < 15;
 
   const displayChallenges = useMemo(() => {
-    if (filter === 'completed')
-      return [...challenges].sort((a, b) => new Date(b.end_date) - new Date(a.end_date)).slice(0, 10);
-    if (filter === 'upcoming')
-      return [...challenges].sort((a, b) => new Date(a.start_date) - new Date(b.start_date)).slice(0, 10);
+    if (filter === "completed")
+      return [...challenges]
+        .sort((a, b) => new Date(b.end_date) - new Date(a.end_date))
+        .slice(0, 10);
+    if (filter === "upcoming")
+      return [...challenges]
+        .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
+        .slice(0, 10);
     return challenges;
   }, [challenges, filter]);
 
   const { data: subscription = [], isLoading: subLoading } = useQuery({
-    queryKey: ['subscription'],
+    queryKey: ["subscription"],
     queryFn: () => api.entities.Subscription.list(),
     staleTime: 1000 * 60 * 5,
   });
 
   const sub = subscription[0];
-  const hasElite = sub?.plan === 'elite_monthly' || sub?.plan === 'elite_yearly';
-  const isActive = sub?.status === 'active' || sub?.status === 'trial' || (sub?.status === 'cancelled' && sub?.end_date && new Date(sub.end_date) > new Date());
+  const hasElite =
+    sub?.plan === "elite_monthly" || sub?.plan === "elite_yearly";
+  const isActive =
+    sub?.status === "active" ||
+    sub?.status === "trial" ||
+    (sub?.status === "cancelled" &&
+      sub?.end_date &&
+      new Date(sub.end_date) > new Date());
   const hasPro = hasElite && isActive; // alias kept so JSX below continues to work
 
   if (isLoading) {
@@ -78,10 +92,16 @@ export default function Challenges() {
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-1">
             <Trophy className="w-5 h-5 text-amber-400" />
-            <p className="text-amber-400 text-xs sm:text-sm font-semibold uppercase tracking-[0.15em]">Challenges</p>
+            <p className="text-amber-400 text-xs sm:text-sm font-semibold uppercase tracking-[0.15em]">
+              Challenges
+            </p>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Community Challenges</h1>
-          <p className="text-zinc-500">Compete with others and level up your fitness</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+            Community Challenges
+          </h1>
+          <p className="text-zinc-500">
+            Compete with others and level up your fitness
+          </p>
         </div>
 
         {!hasPro && (
@@ -89,23 +109,30 @@ export default function Challenges() {
             <Lock className="w-5 h-5 text-amber-400 mt-0.5 shrink-0" />
             <div className="flex-1">
               <p className="text-white font-semibold text-sm">Elite Feature</p>
-              <p className="text-zinc-400 text-xs mt-1">Upgrade to Elite to create and compete in challenges</p>
+              <p className="text-zinc-400 text-xs mt-1">
+                Upgrade to Elite to create and compete in challenges
+              </p>
             </div>
-            <a href="/Subscription" className="text-xs text-amber-400 hover:text-amber-300 font-semibold whitespace-nowrap mt-0.5">Upgrade →</a>
+            <a
+              href="/Subscription"
+              className="text-xs text-amber-400 hover:text-amber-300 font-semibold whitespace-nowrap mt-0.5"
+            >
+              Upgrade →
+            </a>
           </div>
         )}
 
         {/* Filters & Create Button */}
         <div className="flex flex-col sm:flex-row gap-3 mb-8 items-start sm:items-center justify-between">
           <div className="flex gap-2">
-            {['active', 'upcoming', 'completed'].map(f => (
+            {["active", "upcoming", "completed"].map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                   filter === f
-                    ? 'bg-amber-500 text-black'
-                    : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                    ? "bg-amber-500 text-black"
+                    : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
                 }`}
               >
                 {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -115,16 +142,22 @@ export default function Challenges() {
           {hasPro && (
             <div className="flex flex-col items-end gap-1">
               <Button
-                onClick={() => canCreateMore ? setShowCreateForm(true) : setShowLimitModal(true)}
+                onClick={() =>
+                  canCreateMore
+                    ? setShowCreateForm(true)
+                    : setShowLimitModal(true)
+                }
                 className={`px-6 rounded-full h-10 w-full sm:w-auto font-semibold ${
                   canCreateMore
-                    ? 'bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black'
-                    : 'bg-zinc-800 text-zinc-500 cursor-not-allowed opacity-60'
+                    ? "bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black"
+                    : "bg-zinc-800 text-zinc-500 cursor-not-allowed opacity-60"
                 }`}
               >
                 <Plus className="w-4 h-4 mr-2" /> Create Challenge
               </Button>
-              <p className="text-xs text-zinc-500">{createdChallenges.length}/15 created</p>
+              <p className="text-xs text-zinc-500">
+                {createdChallenges.length}/15 created
+              </p>
             </div>
           )}
         </div>
@@ -144,8 +177,12 @@ export default function Challenges() {
             >
               <Trophy className="w-8 h-8 text-zinc-600" />
             </motion.div>
-            <h3 className="text-lg font-semibold text-white mb-2">No Challenges Yet</h3>
-            <p className="text-zinc-500 text-sm">Be the first to create a {filter} challenge!</p>
+            <h3 className="text-lg font-semibold text-white mb-2">
+              No Challenges Yet
+            </h3>
+            <p className="text-zinc-500 text-sm">
+              Be the first to create a {filter} challenge!
+            </p>
           </motion.div>
         ) : (
           <motion.div
@@ -160,10 +197,7 @@ export default function Challenges() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.05 }}
               >
-                <ChallengeCard 
-                  challenge={challenge}
-                  hasPro={hasPro}
-                />
+                <ChallengeCard challenge={challenge} hasPro={hasPro} />
               </motion.div>
             ))}
           </motion.div>
@@ -183,14 +217,22 @@ export default function Challenges() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <AlertCircle className="w-5 h-5 text-amber-400" />
-                  <h3 className="text-white font-bold text-lg">Limit Reached</h3>
+                  <h3 className="text-white font-bold text-lg">
+                    Limit Reached
+                  </h3>
                 </div>
-                <button onClick={() => setShowLimitModal(false)} className="text-zinc-500 hover:text-white transition-colors">
+                <button
+                  onClick={() => setShowLimitModal(false)}
+                  className="text-zinc-500 hover:text-white transition-colors"
+                >
                   <X className="w-5 h-5" />
                 </button>
               </div>
               <p className="text-zinc-400 text-sm mb-6">
-                You've reached the maximum of <span className="text-white font-semibold">15 challenges</span> you can create. Delete an existing challenge to make room for a new one.
+                You've reached the maximum of{" "}
+                <span className="text-white font-semibold">15 challenges</span>{" "}
+                you can create. Delete an existing challenge to make room for a
+                new one.
               </p>
               <Button
                 onClick={() => setShowLimitModal(false)}

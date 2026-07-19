@@ -30,6 +30,7 @@
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
+
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
@@ -62,6 +63,7 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -77,14 +79,16 @@
   @keyframes pulse-glow {
     0%, 100% {
       opacity: 1;
-      box-shadow: 0 0 40px rgba(234, 179, 8, 0.5);  /* yellow-500 shiny gold */
+      box-shadow: 0 0 40px rgba(234, 179, 8, 0.5);
+      /* yellow-500 shiny gold */
     }
+
     50% {
       opacity: 0.85;
       box-shadow: 0 0 70px rgba(234, 179, 8, 0.75);
     }
   }
-  
+
   .animate-pulse-glow {
     -webkit-animation: pulse-glow 3s ease-in-out infinite;
     animation: pulse-glow 3s ease-in-out infinite;
@@ -158,6 +162,7 @@
 
   /* Better mobile select styling */
   @media (max-width: 768px) {
+
     select,
     .select-trigger {
       font-size: 16px !important;
@@ -181,6 +186,7 @@
   a, button, [role="button"] {
     -webkit-tap-highlight-color: transparent;
   }
+
   * {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;

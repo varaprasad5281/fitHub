@@ -1,6 +1,6 @@
-import React from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { api } from '@/api/client';
+import React from "react";
+import { useSearchParams } from "react-router-dom";
+import { api } from "@/api/client";
 import { useQuery } from "@tanstack/react-query";
 import { Flame, Trophy, Award } from "lucide-react";
 import UserAvatar from "@/components/ui/UserAvatar";
@@ -10,10 +10,10 @@ import { createPageUrl } from "@/utils";
 
 export default function PublicProfile() {
   const [searchParams] = useSearchParams();
-  const userEmail = searchParams.get('email');
+  const userEmail = searchParams.get("email");
 
   const { data: user, isLoading: userLoading } = useQuery({
-    queryKey: ['public-user', userEmail],
+    queryKey: ["public-user", userEmail],
     queryFn: async () => {
       if (!userEmail) return null;
       const users = await api.entities.User.filter({ email: userEmail });
@@ -23,7 +23,7 @@ export default function PublicProfile() {
   });
 
   const { data: profiles } = useQuery({
-    queryKey: ['public-profile', userEmail],
+    queryKey: ["public-profile", userEmail],
     queryFn: async () => {
       if (!userEmail) return [];
       return api.entities.Profile.filter({ created_by: userEmail });
@@ -33,7 +33,7 @@ export default function PublicProfile() {
   });
 
   const { data: streaks } = useQuery({
-    queryKey: ['public-streak', userEmail],
+    queryKey: ["public-streak", userEmail],
     queryFn: async () => {
       if (!userEmail) return [];
       return api.entities.Streak.filter({ created_by: userEmail });
@@ -43,7 +43,7 @@ export default function PublicProfile() {
   });
 
   const { data: points } = useQuery({
-    queryKey: ['public-points', userEmail],
+    queryKey: ["public-points", userEmail],
     queryFn: async () => {
       if (!userEmail) return [];
       return api.entities.Points.filter({ created_by: userEmail });
@@ -53,10 +53,13 @@ export default function PublicProfile() {
   });
 
   const { data: featuredBadges = [] } = useQuery({
-    queryKey: ['public-featured-badges', userEmail],
+    queryKey: ["public-featured-badges", userEmail],
     queryFn: async () => {
       if (!userEmail) return [];
-      const res = await api.functions.invoke('getBadges', { action: 'featured', email: userEmail });
+      const res = await api.functions.invoke("getBadges", {
+        action: "featured",
+        email: userEmail,
+      });
       return res?.data || [];
     },
     enabled: !!userEmail,
@@ -67,10 +70,26 @@ export default function PublicProfile() {
   const point = points[0];
 
   const RARITY_STYLES = {
-    common:    { border: 'border-zinc-600', label: 'text-zinc-400',   bg: 'bg-zinc-800/60'   },
-    rare:      { border: 'border-blue-500', label: 'text-blue-400',   bg: 'bg-blue-900/30'   },
-    epic:      { border: 'border-purple-500', label: 'text-purple-400', bg: 'bg-purple-900/30' },
-    legendary: { border: 'border-amber-400', label: 'text-amber-400',  bg: 'bg-amber-900/30'  },
+    common: {
+      border: "border-zinc-600",
+      label: "text-zinc-400",
+      bg: "bg-zinc-800/60",
+    },
+    rare: {
+      border: "border-blue-500",
+      label: "text-blue-400",
+      bg: "bg-blue-900/30",
+    },
+    epic: {
+      border: "border-purple-500",
+      label: "text-purple-400",
+      bg: "bg-purple-900/30",
+    },
+    legendary: {
+      border: "border-amber-400",
+      label: "text-amber-400",
+      bg: "bg-amber-900/30",
+    },
   };
 
   if (userLoading) {
@@ -86,8 +105,12 @@ export default function PublicProfile() {
       <div className="min-h-screen bg-zinc-950 p-6">
         <div className="max-w-2xl mx-auto text-center">
           <User className="w-16 h-16 text-zinc-700 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-white mb-2">Profile Not Found</h2>
-          <p className="text-zinc-400 mb-6">This profile doesn't exist or is private.</p>
+          <h2 className="text-xl font-bold text-white mb-2">
+            Profile Not Found
+          </h2>
+          <p className="text-zinc-400 mb-6">
+            This profile doesn't exist or is private.
+          </p>
           <Link to={createPageUrl("Home")}>
             <Button className="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-semibold px-6 rounded-full">
               Back Home
@@ -111,10 +134,14 @@ export default function PublicProfile() {
             />
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-white mb-1">
-                {user?.full_name || profile.username || user?.email?.split('@')[0]}
+                {user?.full_name ||
+                  profile.username ||
+                  user?.email?.split("@")[0]}
               </h1>
               {profile.username && user?.full_name && (
-                <p className="text-zinc-500 text-sm mb-2">@{profile.username}</p>
+                <p className="text-zinc-500 text-sm mb-2">
+                  @{profile.username}
+                </p>
               )}
               {profile.country && profile.show_on_leaderboard && (
                 <p className="text-zinc-500 text-sm">{profile.country}</p>
@@ -132,23 +159,35 @@ export default function PublicProfile() {
             <div className="p-4 rounded-xl bg-zinc-900 border border-zinc-800">
               <div className="flex items-center gap-2 mb-2">
                 <Flame className="w-4 h-4 text-amber-400" />
-                <span className="text-xs text-zinc-500 uppercase tracking-wider">Streak</span>
+                <span className="text-xs text-zinc-500 uppercase tracking-wider">
+                  Streak
+                </span>
               </div>
-              <p className="text-2xl font-black text-white">{streak?.current_streak || 0}</p>
+              <p className="text-2xl font-black text-white">
+                {streak?.current_streak || 0}
+              </p>
             </div>
             <div className="p-4 rounded-xl bg-zinc-900 border border-zinc-800">
               <div className="flex items-center gap-2 mb-2">
                 <Trophy className="w-4 h-4 text-amber-400" />
-                <span className="text-xs text-zinc-500 uppercase tracking-wider">Points</span>
+                <span className="text-xs text-zinc-500 uppercase tracking-wider">
+                  Points
+                </span>
               </div>
-              <p className="text-2xl font-black text-white">{point?.total_points || 0}</p>
+              <p className="text-2xl font-black text-white">
+                {point?.total_points || 0}
+              </p>
             </div>
             <div className="p-4 rounded-xl bg-zinc-900 border border-zinc-800">
               <div className="flex items-center gap-2 mb-2">
                 <Award className="w-4 h-4 text-amber-400" />
-                <span className="text-xs text-zinc-500 uppercase tracking-wider">Level</span>
+                <span className="text-xs text-zinc-500 uppercase tracking-wider">
+                  Level
+                </span>
               </div>
-              <p className="text-2xl font-black text-white">{point?.level || 1}</p>
+              <p className="text-2xl font-black text-white">
+                {point?.level || 1}
+              </p>
             </div>
           </div>
         </div>
@@ -158,23 +197,32 @@ export default function PublicProfile() {
           <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 mb-6">
             <div className="flex items-center gap-2 mb-4">
               <Award className="w-4 h-4 text-amber-400" />
-              <h3 className="text-sm font-bold text-white uppercase tracking-wide">Featured Badges</h3>
+              <h3 className="text-sm font-bold text-white uppercase tracking-wide">
+                Featured Badges
+              </h3>
             </div>
             <div className="grid grid-cols-3 gap-3">
               {featuredBadges.map((badge) => {
-                const r = RARITY_STYLES[badge.rarity_level] || RARITY_STYLES.common;
+                const r =
+                  RARITY_STYLES[badge.rarity_level] || RARITY_STYLES.common;
                 return (
                   <div
                     key={badge._id || badge.badge_code}
                     className={`rounded-xl border ${r.border} ${r.bg} p-4 flex flex-col items-center gap-1.5 text-center`}
                   >
-                    <span className="text-3xl">{badge.icon || '🏅'}</span>
-                    <p className="text-white font-semibold text-xs leading-tight">{badge.name}</p>
-                    <p className={`text-[10px] font-semibold uppercase tracking-wide ${r.label}`}>
+                    <span className="text-3xl">{badge.icon || "🏅"}</span>
+                    <p className="text-white font-semibold text-xs leading-tight">
+                      {badge.name}
+                    </p>
+                    <p
+                      className={`text-[10px] font-semibold uppercase tracking-wide ${r.label}`}
+                    >
                       {badge.rarity_level}
                     </p>
                     {badge.description && (
-                      <p className="text-zinc-500 text-[10px] leading-snug">{badge.description}</p>
+                      <p className="text-zinc-500 text-[10px] leading-snug">
+                        {badge.description}
+                      </p>
                     )}
                   </div>
                 );
@@ -185,27 +233,39 @@ export default function PublicProfile() {
 
         {/* Profile Details */}
         <div className="space-y-4">
-          <h3 className="text-zinc-500 text-sm font-semibold uppercase tracking-wider">Details</h3>
+          <h3 className="text-zinc-500 text-sm font-semibold uppercase tracking-wider">
+            Details
+          </h3>
           <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 divide-y divide-zinc-800">
             <div className="p-4 flex justify-between">
               <span className="text-zinc-500 text-sm">Age</span>
-              <span className="text-white font-medium">{profile.age} years</span>
+              <span className="text-white font-medium">
+                {profile.age} years
+              </span>
             </div>
             <div className="p-4 flex justify-between">
               <span className="text-zinc-500 text-sm">Height</span>
-              <span className="text-white font-medium">{profile.height_cm} cm</span>
+              <span className="text-white font-medium">
+                {profile.height_cm} cm
+              </span>
             </div>
             <div className="p-4 flex justify-between">
               <span className="text-zinc-500 text-sm">Weight</span>
-              <span className="text-white font-medium">{profile.weight_kg} kg</span>
+              <span className="text-white font-medium">
+                {profile.weight_kg} kg
+              </span>
             </div>
             <div className="p-4 flex justify-between">
               <span className="text-zinc-500 text-sm">Goal</span>
-              <span className="text-white font-medium capitalize">{profile.fitness_goal?.replace('_', ' ')}</span>
+              <span className="text-white font-medium capitalize">
+                {profile.fitness_goal?.replace("_", " ")}
+              </span>
             </div>
             <div className="p-4 flex justify-between">
               <span className="text-zinc-500 text-sm">Activity Level</span>
-              <span className="text-white font-medium capitalize">{profile.activity_level?.replace('_', ' ')}</span>
+              <span className="text-white font-medium capitalize">
+                {profile.activity_level?.replace("_", " ")}
+              </span>
             </div>
           </div>
         </div>
