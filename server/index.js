@@ -29,12 +29,11 @@ app.use(
 );
 // Allow web app + mobile app (Expo Go and production builds send no Origin header)
 const allowedOrigins = [
-  "https://7percent.info",
-  "https://www.7percent.info",
+  "https://fithub-production-269b.up.railway.app",
   process.env.CLIENT_URL,
   "http://localhost:5173",
-  "http://localhost:8081", // Expo dev server
-  "http://localhost:19006", // Expo web
+  "http://localhost:8081",
+  "http://localhost:19006",
 ].filter(Boolean);
 app.use(
   cors({
@@ -83,7 +82,12 @@ const storage = multer.diskStorage({
 
 // Only allow common image formats - blocks SVG (can carry scripts) and
 // arbitrary file types from being uploaded and served from /uploads.
-const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const ALLOWED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+];
 const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
